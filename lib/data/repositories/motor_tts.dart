@@ -36,8 +36,8 @@ class MotorTtsSupertonic implements MotorTts {
   Future<void> cambiarVoz(String voz) async {
     if (voz == this.voz) return;
     this.voz = voz;
-    // El estilo se recarga en la próxima síntesis (paridad con el desktop,
-    // que construye un motor nuevo por voz).
+    // El estilo se recarga en la próxima síntesis (se construye un motor
+    // nuevo por voz).
     _style = null;
   }
 

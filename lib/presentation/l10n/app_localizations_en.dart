@@ -62,9 +62,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get acerca_ver_codigo => 'Model source code';
 
   @override
-  String get acerca_abrir_repositorio => 'Open repository on GitHub';
-
-  @override
   String get cerrar => 'Close';
 
   @override

@@ -200,12 +200,6 @@ abstract class AppLocalizations {
   /// **'Model source code'**
   String get acerca_ver_codigo;
 
-  /// No description provided for @acerca_abrir_repositorio.
-  ///
-  /// In en, this message translates to:
-  /// **'Open repository on GitHub'**
-  String get acerca_abrir_repositorio;
-
   /// No description provided for @cerrar.
   ///
   /// In en, this message translates to:

@@ -6,7 +6,6 @@ import '../l10n/app_localizations.dart';
 /// Metadatos del producto (plan §6.4 — contenido EXACTO).
 const appNombre = 'Supertonic-AudioBook';
 const appVersion = '1.0.3';
-const repositorioUrl = 'https://github.com/Rafael-VH/Supertonic-AudioBook';
 const modeloUrl = 'https://huggingface.co/Supertone/supertonic-3';
 const modeloGithubUrl = 'https://github.com/supertone-inc/supertonic';
 
@@ -47,13 +46,6 @@ class AcercaDeSection extends StatelessWidget {
         const SizedBox(height: 4),
         Text(t?.acerca_licencia ?? 'Licencia MIT',
             style: TextStyle(color: texto)),
-        const SizedBox(height: 8),
-        _Enlace(
-          etiqueta:
-              t?.acerca_abrir_repositorio ?? 'Abrir repositorio en GitHub',
-          url: repositorioUrl,
-          color: primario,
-        ),
       ],
     );
   }

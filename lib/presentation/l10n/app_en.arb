@@ -16,7 +16,6 @@
   "acerca_creditos": "Speech model: Supertonic 3, by Supertone Inc. (OpenRAIL-M license)",
   "acerca_ver_modelo": "View the model on Hugging Face",
   "acerca_ver_codigo": "Model source code",
-  "acerca_abrir_repositorio": "Open repository on GitHub",
   "cerrar": "Close",
   "tab_entrada": "Input & output",
   "tab_sintesis": "Synthesis & log",

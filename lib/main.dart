@@ -23,9 +23,10 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   JustAudioMediaKit.ensureInitialized();
   final docs = await getApplicationDocumentsDirectory();
+  final soporte = await getApplicationSupportDirectory();
   final separador = Platform.pathSeparator;
   final docsBase = '${docs.path}$separador';
-  final modeloDir = '${docsBase}supertonic${separador}modelo';
+  final modeloDir = '${soporte.path}${separador}modelo';
 
   runApp(
     ProviderScope(
@@ -41,7 +42,7 @@ Future<void> main() async {
         motorTtsProvider.overrideWith(
           (ref) => MotorTtsSupertonic(
             onnxDir: modeloDir,
-            voiceStylesDir: '${modeloDir}voice_styles',
+            voiceStylesDir: '$modeloDir$separador' 'voice_styles',
           ),
         ),
         configTtsProvider.overrideWithValue((

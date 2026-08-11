@@ -85,7 +85,6 @@ void main() {
     expect(find.text('Licencia MIT'), findsOneWidget);
     expect(find.text('Ver el modelo en Hugging Face'), findsOneWidget);
     expect(find.text('Código fuente del modelo'), findsOneWidget);
-    expect(find.text('Abrir repositorio en GitHub'), findsOneWidget);
   });
 
   testWidgets('cambiar a oscuro aplica el tema y persiste la clave §6.3',

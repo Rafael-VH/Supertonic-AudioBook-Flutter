@@ -1,5 +1,4 @@
-/// Constantes técnicas — valores EXACTOS (plan §5.1, paridad con
-/// `app/data/config.py` del desktop).
+/// Constantes técnicas — valores EXACTOS (plan §5.1).
 library;
 
 const double silenceDurationSecs = 0.6; // silencio entre fragmentos

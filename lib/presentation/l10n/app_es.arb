@@ -16,7 +16,6 @@
   "acerca_creditos": "Modelo de voz: Supertonic 3, de Supertone Inc. (licencia OpenRAIL-M)",
   "acerca_ver_modelo": "Ver el modelo en Hugging Face",
   "acerca_ver_codigo": "Código fuente del modelo",
-  "acerca_abrir_repositorio": "Abrir repositorio en GitHub",
   "cerrar": "Cerrar",
   "tab_entrada": "Entrada y salida",
   "tab_sintesis": "Síntesis y registro",

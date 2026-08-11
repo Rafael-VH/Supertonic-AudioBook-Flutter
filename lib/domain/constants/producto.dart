@@ -1,4 +1,4 @@
-/// Constantes de producto — valores EXACTOS (paridad con `domain/repositories/motor_tts.py`).
+/// Constantes de producto — valores EXACTOS (plan §6.1).
 library;
 
 const defaultVoice = 'M1';

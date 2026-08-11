@@ -58,7 +58,8 @@ const List<ArchivoModelo> archivosModelo = [
 /// Descarga el modelo supertonic-3 (NO se empaqueta en el build).
 ///
 /// Estrategia (plan §5.5):
-/// - Descarga en runtime a `getApplicationDocumentsDirectory()/supertonic/modelo`.
+/// - Descarga en runtime a `getApplicationSupportDirectory()/modelo`, el
+///   directorio propio de la app (aislado de la carpeta Documents del usuario).
 /// - Resumible con `dio` (header `Range`, modo append sobre un `.part`).
 /// - Verificación de integridad: SHA-256 para los ONNX, tamaño exacto + parseo
 ///   JSON para los archivos de configuración y estilos de voz.
@@ -74,9 +75,8 @@ class ModeloManager implements ModeloGestor {
   ModeloManager({Dio? dio}) : _dio = dio ?? Dio();
 
   Future<Directory> _directorioModelo() async {
-    final docs = await getApplicationDocumentsDirectory();
-    final dir = Directory('${docs.path}${Platform.pathSeparator}supertonic'
-        '${Platform.pathSeparator}modelo');
+    final soporte = await getApplicationSupportDirectory();
+    final dir = Directory('${soporte.path}${Platform.pathSeparator}modelo');
     if (!await dir.exists()) {
       await dir.create(recursive: true);
     }

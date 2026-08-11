@@ -140,7 +140,7 @@ Fase 5 (UI) → Fase 6 (QA/release)**. No empieces el dominio antes de validar q
 | Desktop (Python) | Flutter multiplataforma |
 |---------|---------|
 | CLI (`cli.py`: argparse, `--cli`, tqdm, guard anti path-traversal) | NO aplica (descartada en móvil y desktop) |
-| `configurar_entorno()` / `SUPERTONIC_CACHE_DIR` / `sys.frozen` | `getApplicationDocumentsDirectory()` + descarga resumible con `dio` |
+| `configurar_entorno()` / `SUPERTONIC_CACHE_DIR` / `sys.frozen` | `getApplicationSupportDirectory()` + descarga resumible con `dio` |
 | `winsound` (reproducir muestra) | `just_audio` (+ `just_audio_media_kit` en Windows/Linux) |
 | `soundfile` (sf.write / sf.SoundFile) | `wav_io` propio (§5) + `ffmpeg_kit_flutter_new` |
 | Tkinter GUI | Flutter Material 3 |
@@ -197,7 +197,7 @@ Runtime:
 | `flutter` + `flutter_localizations` | SDK (3.44.9) | UI, Material, l10n base | presentación |
 | `flutter_riverpod` | ^3.4.2 | Estado (requiere Dart ^3.12 — OK con Flutter 3.44.9 / Dart 3.12.2) | presentación |
 | `intl` | ^0.20.x | Formato de fechas/números (l10n) | presentación |
-| `path_provider` | ^2.1.x | Rutas `getApplicationDocumentsDirectory()` para modelo y salidas | data |
+| `path_provider` | ^2.1.x | Rutas `getApplicationSupportDirectory()` (modelo) y `getApplicationDocumentsDirectory()` (salidas) | data |
 | `flutter_onnxruntime` | ^1.8.3 | Inferencia ONNX (ORT 1.23.0) — motor TTS. CPU ✅ en Android/iOS/Windows/Linux | data |
 | `dio` | ^5.x | Descarga resumible del modelo (~400 MB) con Range/continuación | data |
 | `ffmpeg_kit_flutter_new` | ^4.6.2 | Encode FLAC/OGG/MP3 + ffprobe para duración; SAF en Android. Windows/Linux x86_64 | data |
@@ -603,7 +603,8 @@ Casos de orden verificados (tests):
 > (embebe el modelo): acá el modelo se descarga en runtime.
 
 - **Modelo**: supertonic-3, ONNX, ~400 MB. **Descarga en runtime** a
-  `getApplicationDocumentsDirectory()`, **resumible** con `dio` (headers `Range`,
+  `getApplicationSupportDirectory()/modelo` (directorio propio de la app),
+  **resumible** con `dio` (headers `Range`,
   continuación), con aviso al usuario y verificación de integridad. **NUNCA bundle
   en el build** (aplica a las 4 plataformas: mismo `data/modelo/modelo_manager.dart`).
 - **Motor**: `flutter_onnxruntime` (ORT 1.23.0) + port de `lib/helper.dart` del vendor
@@ -709,7 +710,6 @@ Se guardan al: cambiar tema/estilo/idioma, iniciar procesamiento y al cerrar.
 ```dart
 const appNombre = 'Supertonic-AudioBook';
 const appVersion = '1.0.3';
-const repositorioUrl = 'https://github.com/Rafael-VH/Supertonic-AudioBook';
 const modeloUrl = 'https://huggingface.co/Supertone/supertonic-3';
 const modeloGithubUrl = 'https://github.com/supertone-inc/supertonic';
 ```
@@ -719,7 +719,7 @@ const modeloGithubUrl = 'https://github.com/supertone-inc/supertonic';
 - `acerca_creditos` ES: "Modelo de voz: Supertonic 3, de Supertone Inc. (licencia OpenRAIL-M)"
 - `acerca_licencia`: "Licencia MIT" (ES) / "MIT License" (EN).
 - Enlaces: "Ver el modelo en Hugging Face" → `modeloUrl`; "Código fuente del modelo"
-  → `modeloGithubUrl`; "Abrir repositorio en GitHub" → `repositorioUrl`.
+  → `modeloGithubUrl`. No se enlaza el repositorio del proyecto.
 - Muestra de voz por idioma: `TEXTO_MUESTRA_IDIOMAS` — 16 idiomas literales
   (`es`→"Hola, soy la voz de Supertonic. Esta es una muestra de audio.",
   `en`→"Hello, I am a Supertonic voice. This is an audio sample.", fr/de/pt/it/nl/pl/
