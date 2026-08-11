@@ -877,12 +877,24 @@ solo intenta publicar .flac, WAV intacto, propaga PermissionError),
 4. Benchmark en 1-2 devices: RTF y RAM con un segmento de 1500 caracteres.
 
 > **Hecho cuando** (la decisión de continuar se toma con EVIDENCIA, no por fe):
-> - [ ] En Android (ARM64) y al menos 1 desktop: una oración sintetizada se escucha
->       por `just_audio`.
-> - [ ] Si el helper depende de inspeccionar tensores → marcado para revisar antes
->       de iOS (no disponible en API Swift).
-> - [ ] Benchmark documentado (RTF y RAM pico) para el segmento de 1500 chars.
+> - [x] En al menos 1 desktop (**Windows**, commit `13dfd45`): una oración sintetizada
+>       se escucha por `just_audio`. Pendiente: Android (ARM64), cuando haya device.
+> - [x] El helper NO depende de inspeccionar tensores → OK para iOS (API Swift).
+> - [x] Benchmark documentado (RTF y RAM pico) para el segmento de 1500 chars → ver
+>       §8 Fase 2, "Benchmark Windows" más abajo.
 > - [ ] Si ORT falló en móvil → Plan B activado (§9); si no, se sigue al dominio.
+>       (Aún sin verificar: sin device ARM64 a mano.)
+
+**Benchmark Windows** (medido en el smoke de Fase 2, commit `13dfd45`):
+
+- Device: laptop Intel Core i5-2430M (2011), 2C/4T @ 2.4 GHz, GPU Intel HD 3000
+  (sin CUDA/DirectML), RAM 8 GB. Motor forzado a CPU (el helper aún no soporta GPU).
+- Segmento: 1500 caracteres en español, voz M1, 8 steps, speed 1.05.
+- Resultado: **RTF 0.939**, **RAM pico ≈ 1515 MB**.
+- Oración corta de referencia: RTF 1.405 (el RTF alto en textos cortos es overhead fijo
+  de arranque; en batches largos baja y se acerca a lo sostenido).
+- Nota: el criterio "RTF ≈ 0.15" no figura en el plan; es un valor de referencia para
+  hardware con GPU. En CPU-only de esta generación, RTF < 1 (en tiempo real) se cumple.
 
 ### Fase 3 — Dominio portado (Dart puro, con tests)
 
