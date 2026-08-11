@@ -30,7 +30,7 @@ class SintetizarMuestra {
         speed: defaultSpeed,
         lang: lang,
       );
-      _exportador.escribirAudio([wav], ruta, 'wav');
+      await _exportador.escribirAudio([wav], ruta, 'wav');
       _log.i('  → Muestra escrita en $ruta (${wav.length} muestras).');
     } catch (exc) {
       _log.e('Error al sintetizar la muestra: $exc');

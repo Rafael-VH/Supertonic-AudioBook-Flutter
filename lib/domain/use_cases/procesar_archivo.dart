@@ -40,7 +40,7 @@ class ProcesarArchivo {
   /// se cancela o falla durante la síntesis, el output previo de cada formato
   /// queda intacto. En la fase de publicación el WAV va último: si falla un
   /// formato no-WAV, el WAV previo no se reemplaza.
-  void procesar(
+  Future<void> procesar(
     Archivo archivo,
     String rutaBase, {
     required int steps,
@@ -116,7 +116,7 @@ class ProcesarArchivo {
         // Si acumulamos mucha RAM, volcamos a disco.
         if (memoriaAcumulada > _memoriaSafeMarginBytes) {
           _log.i('Volcando a disco por límite de memoria...');
-          _exportador.wavAppend(fragmentos, rutaWavTrabajo);
+          await _exportador.wavAppend(fragmentos, rutaWavTrabajo);
           fragmentos.clear();
           memoriaAcumulada = 0;
           parcialEscrito = true;
@@ -137,20 +137,20 @@ class ProcesarArchivo {
       // Fase 1: generar todo a archivos temporales.
       final salidas = <(String, String)>[];
       if (parcialEscrito) {
-        _exportador.wavAppend(fragmentos, rutaWavTrabajo);
+        await _exportador.wavAppend(fragmentos, rutaWavTrabajo);
         for (final formato in formatosUnicos) {
           if (formato == 'wav') {
             salidas.add((rutaWavTrabajo, '$rutaBase.wav'));
           } else {
             final temporal = _nuevoTemporal(dirSalida, formato, temporales);
-            _exportador.convertirDesdeWav(rutaWavTrabajo, temporal, formato);
+            await _exportador.convertirDesdeWav(rutaWavTrabajo, temporal, formato);
             salidas.add((temporal, '$rutaBase.$formato'));
           }
         }
       } else {
         for (final formato in formatosUnicos) {
           final temporal = _nuevoTemporal(dirSalida, formato, temporales);
-          _exportador.escribirAudio(fragmentos, temporal, formato);
+          await _exportador.escribirAudio(fragmentos, temporal, formato);
           salidas.add((temporal, '$rutaBase.$formato'));
         }
       }
@@ -172,7 +172,7 @@ class ProcesarArchivo {
 
     for (final formato in formatosUnicos) {
       final ruta = '$rutaBase.$formato';
-      final duracion = _exportador.duracionAudio(ruta);
+      final duracion = await _exportador.duracionAudio(ruta);
       _log.i('  + ${File(ruta).uri.pathSegments.last} (${formato.toUpperCase()}): ${duracion.toStringAsFixed(1)} s');
     }
   }
@@ -182,7 +182,9 @@ class ProcesarArchivo {
     try {
       File(origen).renameSync(destino);
     } on FileSystemException catch (e) {
-      if (e.osError?.errorCode == 13 /* EACCES, incluye archivo en uso */) {
+      // EACCES (13) en POSIX y ERROR_SHARING_VIOLATION (32) en Windows son el
+      // "archivo en uso" (paridad con la advertencia del desktop).
+      if (e.osError?.errorCode == 13 || e.osError?.errorCode == 32) {
         _log.e("El archivo '$destino' está en uso por otra aplicación; no se actualizó.");
       }
       rethrow;
