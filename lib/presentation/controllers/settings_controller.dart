@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../theme/paleta.dart';
+import 'providers.dart';
 
 /// Estado de los ajustes de interfaz (plan §6.3, claves exactas).
 class SettingsEstado {
@@ -23,28 +24,40 @@ class SettingsEstado {
   }
 }
 
-/// Ajustes de la interfaz. Los valores iniciales son los defaults de §6.3;
-/// la carga/persistencia se conecta en la composición (main.dart).
+/// Ajustes de la interfaz. Los valores iniciales se cargan del repositorio
+/// inyectado (claves de §6.3) y cada cambio se persiste de inmediato.
 class SettingsController extends Notifier<SettingsEstado> {
   @override
   SettingsEstado build() {
-    return const SettingsEstado(
-      temaOscuro: false,
-      estilo: AppEstilo.material,
-      idioma: 'es',
+    final preferencias = ref.watch(repositorioPreferenciasProvider).cargar();
+    return SettingsEstado(
+      temaOscuro: preferencias['tema_oscuro'] as bool? ?? false,
+      estilo: AppEstilo.desdeId(preferencias['estilo'] as String?),
+      idioma: preferencias['idioma'] as String? ?? 'es',
     );
+  }
+
+  void _persistir() {
+    ref.read(repositorioPreferenciasProvider).guardar({
+      'tema_oscuro': state.temaOscuro,
+      'estilo': state.estilo.id,
+      'idioma': state.idioma,
+    });
   }
 
   void cambiarTemaOscuro(bool valor) {
     state = state.copyWith(temaOscuro: valor);
+    _persistir();
   }
 
   void cambiarEstilo(AppEstilo estilo) {
     state = state.copyWith(estilo: estilo);
+    _persistir();
   }
 
   void cambiarIdioma(String idioma) {
     state = state.copyWith(idioma: idioma);
+    _persistir();
   }
 }
 
