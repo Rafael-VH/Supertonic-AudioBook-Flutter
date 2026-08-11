@@ -224,5 +224,23 @@
       "horas": {"type": "int"},
       "min": {"type": "int"}
     }
+  },
+  "modelo_titulo": "Modelo de voz",
+  "modelo_aviso": "La primera vez se descarga el modelo de voz (~400 MB). Es una sola vez, resumible, y queda guardado en tu equipo.",
+  "modelo_descargar": "Descargar modelo",
+  "modelo_verificando": "Verificando el modelo…",
+  "modelo_cancelar": "Cancelar",
+  "modelo_progreso": "{bytes} MB de {total} MB",
+  "@modelo_progreso": {
+    "placeholders": {
+      "bytes": {"type": "int"},
+      "total": {"type": "int"}
+    }
+  },
+  "modelo_error": "Error de descarga: {error}",
+  "@modelo_error": {
+    "placeholders": {
+      "error": {"type": "String"}
+    }
   }
 }

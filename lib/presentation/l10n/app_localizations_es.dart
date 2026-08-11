@@ -312,4 +312,30 @@ class AppLocalizationsEs extends AppLocalizations {
   String tiempo_hora_min(int horas, int min) {
     return '$horas h $min min';
   }
+
+  @override
+  String get modelo_titulo => 'Modelo de voz';
+
+  @override
+  String get modelo_aviso =>
+      'La primera vez se descarga el modelo de voz (~400 MB). Es una sola vez, resumible, y queda guardado en tu equipo.';
+
+  @override
+  String get modelo_descargar => 'Descargar modelo';
+
+  @override
+  String get modelo_verificando => 'Verificando el modelo…';
+
+  @override
+  String get modelo_cancelar => 'Cancelar';
+
+  @override
+  String modelo_progreso(int bytes, int total) {
+    return '$bytes MB de $total MB';
+  }
+
+  @override
+  String modelo_error(String error) {
+    return 'Error de descarga: $error';
+  }
 }

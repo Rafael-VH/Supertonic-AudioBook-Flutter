@@ -7,6 +7,7 @@ import 'package:path_provider/path_provider.dart';
 
 import 'app.dart';
 import 'data/config.dart';
+import 'data/modelo/modelo_manager.dart';
 import 'data/repositories/exportador_audio_ffmpeg.dart';
 import 'data/repositories/motor_tts.dart';
 import 'data/repositories/repositorio_archivos.dart';
@@ -48,6 +49,7 @@ Future<void> main() async {
           memoriaSafeMarginBytes: memoriaSafeMarginBytes,
         )),
         carpetaBaseProvider.overrideWithValue(docsBase),
+        modeloManagerProvider.overrideWithValue(ModeloManager()),
       ],
       child: const SupertonicApp(),
     ),

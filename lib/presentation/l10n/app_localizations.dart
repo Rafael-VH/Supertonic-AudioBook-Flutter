@@ -595,6 +595,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{horas} h {min} min'**
   String tiempo_hora_min(int horas, int min);
+
+  /// No description provided for @modelo_titulo.
+  ///
+  /// In en, this message translates to:
+  /// **'Voice model'**
+  String get modelo_titulo;
+
+  /// No description provided for @modelo_aviso.
+  ///
+  /// In en, this message translates to:
+  /// **'The first run downloads the voice model (~400 MB). It is a one-time, resumable download stored on your device.'**
+  String get modelo_aviso;
+
+  /// No description provided for @modelo_descargar.
+  ///
+  /// In en, this message translates to:
+  /// **'Download model'**
+  String get modelo_descargar;
+
+  /// No description provided for @modelo_verificando.
+  ///
+  /// In en, this message translates to:
+  /// **'Verifying the model…'**
+  String get modelo_verificando;
+
+  /// No description provided for @modelo_cancelar.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get modelo_cancelar;
+
+  /// No description provided for @modelo_progreso.
+  ///
+  /// In en, this message translates to:
+  /// **'{bytes} MB of {total} MB'**
+  String modelo_progreso(int bytes, int total);
+
+  /// No description provided for @modelo_error.
+  ///
+  /// In en, this message translates to:
+  /// **'Download error: {error}'**
+  String modelo_error(String error);
 }
 
 class _AppLocalizationsDelegate

@@ -224,5 +224,23 @@
       "horas": {"type": "int"},
       "min": {"type": "int"}
     }
+  },
+  "modelo_titulo": "Voice model",
+  "modelo_aviso": "The first run downloads the voice model (~400 MB). It is a one-time, resumable download stored on your device.",
+  "modelo_descargar": "Download model",
+  "modelo_verificando": "Verifying the model…",
+  "modelo_cancelar": "Cancel",
+  "modelo_progreso": "{bytes} MB of {total} MB",
+  "@modelo_progreso": {
+    "placeholders": {
+      "bytes": {"type": "int"},
+      "total": {"type": "int"}
+    }
+  },
+  "modelo_error": "Download error: {error}",
+  "@modelo_error": {
+    "placeholders": {
+      "error": {"type": "String"}
+    }
   }
 }

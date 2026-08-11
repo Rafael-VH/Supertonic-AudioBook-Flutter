@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../domain/contracts/exportador_audio.dart';
+import '../../domain/contracts/modelo_gestor.dart';
 import '../../domain/contracts/motor_tts.dart';
 import '../../domain/contracts/repositorio_archivos.dart';
 import '../../domain/contracts/repositorio_preferencias.dart';
@@ -51,6 +52,13 @@ final configTtsProvider = Provider<TtsConfig>(
 /// `<carpeta_base>/audio` como carpetas por defecto (paridad con `gui.py`).
 final carpetaBaseProvider = Provider<String>(
   (_) => throw UnimplementedError('carpetaBaseProvider se inyecta en main.dart'),
+);
+
+/// Gestión del modelo supertonic-3 (descarga + verificación, plan §5.5),
+/// inyectada desde la composición (`data/modelo/modelo_manager.dart`).
+final modeloManagerProvider = Provider<ModeloGestor>(
+  (_) => throw UnimplementedError(
+      'modeloManagerProvider se inyecta en main.dart'),
 );
 
 /// Caso de uso de conversión, compuesto con los contratos y la config técnica.

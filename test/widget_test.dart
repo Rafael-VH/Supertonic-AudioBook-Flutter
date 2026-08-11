@@ -8,6 +8,8 @@ import 'package:supertonic_audiobook/domain/contracts/repositorio_preferencias.d
 import 'package:supertonic_audiobook/domain/entities/archivo.dart';
 import 'package:supertonic_audiobook/presentation/controllers/providers.dart';
 
+import 'support/fakes.dart';
+
 /// Preferencias en memoria para los tests de widget (sin disco).
 class _PreferenciasMemoria implements RepositorioPreferencias {
   final Map<String, Object> _datos = {};
@@ -42,10 +44,14 @@ void main() {
               .overrideWithValue(_PreferenciasMemoria()),
           repositorioArchivosProvider.overrideWithValue(_ArchivosVacios()),
           carpetaBaseProvider.overrideWithValue('C:/base'),
+          modeloManagerProvider
+              .overrideWithValue(ModeloGestorFake(disponible: true)),
         ],
         child: const SupertonicApp(),
       ),
     );
+
+    await tester.pump();
 
     expect(find.text('Supertonic-AudioBook — Conversor de archivos a audio'),
         findsOneWidget);
@@ -60,11 +66,14 @@ void main() {
               .overrideWithValue(_PreferenciasMemoria()),
           repositorioArchivosProvider.overrideWithValue(_ArchivosVacios()),
           carpetaBaseProvider.overrideWithValue('C:/base'),
+          modeloManagerProvider
+              .overrideWithValue(ModeloGestorFake(disponible: true)),
         ],
         child: const SupertonicApp(),
       ),
     );
 
+    await tester.pump();
     await tester.tap(find.byIcon(Icons.settings_outlined));
     await tester.pumpAndSettle();
 

@@ -100,6 +100,8 @@ void main() {
       expect(() => contenedor.read(exportadorAudioProvider), fallaComposicion);
       expect(() => contenedor.read(repositorioPreferenciasProvider),
           fallaComposicion);
+      expect(() => contenedor.read(reproductorAudioProvider), fallaComposicion);
+      expect(() => contenedor.read(modeloManagerProvider), fallaComposicion);
       expect(() => contenedor.read(configTtsProvider), fallaComposicion);
       expect(() => contenedor.read(procesarArchivoProvider), fallaComposicion);
       expect(() => contenedor.read(sintetizarMuestraProvider),

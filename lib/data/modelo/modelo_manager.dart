@@ -5,6 +5,8 @@ import 'package:crypto/crypto.dart';
 import 'package:dio/dio.dart';
 import 'package:path_provider/path_provider.dart';
 
+import '../../domain/contracts/modelo_gestor.dart';
+
 /// Archivo publicado en el repo HuggingFace de supertonic-3.
 class ArchivoModelo {
   final String ruta;
@@ -60,11 +62,14 @@ const List<ArchivoModelo> archivosModelo = [
 /// - Resumible con `dio` (header `Range`, modo append sobre un `.part`).
 /// - Verificación de integridad: SHA-256 para los ONNX, tamaño exacto + parseo
 ///   JSON para los archivos de configuración y estilos de voz.
-class ModeloManager {
+class ModeloManager implements ModeloGestor {
   static const String urlBase =
       'https://huggingface.co/Supertone/supertonic-3/resolve/main';
 
   final Dio _dio;
+
+  /// Descarga activa, para poder cancelarla desde la presentación.
+  CancelToken? _activo;
 
   ModeloManager({Dio? dio}) : _dio = dio ?? Dio();
 
@@ -81,61 +86,86 @@ class ModeloManager {
   /// Garantiza el modelo descargado y verificado. Devuelve el directorio raíz.
   ///
   /// [onProgreso] recibe `(bytesDescargados, bytesTotales, archivoActual)`.
+  @override
   Future<Directory> asegurarModelo({
     void Function(int bytes, int total, String archivo)? onProgreso,
-    CancelToken? cancelToken,
   }) async {
     final raiz = await _directorioModelo();
-    final totalBytes = archivosModelo
-        .map((a) => a.tamanoBytes)
-        .fold<int>(0, (sum, n) => sum + n);
-    var descargados = 0;
+    final token = _activo = CancelToken();
+    try {
+      final totalBytes = archivosModelo
+          .map((a) => a.tamanoBytes)
+          .fold<int>(0, (sum, n) => sum + n);
+      var descargados = 0;
 
-    for (final archivo in archivosModelo) {
-      final destino = File('${raiz.path}${Platform.pathSeparator}${archivo.ruta}');
-      await destino.parent.create(recursive: true);
+      for (final archivo in archivosModelo) {
+        final destino =
+            File('${raiz.path}${Platform.pathSeparator}${archivo.ruta}');
+        await destino.parent.create(recursive: true);
 
-      if (await _estaVerificado(destino, archivo)) {
+        if (await _estaVerificado(destino, archivo)) {
+          descargados += archivo.tamanoBytes;
+          onProgreso?.call(descargados, totalBytes, archivo.ruta);
+          continue;
+        }
+
+        final part = File('${destino.path}.part');
+        if (await part.exists()) {
+          final tamano = await part.length();
+          if (tamano > archivo.tamanoBytes) {
+            await part.delete();
+          }
+        }
+
+        var intentos = 0;
+        var ok = false;
+        while (!ok && intentos < 3) {
+          intentos++;
+          try {
+            await _descargar(archivo, part, onProgreso,
+                yaDescargados: descargados, totalBytes: totalBytes);
+            final verificada = await _verificar(part, archivo);
+            if (!verificada) {
+              throw Exception(
+                  'Integridad fallida para ${archivo.ruta} (SHA-256 o tamaño no coincide)');
+            }
+            await part.rename(destino.path);
+            ok = true;
+          } on DioException catch (e) {
+            if (e.type == DioExceptionType.cancel) {
+              rethrow;
+            }
+            if (intentos >= 3) rethrow;
+          }
+        }
+
         descargados += archivo.tamanoBytes;
         onProgreso?.call(descargados, totalBytes, archivo.ruta);
-        continue;
       }
 
-      final part = File('${destino.path}.part');
-      if (await part.exists()) {
-        final tamano = await part.length();
-        if (tamano > archivo.tamanoBytes) {
-          await part.delete();
-        }
-      }
-
-      var intentos = 0;
-      var ok = false;
-      while (!ok && intentos < 3) {
-        intentos++;
-        try {
-          await _descargar(archivo, part, onProgreso, cancelToken,
-              yaDescargados: descargados, totalBytes: totalBytes);
-          final verificada = await _verificar(part, archivo);
-          if (!verificada) {
-            throw Exception(
-                'Integridad fallida para ${archivo.ruta} (SHA-256 o tamaño no coincide)');
-          }
-          await part.rename(destino.path);
-          ok = true;
-        } on DioException catch (e) {
-          if (e.type == DioExceptionType.cancel) {
-            rethrow;
-          }
-          if (intentos >= 3) rethrow;
-        }
-      }
-
-      descargados += archivo.tamanoBytes;
-      onProgreso?.call(descargados, totalBytes, archivo.ruta);
+      return raiz;
+    } finally {
+      if (identical(_activo, token)) _activo = null;
     }
+  }
 
-    return raiz;
+  /// Comprueba si el modelo ya está completo y verificado en disco.
+  @override
+  Future<bool> verificarDisponible() async {
+    final raiz = await _directorioModelo();
+    for (final archivo in archivosModelo) {
+      final destino =
+          File('${raiz.path}${Platform.pathSeparator}${archivo.ruta}');
+      if (!await _estaVerificado(destino, archivo)) return false;
+    }
+    return true;
+  }
+
+  /// Cancela la descarga en curso (no-op si no hay ninguna activa).
+  @override
+  void cancelar() {
+    _activo?.cancel();
+    _activo = null;
   }
 
   Future<bool> _estaVerificado(File destino, ArchivoModelo archivo) async {
@@ -151,8 +181,7 @@ class ModeloManager {
   Future<void> _descargar(
     ArchivoModelo archivo,
     File part,
-    void Function(int bytes, int total, String archivo)? onProgreso,
-    CancelToken? cancelToken, {
+    void Function(int bytes, int total, String archivo)? onProgreso, {
     required int yaDescargados,
     required int totalBytes,
   }) async {
@@ -162,7 +191,7 @@ class ModeloManager {
     await _dio.download(
       url,
       part.path,
-      cancelToken: cancelToken,
+      cancelToken: _activo,
       deleteOnError: false,
       fileAccessMode: FileAccessMode.append,
       options: Options(

@@ -1,6 +1,9 @@
+import 'dart:async';
+import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:supertonic_audiobook/domain/contracts/exportador_audio.dart';
+import 'package:supertonic_audiobook/domain/contracts/modelo_gestor.dart';
 import 'package:supertonic_audiobook/domain/contracts/motor_tts.dart';
 import 'package:supertonic_audiobook/domain/contracts/repositorio_archivos.dart';
 import 'package:supertonic_audiobook/domain/contracts/repositorio_preferencias.dart';
@@ -99,5 +102,46 @@ class ReproductorFake implements ReproductorAudio {
   @override
   Future<void> reproducir(String ruta) async {
     rutas.add(ruta);
+  }
+}
+
+/// Gestor del modelo falso.
+///
+/// Emite 10 MB de progreso en bloques de 1 MB. Si se define [espera], la
+/// descarga queda bloqueada hasta completarlo (para probar progreso y
+/// cancelación). [fallar] lanza un error apenas inicia.
+class ModeloGestorFake implements ModeloGestor {
+  ModeloGestorFake({this.disponible = false, this.fallar = false});
+
+  bool disponible;
+  final bool fallar;
+
+  int descargas = 0;
+  int cancelaciones = 0;
+  Completer<void>? espera;
+
+  static const int _mb = 1 << 20;
+
+  @override
+  Future<bool> verificarDisponible() async => disponible;
+
+  @override
+  Future<Directory> asegurarModelo({
+    void Function(int bytes, int total, String archivo)? onProgreso,
+  }) async {
+    descargas++;
+    if (fallar) throw Exception('fallo simulado');
+    const total = 10 * _mb;
+    onProgreso?.call(1 * _mb, total, 'onnx/vocoder.onnx');
+    if (espera != null) await espera!.future;
+    for (var i = 2; i <= 10; i++) {
+      onProgreso?.call(i * _mb, total, 'onnx/vocoder.onnx');
+    }
+    return Directory('C:/modelo');
+  }
+
+  @override
+  void cancelar() {
+    cancelaciones++;
   }
 }
