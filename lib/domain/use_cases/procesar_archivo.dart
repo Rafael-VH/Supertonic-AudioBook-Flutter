@@ -49,7 +49,7 @@ class ProcesarArchivo {
     String lang = defaultLang,
     void Function(int procesados, int total)? onProgreso,
     bool Function()? debeDetenerse,
-  }) {
+  }) async {
     _log.i('=' * 50);
     _log.i('  Procesando: ${archivo.nombre}');
     _log.i('=' * 50);
@@ -104,7 +104,7 @@ class ProcesarArchivo {
           break;
         }
 
-        final wav = _motor.sintetizar(texto, steps: steps, speed: speed, lang: lang);
+        final wav = await _motor.sintetizar(texto, steps: steps, speed: speed, lang: lang);
         if (onProgreso != null) onProgreso(procesados, total);
         if (wav.isEmpty) continue;
 
@@ -157,7 +157,7 @@ class ProcesarArchivo {
 
       // Fase 2: publicar. El WAV se publica al final: si un formato falla,
       // no queda un WAV nuevo con el resto de los formatos viejos.
-      for (final par in _ordenPublicacion(salidas)) {
+      for (final par in ordenPublicacion(salidas)) {
         _publicar(par.$1, par.$2, temporales);
       }
     } finally {
@@ -191,7 +191,7 @@ class ProcesarArchivo {
   }
 
   /// Ordena las salidas para publicar: los no-WAV primero, el WAV al final.
-  List<(String, String)> _ordenPublicacion(List<(String, String)> salidas) {
+  static List<(String, String)> ordenPublicacion(List<(String, String)> salidas) {
     final copia = [...salidas];
     copia.sort((a, b) {
       final aWav = a.$2.toLowerCase().endsWith('.wav');

@@ -10,7 +10,9 @@ abstract class MotorTts {
   /// Convierte texto a audio.
   ///
   /// Devuelve las muestras float32 (1D) del audio; vacío si no se generó.
-  Float32List sintetizar(
+  /// Es asíncrono porque la inferencia ONNX (flutter_onnxruntime) es
+  /// asíncrona por diseño.
+  Future<Float32List> sintetizar(
     String texto, {
     required int steps,
     required double speed,

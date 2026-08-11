@@ -1,27 +1,40 @@
 import 'package:logger/logger.dart';
 
+import '../constants/producto.dart';
+import '../contracts/exportador_audio.dart';
 import '../contracts/motor_tts.dart';
 
 final _log = Logger();
 
 /// Sintetiza un texto de muestra para verificar que el motor funciona.
 ///
-/// Devuelve `true` si se generó audio, `false` en caso contrario. Se usa para
-/// validar la configuración de voz en la interfaz (paridad con
-/// `app/domain/use_cases/sintetizar_muestra.py`).
-bool sintetizarMuestra(
-  MotorTts motor,
-  String texto, {
-  required int steps,
-  required double speed,
-}) {
-  try {
-    final wav = motor.sintetizar(texto, steps: steps, speed: speed);
-    final ok = wav.isNotEmpty;
-    _log.i('  → Muestra ${ok ? 'generada' : 'vacía'} (${wav.length} muestras).');
-    return ok;
-  } catch (exc) {
-    _log.e('Error al sintetizar la muestra: $exc');
-    return false;
+/// Escribe un WAV PCM16 en [ruta] y la devuelve. Lo usa el botón **Escuchar**
+/// de la interfaz (paridad con `sintetizar_muestra.py`).
+class SintetizarMuestra {
+  SintetizarMuestra({required this._motor, required this._exportador});
+
+  final MotorTts _motor;
+  final ExportadorAudio _exportador;
+
+  /// Sintetiza [texto] con los pasos/velocidad por defecto del producto y
+  /// escribe el resultado en [ruta]. Devuelve [ruta] (exista o no el archivo).
+  Future<String> generar(
+    String texto, {
+    String lang = defaultLang,
+    required String ruta,
+  }) async {
+    try {
+      final wav = await _motor.sintetizar(
+        texto,
+        steps: defaultTtsSteps,
+        speed: defaultSpeed,
+        lang: lang,
+      );
+      _exportador.escribirAudio([wav], ruta, 'wav');
+      _log.i('  → Muestra escrita en $ruta (${wav.length} muestras).');
+    } catch (exc) {
+      _log.e('Error al sintetizar la muestra: $exc');
+    }
+    return ruta;
   }
 }
