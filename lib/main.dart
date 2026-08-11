@@ -11,7 +11,7 @@ import 'data/repositories/exportador_audio_ffmpeg.dart';
 import 'data/repositories/motor_tts.dart';
 import 'data/repositories/repositorio_archivos.dart';
 import 'data/repositories/repositorio_preferencias.dart';
-import 'domain/constants/producto.dart';
+import 'data/repositories/reproductor_just_audio.dart';
 import 'presentation/controllers/providers.dart';
 
 /// Composition root: único punto que importa `data/`.
@@ -36,16 +36,18 @@ Future<void> main() async {
           PreferenciasJsonLocal(ruta: '${docsBase}preferencias.json'),
         ),
         exportadorAudioProvider.overrideWithValue(ExportadorAudioFfmpeg()),
+        reproductorAudioProvider.overrideWithValue(ReproductorJustAudio()),
         motorTtsProvider.overrideWith(
           (ref) => MotorTtsSupertonic(
             onnxDir: modeloDir,
-            vozPath: '${modeloDir}voice_styles$separador$defaultVoice.json',
+            voiceStylesDir: '${modeloDir}voice_styles',
           ),
         ),
         configTtsProvider.overrideWithValue((
           silencioMuestras: silenceSamples,
           memoriaSafeMarginBytes: memoriaSafeMarginBytes,
         )),
+        carpetaBaseProvider.overrideWithValue(docsBase),
       ],
       child: const SupertonicApp(),
     ),

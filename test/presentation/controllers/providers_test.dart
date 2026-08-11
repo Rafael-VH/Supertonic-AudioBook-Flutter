@@ -16,6 +16,9 @@ import 'package:supertonic_audiobook/presentation/theme/paleta.dart';
 
 class MotorFalso implements MotorTts {
   @override
+  Future<void> cambiarVoz(String voz) async {}
+
+  @override
   Future<Float32List> sintetizar(
     String texto, {
     required int steps,

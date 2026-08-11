@@ -4,6 +4,7 @@ import '../../domain/contracts/exportador_audio.dart';
 import '../../domain/contracts/motor_tts.dart';
 import '../../domain/contracts/repositorio_archivos.dart';
 import '../../domain/contracts/repositorio_preferencias.dart';
+import '../../domain/contracts/reproductor_audio.dart';
 import '../../domain/use_cases/procesar_archivo.dart';
 import '../../domain/use_cases/sintetizar_muestra.dart';
 
@@ -35,9 +36,21 @@ final repositorioPreferenciasProvider = Provider<RepositorioPreferencias>(
       'repositorioPreferenciasProvider se inyecta en main.dart'),
 );
 
+/// Reproducción de audio del botón **Escuchar**.
+final reproductorAudioProvider = Provider<ReproductorAudio>(
+  (_) => throw UnimplementedError('reproductorAudioProvider se inyecta en main.dart'),
+);
+
 /// Parámetros técnicos del pipeline, decididos en la composición.
 final configTtsProvider = Provider<TtsConfig>(
   (_) => throw UnimplementedError('configTtsProvider se inyecta en main.dart'),
+);
+
+/// Carpeta base de documentos (raíz de `archivos/` y `audio/`), inyectada
+/// desde la composición. El desktop usa `<carpeta_base>/archivos` y
+/// `<carpeta_base>/audio` como carpetas por defecto (paridad con `gui.py`).
+final carpetaBaseProvider = Provider<String>(
+  (_) => throw UnimplementedError('carpetaBaseProvider se inyecta en main.dart'),
 );
 
 /// Caso de uso de conversión, compuesto con los contratos y la config técnica.

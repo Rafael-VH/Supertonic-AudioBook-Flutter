@@ -26,6 +26,9 @@ class _FakeMotor implements MotorTts {
   int llamadas = 0;
 
   @override
+  Future<void> cambiarVoz(String voz) async {}
+
+  @override
   Future<Float32List> sintetizar(
     String texto, {
     required int steps,

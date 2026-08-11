@@ -38,11 +38,15 @@ class SettingsController extends Notifier<SettingsEstado> {
   }
 
   void _persistir() {
-    ref.read(repositorioPreferenciasProvider).guardar({
+    // Merge: el mismo repositorio guarda las claves de Home (§6.3) y no debe
+    // borrarlas al persistir solo las de interfaz.
+    final prefs = {
+      ...ref.read(repositorioPreferenciasProvider).cargar(),
       'tema_oscuro': state.temaOscuro,
       'estilo': state.estilo.id,
       'idioma': state.idioma,
-    });
+    };
+    ref.read(repositorioPreferenciasProvider).guardar(prefs);
   }
 
   void cambiarTemaOscuro(bool valor) {
