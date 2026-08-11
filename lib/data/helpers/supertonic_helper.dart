@@ -597,7 +597,11 @@ Future<Style> loadVoiceStyle(List<String> paths) async {
 
 Future<Map<String, dynamic>> _loadCfgs(String onnxDir) async {
   final path = '$onnxDir/tts.json';
-  final json = jsonDecode(await rootBundle.loadString(path));
+  final json = jsonDecode(
+    path.startsWith('assets/')
+        ? await rootBundle.loadString(path)
+        : File(path).readAsStringSync(),
+  );
   return json as Map<String, dynamic>;
 }
 
@@ -621,9 +625,15 @@ Future<Map<String, OrtSession>> _loadOnnxAll(String dir) async {
   ];
 
   final sessions = await Future.wait(models.map((name) async {
-    final path = await copyModelToFile('$dir/$name.onnx');
+    final path = '$dir/$name.onnx';
+    final String modelPath;
+    if (path.startsWith('assets/')) {
+      modelPath = await copyModelToFile(path);
+    } else {
+      modelPath = path;
+    }
     logger.d('Loading $name.onnx');
-    return ort.createSessionFromAsset(path);
+    return ort.createSession(modelPath);
   }));
 
   return {

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'smoke_tts_screen.dart';
+
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
 
@@ -10,8 +12,25 @@ class HomeScreen extends ConsumerWidget {
       appBar: AppBar(
         title: const Text('Supertonic-AudioBook'),
       ),
-      body: const Center(
-        child: Text('Entrada y salida'),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Text('Entrada y salida'),
+            const SizedBox(height: 24),
+            FilledButton.icon(
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (_) => const SmokeTtsScreen(),
+                  ),
+                );
+              },
+              icon: const Icon(Icons.science),
+              label: const Text('Smoke TTS (Fase 2)'),
+            ),
+          ],
+        ),
       ),
     );
   }
