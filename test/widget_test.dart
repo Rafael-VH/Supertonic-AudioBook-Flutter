@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -31,5 +32,25 @@ void main() {
     );
 
     expect(find.text('Supertonic-AudioBook'), findsOneWidget);
+  });
+
+  testWidgets('el botón de ajustes abre la pantalla de configuración',
+      (WidgetTester tester) async {
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          repositorioPreferenciasProvider
+              .overrideWithValue(_PreferenciasMemoria()),
+        ],
+        child: const SupertonicApp(),
+      ),
+    );
+
+    await tester.tap(find.byIcon(Icons.settings_outlined));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Ajustes'), findsOneWidget);
+    expect(find.text('Tema'), findsOneWidget);
+    expect(find.text('Acerca de'), findsOneWidget);
   });
 }
