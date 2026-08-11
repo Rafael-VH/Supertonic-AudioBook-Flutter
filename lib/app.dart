@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
+import 'presentation/l10n/app_localizations.dart';
 import 'presentation/screens/home_screen.dart';
 
 class SupertonicApp extends StatelessWidget {
@@ -21,6 +23,14 @@ class SupertonicApp extends StatelessWidget {
         useMaterial3: true,
       ),
       home: const HomeScreen(),
+      locale: const Locale('es'),
+      supportedLocales: const [Locale('es'), Locale('en')],
+      localizationsDelegates: const [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
     );
   }
 }

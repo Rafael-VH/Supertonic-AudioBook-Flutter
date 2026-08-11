@@ -1,0 +1,313 @@
+// ignore: unused_import
+import 'package:intl/intl.dart' as intl;
+import 'app_localizations.dart';
+
+// ignore_for_file: type=lint
+
+/// The translations for English (`en`).
+class AppLocalizationsEn extends AppLocalizations {
+  AppLocalizationsEn([String locale = 'en']) : super(locale);
+
+  @override
+  String get ventana_titulo => 'Supertonic-AudioBook — File to audio converter';
+
+  @override
+  String get ajustes => 'Settings';
+
+  @override
+  String get tema => 'Theme';
+
+  @override
+  String get idioma => 'Language';
+
+  @override
+  String get claro => 'Light';
+
+  @override
+  String get oscuro => 'Dark';
+
+  @override
+  String get estilo => 'Style';
+
+  @override
+  String get estilo_material => 'Material (current)';
+
+  @override
+  String get estilo_neumorfismo => 'Neumorphism';
+
+  @override
+  String get estilo_skeuomorfismo => 'Skeuomorphism';
+
+  @override
+  String get acerca_de => 'About';
+
+  @override
+  String get acerca_descripcion =>
+      'Turn your Markdown books into audiobooks with synthetic speech: 100 % local, no cloud, no GPU.';
+
+  @override
+  String get acerca_version => 'Version';
+
+  @override
+  String get acerca_licencia => 'MIT License';
+
+  @override
+  String get acerca_creditos =>
+      'Speech model: Supertonic 3, by Supertone Inc. (OpenRAIL-M license)';
+
+  @override
+  String get acerca_ver_modelo => 'View the model on Hugging Face';
+
+  @override
+  String get acerca_ver_codigo => 'Model source code';
+
+  @override
+  String get acerca_abrir_repositorio => 'Open repository on GitHub';
+
+  @override
+  String get cerrar => 'Close';
+
+  @override
+  String get tab_entrada => 'Input & output';
+
+  @override
+  String get tab_sintesis => 'Synthesis & log';
+
+  @override
+  String get salida_audio => 'Audio output';
+
+  @override
+  String get carpeta_origen => 'Source folder';
+
+  @override
+  String get etiqueta_carpeta => 'Folder:';
+
+  @override
+  String get examinar => 'Browse…';
+
+  @override
+  String get archivos_encontrados => 'Files Found';
+
+  @override
+  String get todo => 'All';
+
+  @override
+  String get nada => 'None';
+
+  @override
+  String get refrescar => 'Refresh';
+
+  @override
+  String get ayuda_seleccion => 'Check the ones you want\nnone checked = all';
+
+  @override
+  String get opciones_sintesis => 'Synthesis options';
+
+  @override
+  String get formato => 'Format';
+
+  @override
+  String get voz => 'Voice';
+
+  @override
+  String get modelo_supertonic => 'supertonic-3 model';
+
+  @override
+  String get pasos => 'Steps';
+
+  @override
+  String get calidad_lento => 'more quality = slower';
+
+  @override
+  String get velocidad => 'Speed';
+
+  @override
+  String get rapido_lento => 'faster / slower';
+
+  @override
+  String get idioma_voz => 'Voice language';
+
+  @override
+  String get idioma_voz_auto => 'Auto (no language)';
+
+  @override
+  String get escuchar => 'Listen';
+
+  @override
+  String get muestra_texto => 'This is a sample of the synthetic voice.';
+
+  @override
+  String log_muestra(String voz, String lang) {
+    return '    Generating sample of voice $voz ($lang)...';
+  }
+
+  @override
+  String get log_muestra_fin => '    Sample ready. Playing...';
+
+  @override
+  String get log_muestra_error => '    Could not generate or play the sample.';
+
+  @override
+  String get registro => 'Log';
+
+  @override
+  String get btn_procesar => '▶  Process';
+
+  @override
+  String get btn_cancelar => '■  Cancel';
+
+  @override
+  String get estado_listo => 'Ready.';
+
+  @override
+  String estado_archivo(int i, int n, String nombre) {
+    return 'File $i of $n: $nombre';
+  }
+
+  @override
+  String estado_segmentos(int actual, int total) {
+    return '$actual/$total segments synthesized';
+  }
+
+  @override
+  String estado_listo_n(int n, String tiempo) {
+    return 'Done: $n file(s) in $tiempo.';
+  }
+
+  @override
+  String get estado_cancelando =>
+      'Cancelling (exports what was generated so far)…';
+
+  @override
+  String get estado_cancelado => 'Cancelled by the user.';
+
+  @override
+  String get estado_error => 'Error.';
+
+  @override
+  String estado_con_errores(int exitos, int total, int errores) {
+    return 'Finished with errors: $exitos/$total OK, $errores error(s).';
+  }
+
+  @override
+  String get snackbar_formato => 'Choose at least one output format.';
+
+  @override
+  String get snackbar_sin_md => 'There are no .md files in the input folder.';
+
+  @override
+  String snackbar_procesado(int n, String tiempo) {
+    return '$n file(s) processed in $tiempo.';
+  }
+
+  @override
+  String get snackbar_exportado => 'Exported what was generated so far.';
+
+  @override
+  String snackbar_con_errores(int exitos, int errores, String tiempo) {
+    return '$exitos processed, $errores error(s) in $tiempo.';
+  }
+
+  @override
+  String conteo_seleccionados(int sel, int total) {
+    return '$sel/$total selected';
+  }
+
+  @override
+  String conteo_archivos(int total) {
+    return '$total files';
+  }
+
+  @override
+  String get conteo_sin => 'No files';
+
+  @override
+  String log_inicio(int sel, int total) {
+    return '▶ Start: $sel file(s) selected of $total available.';
+  }
+
+  @override
+  String get log_formato_no_ok =>
+      'Could not start: no output format was chosen.';
+
+  @override
+  String get log_sin_md =>
+      'Could not start: the input folder has no .md files.';
+
+  @override
+  String get log_cancelar =>
+      '■ Cancellation requested: what was generated so far will be exported.';
+
+  @override
+  String get log_config_titulo => '  CONFIGURATION';
+
+  @override
+  String log_config_voz(String voz, int pasos, String vel) {
+    return '    Voice: $voz   Steps: $pasos   Speed: $vel';
+  }
+
+  @override
+  String log_config_lang(String lang) {
+    return '    Voice language: $lang';
+  }
+
+  @override
+  String log_config_formatos(String formatos) {
+    return '    Formats: $formatos';
+  }
+
+  @override
+  String log_config_salida(String salida) {
+    return '    Output: $salida';
+  }
+
+  @override
+  String log_archivo(int i, int n, String nombre) {
+    return '▶ File $i/$n: $nombre';
+  }
+
+  @override
+  String log_segmento(int actual, int total) {
+    return '      Segment $actual/$total synthesized…';
+  }
+
+  @override
+  String log_archivo_fin(int i, int n) {
+    return '✔ File $i/$n finished.';
+  }
+
+  @override
+  String log_completado(int n, String tiempo) {
+    return '✔ PROCESSING COMPLETED: $n file(s) in $tiempo.';
+  }
+
+  @override
+  String log_con_errores(int errores, int total) {
+    return 'Finished with $errores error(s) out of $total file(s).';
+  }
+
+  @override
+  String log_cancelado(String tiempo) {
+    return '✖ Processing cancelled by the user after $tiempo.';
+  }
+
+  @override
+  String log_error(String texto) {
+    return '✖ ERROR: $texto';
+  }
+
+  @override
+  String tiempo_seg(int total) {
+    return '$total s';
+  }
+
+  @override
+  String tiempo_min_seg(int min, int seg) {
+    return '$min min $seg s';
+  }
+
+  @override
+  String tiempo_hora_min(int horas, int min) {
+    return '$horas h $min min';
+  }
+}

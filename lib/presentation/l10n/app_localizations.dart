@@ -1,0 +1,632 @@
+import 'dart:async';
+
+import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:intl/intl.dart' as intl;
+
+import 'app_localizations_en.dart';
+import 'app_localizations_es.dart';
+
+// ignore_for_file: type=lint
+
+/// Callers can lookup localized strings with an instance of AppLocalizations
+/// returned by `AppLocalizations.of(context)`.
+///
+/// Applications need to include `AppLocalizations.delegate()` in their app's
+/// `localizationDelegates` list, and the locales they support in the app's
+/// `supportedLocales` list. For example:
+///
+/// ```dart
+/// import 'l10n/app_localizations.dart';
+///
+/// return MaterialApp(
+///   localizationsDelegates: AppLocalizations.localizationsDelegates,
+///   supportedLocales: AppLocalizations.supportedLocales,
+///   home: MyApplicationHome(),
+/// );
+/// ```
+///
+/// ## Update pubspec.yaml
+///
+/// Please make sure to update your pubspec.yaml to include the following
+/// packages:
+///
+/// ```yaml
+/// dependencies:
+///   # Internationalization support.
+///   flutter_localizations:
+///     sdk: flutter
+///   intl: any # Use the pinned version from flutter_localizations
+///
+///   # Rest of dependencies
+/// ```
+///
+/// ## iOS Applications
+///
+/// iOS applications define key application metadata, including supported
+/// locales, in an Info.plist file that is built into the application bundle.
+/// To configure the locales supported by your app, you’ll need to edit this
+/// file.
+///
+/// First, open your project’s ios/Runner.xcworkspace Xcode workspace file.
+/// Then, in the Project Navigator, open the Info.plist file under the Runner
+/// project’s Runner folder.
+///
+/// Next, select the Information Property List item, select Add Item from the
+/// Editor menu, then select Localizations from the pop-up menu.
+///
+/// Select and expand the newly-created Localizations item then, for each
+/// locale your application supports, add a new item and select the locale
+/// you wish to add from the pop-up menu in the Value field. This list should
+/// be consistent with the languages listed in the AppLocalizations.supportedLocales
+/// property.
+abstract class AppLocalizations {
+  AppLocalizations(String locale)
+    : localeName = intl.Intl.canonicalizedLocale(locale.toString());
+
+  final String localeName;
+
+  static AppLocalizations? of(BuildContext context) {
+    return Localizations.of<AppLocalizations>(context, AppLocalizations);
+  }
+
+  static const LocalizationsDelegate<AppLocalizations> delegate =
+      _AppLocalizationsDelegate();
+
+  /// A list of this localizations delegate along with the default localizations
+  /// delegates.
+  ///
+  /// Returns a list of localizations delegates containing this delegate along with
+  /// GlobalMaterialLocalizations.delegate, GlobalCupertinoLocalizations.delegate,
+  /// and GlobalWidgetsLocalizations.delegate.
+  ///
+  /// Additional delegates can be added by appending to this list in
+  /// MaterialApp. This list does not have to be used at all if a custom list
+  /// of delegates is preferred or required.
+  static const List<LocalizationsDelegate<dynamic>> localizationsDelegates =
+      <LocalizationsDelegate<dynamic>>[
+        delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+      ];
+
+  /// A list of this localizations delegate's supported locales.
+  static const List<Locale> supportedLocales = <Locale>[
+    Locale('en'),
+    Locale('es'),
+  ];
+
+  /// No description provided for @ventana_titulo.
+  ///
+  /// In en, this message translates to:
+  /// **'Supertonic-AudioBook — File to audio converter'**
+  String get ventana_titulo;
+
+  /// No description provided for @ajustes.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings'**
+  String get ajustes;
+
+  /// No description provided for @tema.
+  ///
+  /// In en, this message translates to:
+  /// **'Theme'**
+  String get tema;
+
+  /// No description provided for @idioma.
+  ///
+  /// In en, this message translates to:
+  /// **'Language'**
+  String get idioma;
+
+  /// No description provided for @claro.
+  ///
+  /// In en, this message translates to:
+  /// **'Light'**
+  String get claro;
+
+  /// No description provided for @oscuro.
+  ///
+  /// In en, this message translates to:
+  /// **'Dark'**
+  String get oscuro;
+
+  /// No description provided for @estilo.
+  ///
+  /// In en, this message translates to:
+  /// **'Style'**
+  String get estilo;
+
+  /// No description provided for @estilo_material.
+  ///
+  /// In en, this message translates to:
+  /// **'Material (current)'**
+  String get estilo_material;
+
+  /// No description provided for @estilo_neumorfismo.
+  ///
+  /// In en, this message translates to:
+  /// **'Neumorphism'**
+  String get estilo_neumorfismo;
+
+  /// No description provided for @estilo_skeuomorfismo.
+  ///
+  /// In en, this message translates to:
+  /// **'Skeuomorphism'**
+  String get estilo_skeuomorfismo;
+
+  /// No description provided for @acerca_de.
+  ///
+  /// In en, this message translates to:
+  /// **'About'**
+  String get acerca_de;
+
+  /// No description provided for @acerca_descripcion.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn your Markdown books into audiobooks with synthetic speech: 100 % local, no cloud, no GPU.'**
+  String get acerca_descripcion;
+
+  /// No description provided for @acerca_version.
+  ///
+  /// In en, this message translates to:
+  /// **'Version'**
+  String get acerca_version;
+
+  /// No description provided for @acerca_licencia.
+  ///
+  /// In en, this message translates to:
+  /// **'MIT License'**
+  String get acerca_licencia;
+
+  /// No description provided for @acerca_creditos.
+  ///
+  /// In en, this message translates to:
+  /// **'Speech model: Supertonic 3, by Supertone Inc. (OpenRAIL-M license)'**
+  String get acerca_creditos;
+
+  /// No description provided for @acerca_ver_modelo.
+  ///
+  /// In en, this message translates to:
+  /// **'View the model on Hugging Face'**
+  String get acerca_ver_modelo;
+
+  /// No description provided for @acerca_ver_codigo.
+  ///
+  /// In en, this message translates to:
+  /// **'Model source code'**
+  String get acerca_ver_codigo;
+
+  /// No description provided for @acerca_abrir_repositorio.
+  ///
+  /// In en, this message translates to:
+  /// **'Open repository on GitHub'**
+  String get acerca_abrir_repositorio;
+
+  /// No description provided for @cerrar.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get cerrar;
+
+  /// No description provided for @tab_entrada.
+  ///
+  /// In en, this message translates to:
+  /// **'Input & output'**
+  String get tab_entrada;
+
+  /// No description provided for @tab_sintesis.
+  ///
+  /// In en, this message translates to:
+  /// **'Synthesis & log'**
+  String get tab_sintesis;
+
+  /// No description provided for @salida_audio.
+  ///
+  /// In en, this message translates to:
+  /// **'Audio output'**
+  String get salida_audio;
+
+  /// No description provided for @carpeta_origen.
+  ///
+  /// In en, this message translates to:
+  /// **'Source folder'**
+  String get carpeta_origen;
+
+  /// No description provided for @etiqueta_carpeta.
+  ///
+  /// In en, this message translates to:
+  /// **'Folder:'**
+  String get etiqueta_carpeta;
+
+  /// No description provided for @examinar.
+  ///
+  /// In en, this message translates to:
+  /// **'Browse…'**
+  String get examinar;
+
+  /// No description provided for @archivos_encontrados.
+  ///
+  /// In en, this message translates to:
+  /// **'Files Found'**
+  String get archivos_encontrados;
+
+  /// No description provided for @todo.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get todo;
+
+  /// No description provided for @nada.
+  ///
+  /// In en, this message translates to:
+  /// **'None'**
+  String get nada;
+
+  /// No description provided for @refrescar.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh'**
+  String get refrescar;
+
+  /// No description provided for @ayuda_seleccion.
+  ///
+  /// In en, this message translates to:
+  /// **'Check the ones you want\nnone checked = all'**
+  String get ayuda_seleccion;
+
+  /// No description provided for @opciones_sintesis.
+  ///
+  /// In en, this message translates to:
+  /// **'Synthesis options'**
+  String get opciones_sintesis;
+
+  /// No description provided for @formato.
+  ///
+  /// In en, this message translates to:
+  /// **'Format'**
+  String get formato;
+
+  /// No description provided for @voz.
+  ///
+  /// In en, this message translates to:
+  /// **'Voice'**
+  String get voz;
+
+  /// No description provided for @modelo_supertonic.
+  ///
+  /// In en, this message translates to:
+  /// **'supertonic-3 model'**
+  String get modelo_supertonic;
+
+  /// No description provided for @pasos.
+  ///
+  /// In en, this message translates to:
+  /// **'Steps'**
+  String get pasos;
+
+  /// No description provided for @calidad_lento.
+  ///
+  /// In en, this message translates to:
+  /// **'more quality = slower'**
+  String get calidad_lento;
+
+  /// No description provided for @velocidad.
+  ///
+  /// In en, this message translates to:
+  /// **'Speed'**
+  String get velocidad;
+
+  /// No description provided for @rapido_lento.
+  ///
+  /// In en, this message translates to:
+  /// **'faster / slower'**
+  String get rapido_lento;
+
+  /// No description provided for @idioma_voz.
+  ///
+  /// In en, this message translates to:
+  /// **'Voice language'**
+  String get idioma_voz;
+
+  /// No description provided for @idioma_voz_auto.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto (no language)'**
+  String get idioma_voz_auto;
+
+  /// No description provided for @escuchar.
+  ///
+  /// In en, this message translates to:
+  /// **'Listen'**
+  String get escuchar;
+
+  /// No description provided for @muestra_texto.
+  ///
+  /// In en, this message translates to:
+  /// **'This is a sample of the synthetic voice.'**
+  String get muestra_texto;
+
+  /// Log when generating the voice sample for Listen.
+  ///
+  /// In en, this message translates to:
+  /// **'    Generating sample of voice {voz} ({lang})...'**
+  String log_muestra(String voz, String lang);
+
+  /// No description provided for @log_muestra_fin.
+  ///
+  /// In en, this message translates to:
+  /// **'    Sample ready. Playing...'**
+  String get log_muestra_fin;
+
+  /// No description provided for @log_muestra_error.
+  ///
+  /// In en, this message translates to:
+  /// **'    Could not generate or play the sample.'**
+  String get log_muestra_error;
+
+  /// No description provided for @registro.
+  ///
+  /// In en, this message translates to:
+  /// **'Log'**
+  String get registro;
+
+  /// No description provided for @btn_procesar.
+  ///
+  /// In en, this message translates to:
+  /// **'▶  Process'**
+  String get btn_procesar;
+
+  /// No description provided for @btn_cancelar.
+  ///
+  /// In en, this message translates to:
+  /// **'■  Cancel'**
+  String get btn_cancelar;
+
+  /// No description provided for @estado_listo.
+  ///
+  /// In en, this message translates to:
+  /// **'Ready.'**
+  String get estado_listo;
+
+  /// No description provided for @estado_archivo.
+  ///
+  /// In en, this message translates to:
+  /// **'File {i} of {n}: {nombre}'**
+  String estado_archivo(int i, int n, String nombre);
+
+  /// No description provided for @estado_segmentos.
+  ///
+  /// In en, this message translates to:
+  /// **'{actual}/{total} segments synthesized'**
+  String estado_segmentos(int actual, int total);
+
+  /// No description provided for @estado_listo_n.
+  ///
+  /// In en, this message translates to:
+  /// **'Done: {n} file(s) in {tiempo}.'**
+  String estado_listo_n(int n, String tiempo);
+
+  /// No description provided for @estado_cancelando.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelling (exports what was generated so far)…'**
+  String get estado_cancelando;
+
+  /// No description provided for @estado_cancelado.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelled by the user.'**
+  String get estado_cancelado;
+
+  /// No description provided for @estado_error.
+  ///
+  /// In en, this message translates to:
+  /// **'Error.'**
+  String get estado_error;
+
+  /// No description provided for @estado_con_errores.
+  ///
+  /// In en, this message translates to:
+  /// **'Finished with errors: {exitos}/{total} OK, {errores} error(s).'**
+  String estado_con_errores(int exitos, int total, int errores);
+
+  /// No description provided for @snackbar_formato.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose at least one output format.'**
+  String get snackbar_formato;
+
+  /// No description provided for @snackbar_sin_md.
+  ///
+  /// In en, this message translates to:
+  /// **'There are no .md files in the input folder.'**
+  String get snackbar_sin_md;
+
+  /// No description provided for @snackbar_procesado.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} file(s) processed in {tiempo}.'**
+  String snackbar_procesado(int n, String tiempo);
+
+  /// No description provided for @snackbar_exportado.
+  ///
+  /// In en, this message translates to:
+  /// **'Exported what was generated so far.'**
+  String get snackbar_exportado;
+
+  /// No description provided for @snackbar_con_errores.
+  ///
+  /// In en, this message translates to:
+  /// **'{exitos} processed, {errores} error(s) in {tiempo}.'**
+  String snackbar_con_errores(int exitos, int errores, String tiempo);
+
+  /// No description provided for @conteo_seleccionados.
+  ///
+  /// In en, this message translates to:
+  /// **'{sel}/{total} selected'**
+  String conteo_seleccionados(int sel, int total);
+
+  /// No description provided for @conteo_archivos.
+  ///
+  /// In en, this message translates to:
+  /// **'{total} files'**
+  String conteo_archivos(int total);
+
+  /// No description provided for @conteo_sin.
+  ///
+  /// In en, this message translates to:
+  /// **'No files'**
+  String get conteo_sin;
+
+  /// No description provided for @log_inicio.
+  ///
+  /// In en, this message translates to:
+  /// **'▶ Start: {sel} file(s) selected of {total} available.'**
+  String log_inicio(int sel, int total);
+
+  /// No description provided for @log_formato_no_ok.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not start: no output format was chosen.'**
+  String get log_formato_no_ok;
+
+  /// No description provided for @log_sin_md.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not start: the input folder has no .md files.'**
+  String get log_sin_md;
+
+  /// No description provided for @log_cancelar.
+  ///
+  /// In en, this message translates to:
+  /// **'■ Cancellation requested: what was generated so far will be exported.'**
+  String get log_cancelar;
+
+  /// No description provided for @log_config_titulo.
+  ///
+  /// In en, this message translates to:
+  /// **'  CONFIGURATION'**
+  String get log_config_titulo;
+
+  /// No description provided for @log_config_voz.
+  ///
+  /// In en, this message translates to:
+  /// **'    Voice: {voz}   Steps: {pasos}   Speed: {vel}'**
+  String log_config_voz(String voz, int pasos, String vel);
+
+  /// No description provided for @log_config_lang.
+  ///
+  /// In en, this message translates to:
+  /// **'    Voice language: {lang}'**
+  String log_config_lang(String lang);
+
+  /// No description provided for @log_config_formatos.
+  ///
+  /// In en, this message translates to:
+  /// **'    Formats: {formatos}'**
+  String log_config_formatos(String formatos);
+
+  /// No description provided for @log_config_salida.
+  ///
+  /// In en, this message translates to:
+  /// **'    Output: {salida}'**
+  String log_config_salida(String salida);
+
+  /// No description provided for @log_archivo.
+  ///
+  /// In en, this message translates to:
+  /// **'▶ File {i}/{n}: {nombre}'**
+  String log_archivo(int i, int n, String nombre);
+
+  /// No description provided for @log_segmento.
+  ///
+  /// In en, this message translates to:
+  /// **'      Segment {actual}/{total} synthesized…'**
+  String log_segmento(int actual, int total);
+
+  /// No description provided for @log_archivo_fin.
+  ///
+  /// In en, this message translates to:
+  /// **'✔ File {i}/{n} finished.'**
+  String log_archivo_fin(int i, int n);
+
+  /// No description provided for @log_completado.
+  ///
+  /// In en, this message translates to:
+  /// **'✔ PROCESSING COMPLETED: {n} file(s) in {tiempo}.'**
+  String log_completado(int n, String tiempo);
+
+  /// No description provided for @log_con_errores.
+  ///
+  /// In en, this message translates to:
+  /// **'Finished with {errores} error(s) out of {total} file(s).'**
+  String log_con_errores(int errores, int total);
+
+  /// No description provided for @log_cancelado.
+  ///
+  /// In en, this message translates to:
+  /// **'✖ Processing cancelled by the user after {tiempo}.'**
+  String log_cancelado(String tiempo);
+
+  /// No description provided for @log_error.
+  ///
+  /// In en, this message translates to:
+  /// **'✖ ERROR: {texto}'**
+  String log_error(String texto);
+
+  /// No description provided for @tiempo_seg.
+  ///
+  /// In en, this message translates to:
+  /// **'{total} s'**
+  String tiempo_seg(int total);
+
+  /// No description provided for @tiempo_min_seg.
+  ///
+  /// In en, this message translates to:
+  /// **'{min} min {seg} s'**
+  String tiempo_min_seg(int min, int seg);
+
+  /// No description provided for @tiempo_hora_min.
+  ///
+  /// In en, this message translates to:
+  /// **'{horas} h {min} min'**
+  String tiempo_hora_min(int horas, int min);
+}
+
+class _AppLocalizationsDelegate
+    extends LocalizationsDelegate<AppLocalizations> {
+  const _AppLocalizationsDelegate();
+
+  @override
+  Future<AppLocalizations> load(Locale locale) {
+    return SynchronousFuture<AppLocalizations>(lookupAppLocalizations(locale));
+  }
+
+  @override
+  bool isSupported(Locale locale) =>
+      <String>['en', 'es'].contains(locale.languageCode);
+
+  @override
+  bool shouldReload(_AppLocalizationsDelegate old) => false;
+}
+
+AppLocalizations lookupAppLocalizations(Locale locale) {
+  // Lookup logic when only language code is specified.
+  switch (locale.languageCode) {
+    case 'en':
+      return AppLocalizationsEn();
+    case 'es':
+      return AppLocalizationsEs();
+  }
+
+  throw FlutterError(
+    'AppLocalizations.delegate failed to load unsupported locale "$locale". This is likely '
+    'an issue with the localizations generation tool. Please file an issue '
+    'on GitHub with a reproducible sample app and the gen-l10n configuration '
+    'that was used.',
+  );
+}

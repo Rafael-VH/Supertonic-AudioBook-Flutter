@@ -1,0 +1,228 @@
+{
+  "ventana_titulo": "Supertonic-AudioBook — Conversor de archivos a audio",
+  "ajustes": "Ajustes",
+  "tema": "Tema",
+  "idioma": "Idioma",
+  "claro": "Claro",
+  "oscuro": "Oscuro",
+  "estilo": "Estilo",
+  "estilo_material": "Material (actual)",
+  "estilo_neumorfismo": "Neumorfismo",
+  "estilo_skeuomorfismo": "Skeuomorfismo",
+  "acerca_de": "Acerca de",
+  "acerca_descripcion": "Convierte tus libros Markdown en audiolibros con voz sintética: 100 % local, sin nube y sin GPU.",
+  "acerca_version": "Versión",
+  "acerca_licencia": "Licencia MIT",
+  "acerca_creditos": "Modelo de voz: Supertonic 3, de Supertone Inc. (licencia OpenRAIL-M)",
+  "acerca_ver_modelo": "Ver el modelo en Hugging Face",
+  "acerca_ver_codigo": "Código fuente del modelo",
+  "acerca_abrir_repositorio": "Abrir repositorio en GitHub",
+  "cerrar": "Cerrar",
+  "tab_entrada": "Entrada y salida",
+  "tab_sintesis": "Síntesis y registro",
+  "salida_audio": "Salida de audio",
+  "carpeta_origen": "Carpeta de origen",
+  "etiqueta_carpeta": "Carpeta:",
+  "examinar": "Examinar…",
+  "archivos_encontrados": "Archivos Encontrados",
+  "todo": "Todo",
+  "nada": "Nada",
+  "refrescar": "Refrescar",
+  "ayuda_seleccion": "Marcá los que querés\nsin marcas = todos",
+  "opciones_sintesis": "Opciones de síntesis",
+  "formato": "Formato",
+  "voz": "Voz",
+  "modelo_supertonic": "Modelo supertonic-3",
+  "pasos": "Pasos",
+  "calidad_lento": "más calidad = más lento",
+  "velocidad": "Velocidad",
+  "rapido_lento": "más rápido / más lento",
+  "idioma_voz": "Idioma de la voz",
+  "idioma_voz_auto": "Auto (sin idioma)",
+  "escuchar": "Escuchar",
+  "muestra_texto": "Esta es una muestra de la voz sintética.",
+  "log_muestra": "    Generando muestra de voz {voz} ({lang})...",
+  "@log_muestra": {
+    "description": "Log al generar la muestra de voz para Escuchar.",
+    "placeholders": {
+      "voz": {"type": "String"},
+      "lang": {"type": "String"}
+    }
+  },
+  "log_muestra_fin": "    Muestra lista. Reproduciendo...",
+  "log_muestra_error": "    No se pudo generar o reproducir la muestra.",
+  "registro": "Registro",
+  "btn_procesar": "▶  Procesar",
+  "btn_cancelar": "■  Cancelar",
+  "estado_listo": "Listo.",
+  "estado_archivo": "Archivo {i} de {n}: {nombre}",
+  "@estado_archivo": {
+    "placeholders": {
+      "i": {"type": "int"},
+      "n": {"type": "int"},
+      "nombre": {"type": "String"}
+    }
+  },
+  "estado_segmentos": "{actual}/{total} segmentos sintetizados",
+  "@estado_segmentos": {
+    "placeholders": {
+      "actual": {"type": "int"},
+      "total": {"type": "int"}
+    }
+  },
+  "estado_listo_n": "Listo: {n} archivo(s) en {tiempo}.",
+  "@estado_listo_n": {
+    "placeholders": {
+      "n": {"type": "int"},
+      "tiempo": {"type": "String"}
+    }
+  },
+  "estado_cancelando": "Cancelando (exporta lo generado hasta ahora)…",
+  "estado_cancelado": "Cancelado por el usuario.",
+  "estado_error": "Error.",
+  "estado_con_errores": "Completado con errores: {exitos}/{total} OK, {errores} error/es.",
+  "@estado_con_errores": {
+    "placeholders": {
+      "exitos": {"type": "int"},
+      "total": {"type": "int"},
+      "errores": {"type": "int"}
+    }
+  },
+  "snackbar_formato": "Elegí al menos un formato de salida.",
+  "snackbar_sin_md": "No hay archivos .md en la carpeta de entrada.",
+  "snackbar_procesado": "Se procesaron {n} archivo(s) en {tiempo}.",
+  "@snackbar_procesado": {
+    "placeholders": {
+      "n": {"type": "int"},
+      "tiempo": {"type": "String"}
+    }
+  },
+  "snackbar_exportado": "Se exportó lo generado hasta el momento.",
+  "snackbar_con_errores": "{exitos} procesado(s), {errores} error(es) en {tiempo}.",
+  "@snackbar_con_errores": {
+    "placeholders": {
+      "exitos": {"type": "int"},
+      "errores": {"type": "int"},
+      "tiempo": {"type": "String"}
+    }
+  },
+  "conteo_seleccionados": "{sel}/{total} seleccionados",
+  "@conteo_seleccionados": {
+    "placeholders": {
+      "sel": {"type": "int"},
+      "total": {"type": "int"}
+    }
+  },
+  "conteo_archivos": "{total} archivos",
+  "@conteo_archivos": {
+    "placeholders": {
+      "total": {"type": "int"}
+    }
+  },
+  "conteo_sin": "Sin archivos",
+  "log_inicio": "▶ Inicio: {sel} archivo(s) seleccionado(s) de {total} disponible(s).",
+  "@log_inicio": {
+    "placeholders": {
+      "sel": {"type": "int"},
+      "total": {"type": "int"}
+    }
+  },
+  "log_formato_no_ok": "No se pudo iniciar: no se eligió ningún formato de salida.",
+  "log_sin_md": "No se pudo iniciar: la carpeta de entrada no tiene archivos .md.",
+  "log_cancelar": "■ Cancelación solicitada: se exporta lo generado hasta el momento.",
+  "log_config_titulo": "  CONFIGURACIÓN",
+  "log_config_voz": "    Voz: {voz}   Pasos: {pasos}   Velocidad: {vel}",
+  "@log_config_voz": {
+    "placeholders": {
+      "voz": {"type": "String"},
+      "pasos": {"type": "int"},
+      "vel": {"type": "String"}
+    }
+  },
+  "log_config_lang": "    Idioma de la voz: {lang}",
+  "@log_config_lang": {
+    "placeholders": {
+      "lang": {"type": "String"}
+    }
+  },
+  "log_config_formatos": "    Formatos: {formatos}",
+  "@log_config_formatos": {
+    "placeholders": {
+      "formatos": {"type": "String"}
+    }
+  },
+  "log_config_salida": "    Salida: {salida}",
+  "@log_config_salida": {
+    "placeholders": {
+      "salida": {"type": "String"}
+    }
+  },
+  "log_archivo": "▶ Archivo {i}/{n}: {nombre}",
+  "@log_archivo": {
+    "placeholders": {
+      "i": {"type": "int"},
+      "n": {"type": "int"},
+      "nombre": {"type": "String"}
+    }
+  },
+  "log_segmento": "      Segmento {actual}/{total} sintetizado…",
+  "@log_segmento": {
+    "placeholders": {
+      "actual": {"type": "int"},
+      "total": {"type": "int"}
+    }
+  },
+  "log_archivo_fin": "✔ Archivo {i}/{n} terminado.",
+  "@log_archivo_fin": {
+    "placeholders": {
+      "i": {"type": "int"},
+      "n": {"type": "int"}
+    }
+  },
+  "log_completado": "✔ PROCESAMIENTO COMPLETADO: {n} archivo(s) en {tiempo}.",
+  "@log_completado": {
+    "placeholders": {
+      "n": {"type": "int"},
+      "tiempo": {"type": "String"}
+    }
+  },
+  "log_con_errores": "Finalizado con {errores} error(es) de {total} archivo(s).",
+  "@log_con_errores": {
+    "placeholders": {
+      "errores": {"type": "int"},
+      "total": {"type": "int"}
+    }
+  },
+  "log_cancelado": "✖ Procesamiento cancelado por el usuario tras {tiempo}.",
+  "@log_cancelado": {
+    "placeholders": {
+      "tiempo": {"type": "String"}
+    }
+  },
+  "log_error": "✖ ERROR: {texto}",
+  "@log_error": {
+    "placeholders": {
+      "texto": {"type": "String"}
+    }
+  },
+  "tiempo_seg": "{total} s",
+  "@tiempo_seg": {
+    "placeholders": {
+      "total": {"type": "int"}
+    }
+  },
+  "tiempo_min_seg": "{min} min {seg} s",
+  "@tiempo_min_seg": {
+    "placeholders": {
+      "min": {"type": "int"},
+      "seg": {"type": "int"}
+    }
+  },
+  "tiempo_hora_min": "{horas} h {min} min",
+  "@tiempo_hora_min": {
+    "placeholders": {
+      "horas": {"type": "int"},
+      "min": {"type": "int"}
+    }
+  }
+}
