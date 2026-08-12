@@ -41,7 +41,7 @@ Future<void> main() async {
         reproductorAudioProvider.overrideWithValue(ReproductorJustAudio()),
         motorTtsProvider.overrideWith(
           (ref) => MotorTtsSupertonic(
-            onnxDir: modeloDir,
+            onnxDir: '$modeloDir$separador' 'onnx',
             voiceStylesDir: '$modeloDir$separador' 'voice_styles',
           ),
         ),
