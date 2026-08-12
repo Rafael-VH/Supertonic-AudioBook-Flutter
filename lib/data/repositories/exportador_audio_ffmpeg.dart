@@ -59,11 +59,13 @@ class ExportadorAudioFfmpeg implements ExportadorAudio {
     }
     File(rutaDestino).parent.createSync(recursive: true);
     final sesion = await FFmpegKit.executeWithArguments(
-        ['-i', rutaWav, '-c:a', codec, rutaDestino]);
+        ['-i', rutaWav, '-c:a', codec, '-f', formato, rutaDestino]);
     final codigo = await sesion.getReturnCode();
     if (!ReturnCode.isSuccess(codigo)) {
-      throw StateError(
-          'FFmpeg falló (código $codigo) al convertir a $formato: $rutaWav → $rutaDestino');
+      final logs = await sesion.getAllLogs();
+      final detalle = logs.map((l) => l.getMessage()).join('\n');
+      throw StateError('FFmpeg falló (código $codigo) al convertir a $formato: '
+          '$rutaWav → $rutaDestino\n$detalle');
     }
   }
 
