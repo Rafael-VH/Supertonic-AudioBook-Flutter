@@ -5,7 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'presentation/controllers/modelo_controller.dart';
 import 'presentation/controllers/settings_controller.dart';
 import 'presentation/l10n/app_localizations.dart';
-import 'presentation/screens/home_screen.dart';
+import 'presentation/screens/home/home_screen.dart';
 import 'presentation/screens/modelo_screen.dart';
 import 'presentation/theme/app_theme.dart';
 

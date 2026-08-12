@@ -9,7 +9,7 @@ import 'package:supertonic_audiobook/domain/entities/archivo.dart';
 import 'package:supertonic_audiobook/presentation/controllers/providers.dart';
 import 'package:supertonic_audiobook/presentation/controllers/settings_controller.dart';
 import 'package:supertonic_audiobook/presentation/l10n/app_localizations.dart';
-import 'package:supertonic_audiobook/presentation/screens/home_screen.dart';
+import 'package:supertonic_audiobook/presentation/screens/home/home_screen.dart';
 import 'package:supertonic_audiobook/presentation/theme/app_theme.dart';
 
 import '../../support/fakes.dart';
