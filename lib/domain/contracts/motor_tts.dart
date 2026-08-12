@@ -1,6 +1,6 @@
 import 'dart:typed_data';
 
-import '../constants/producto.dart';
+import 'package:supertonic_audiobook/domain/constants/producto.dart';
 
 /// Abstracción del motor de síntesis de voz (contrato de dominio).
 ///

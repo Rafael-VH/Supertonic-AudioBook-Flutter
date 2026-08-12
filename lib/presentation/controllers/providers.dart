@@ -1,13 +1,13 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../domain/contracts/exportador_audio.dart';
-import '../../domain/contracts/modelo_gestor.dart';
-import '../../domain/contracts/motor_tts.dart';
-import '../../domain/contracts/repositorio_archivos.dart';
-import '../../domain/contracts/repositorio_preferencias.dart';
-import '../../domain/contracts/reproductor_audio.dart';
-import '../../domain/use_cases/procesar_archivo.dart';
-import '../../domain/use_cases/sintetizar_muestra.dart';
+import 'package:supertonic_audiobook/domain/contracts/exportador_audio.dart';
+import 'package:supertonic_audiobook/domain/contracts/modelo_gestor.dart';
+import 'package:supertonic_audiobook/domain/contracts/motor_tts.dart';
+import 'package:supertonic_audiobook/domain/contracts/repositorio_archivos.dart';
+import 'package:supertonic_audiobook/domain/contracts/repositorio_preferencias.dart';
+import 'package:supertonic_audiobook/domain/contracts/reproductor_audio.dart';
+import 'package:supertonic_audiobook/domain/use_cases/procesar_archivo.dart';
+import 'package:supertonic_audiobook/domain/use_cases/sintetizar_muestra.dart';
 
 /// Parámetros técnicos del pipeline de síntesis (plan §5.1), inyectados desde
 /// la composición (`main.dart`). El caso de uso los recibe en el constructor.

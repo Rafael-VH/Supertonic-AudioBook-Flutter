@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
-import '../controllers/settings_controller.dart';
-import '../l10n/app_localizations.dart';
-import '../theme/paleta.dart';
-import '../widgets/acerca_de_section.dart';
+import 'package:supertonic_audiobook/presentation/controllers/settings_controller.dart';
+import 'package:supertonic_audiobook/presentation/l10n/app_localizations.dart';
+import 'package:supertonic_audiobook/presentation/theme/paleta.dart';
+import 'package:supertonic_audiobook/presentation/widgets/acerca_de_section.dart';
 
 /// Idiomas de interfaz con su nombre nativo (plan §6.5 — IDIOMAS).
 const _idiomas = <(String, String)>[

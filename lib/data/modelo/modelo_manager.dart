@@ -5,7 +5,7 @@ import 'package:crypto/crypto.dart';
 import 'package:dio/dio.dart';
 import 'package:path_provider/path_provider.dart';
 
-import '../../domain/contracts/modelo_gestor.dart';
+import 'package:supertonic_audiobook/domain/contracts/modelo_gestor.dart';
 
 /// Archivo publicado en el repo HuggingFace de supertonic-3.
 class ArchivoModelo {

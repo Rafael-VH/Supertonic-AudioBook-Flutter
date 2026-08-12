@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'providers.dart';
+import 'package:supertonic_audiobook/presentation/controllers/providers.dart';
 
 /// Estado del modelo de voz en el arranque (plan §5.5, gate de descarga).
 class ModeloEstado {

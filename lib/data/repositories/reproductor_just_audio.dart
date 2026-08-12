@@ -1,6 +1,6 @@
 import 'package:just_audio/just_audio.dart';
 
-import '../../domain/contracts/reproductor_audio.dart';
+import 'package:supertonic_audiobook/domain/contracts/reproductor_audio.dart';
 
 /// Implementación de [ReproductorAudio] sobre `just_audio`.
 class ReproductorJustAudio implements ReproductorAudio {

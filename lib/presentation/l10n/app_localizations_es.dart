@@ -1,6 +1,6 @@
 // ignore: unused_import
 import 'package:intl/intl.dart' as intl;
-import 'app_localizations.dart';
+import 'package:supertonic_audiobook/presentation/l10n/app_localizations.dart';
 
 // ignore_for_file: type=lint
 

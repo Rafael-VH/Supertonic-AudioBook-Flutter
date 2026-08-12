@@ -1,4 +1,4 @@
-import '../entities/archivo.dart';
+import 'package:supertonic_audiobook/domain/entities/archivo.dart';
 
 /// Acceso a los archivos Markdown de entrada (contrato de dominio).
 abstract class RepositorioArchivos {

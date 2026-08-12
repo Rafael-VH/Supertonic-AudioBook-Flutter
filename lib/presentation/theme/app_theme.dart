@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'paleta.dart';
+import 'package:supertonic_audiobook/presentation/theme/paleta.dart';
 
 /// Extensión de tema con los colores de la paleta del port (§6.2) que
 /// Material 3 no modela (biseles luz/sombra, snackbar, advertencia, etc.).

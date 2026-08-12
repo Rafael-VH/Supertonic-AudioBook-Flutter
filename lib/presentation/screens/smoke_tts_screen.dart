@@ -3,9 +3,8 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:path_provider/path_provider.dart';
-
-import '../../data/helpers/supertonic_helper.dart';
-import '../../data/modelo/modelo_manager.dart';
+import 'package:supertonic_audiobook/data/helpers/supertonic_helper.dart';
+import 'package:supertonic_audiobook/data/modelo/modelo_manager.dart';
 
 /// Smoke de Fase 2 (plan §8): valida que el modelo corre en el target real.
 /// Descarga el modelo si falta, sintetiza una oración y la reproduce.

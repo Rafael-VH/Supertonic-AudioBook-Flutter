@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
-import '../../controllers/home_controller.dart';
-import '../../l10n/app_localizations.dart';
-import '../../widgets/barra_progreso.dart';
+import 'package:supertonic_audiobook/presentation/controllers/home_controller.dart';
+import 'package:supertonic_audiobook/presentation/l10n/app_localizations.dart';
+import 'package:supertonic_audiobook/presentation/widgets/barra_progreso.dart';
 
 /// Card de registro: log, estado, progreso y (desktop) botones de acción.
 class CardRegistro extends StatelessWidget {

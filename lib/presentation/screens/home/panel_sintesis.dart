@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
-
-import '../../controllers/home_controller.dart';
-import '../../../domain/constants/producto.dart';
-import '../../../domain/use_cases/formato.dart';
-import '../../constants/muestra_voz.dart';
-import '../../l10n/app_localizations.dart';
-import 'card_registro.dart';
+import 'package:supertonic_audiobook/domain/constants/producto.dart';
+import 'package:supertonic_audiobook/domain/use_cases/formato.dart';
+import 'package:supertonic_audiobook/presentation/constants/muestra_voz.dart';
+import 'package:supertonic_audiobook/presentation/controllers/home_controller.dart';
+import 'package:supertonic_audiobook/presentation/l10n/app_localizations.dart';
+import 'package:supertonic_audiobook/presentation/screens/home/card_registro.dart';
 
 /// Panel de síntesis: opciones y registro (solo desktop).
 class PanelSintesis extends StatelessWidget {

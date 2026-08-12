@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
-import '../controllers/modelo_controller.dart';
-import '../l10n/app_localizations.dart';
+import 'package:supertonic_audiobook/presentation/controllers/modelo_controller.dart';
+import 'package:supertonic_audiobook/presentation/l10n/app_localizations.dart';
 
 /// Pantalla de arranque que asegura el modelo de voz antes de entrar a Home.
 ///

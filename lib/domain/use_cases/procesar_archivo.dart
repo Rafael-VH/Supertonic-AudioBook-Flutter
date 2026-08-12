@@ -3,13 +3,13 @@ import 'dart:typed_data';
 
 import 'package:logger/logger.dart';
 
-import '../constants/producto.dart';
-import '../contracts/exportador_audio.dart';
-import '../contracts/motor_tts.dart';
-import '../contracts/repositorio_archivos.dart';
-import '../entities/archivo.dart';
-import 'limpiar_markdown.dart';
-import 'segmentar_texto.dart';
+import 'package:supertonic_audiobook/domain/constants/producto.dart';
+import 'package:supertonic_audiobook/domain/contracts/exportador_audio.dart';
+import 'package:supertonic_audiobook/domain/contracts/motor_tts.dart';
+import 'package:supertonic_audiobook/domain/contracts/repositorio_archivos.dart';
+import 'package:supertonic_audiobook/domain/entities/archivo.dart';
+import 'package:supertonic_audiobook/domain/use_cases/limpiar_markdown.dart';
+import 'package:supertonic_audiobook/domain/use_cases/segmentar_texto.dart';
 
 final _log = Logger();
 

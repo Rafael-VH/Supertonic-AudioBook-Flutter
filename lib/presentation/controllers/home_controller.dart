@@ -5,11 +5,11 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path_provider/path_provider.dart';
 
-import '../../domain/constants/producto.dart';
-import '../../domain/entities/archivo.dart';
-import '../constants/muestra_voz.dart';
-import '../l10n/app_localizations.dart';
-import 'providers.dart';
+import 'package:supertonic_audiobook/domain/constants/producto.dart';
+import 'package:supertonic_audiobook/domain/entities/archivo.dart';
+import 'package:supertonic_audiobook/presentation/constants/muestra_voz.dart';
+import 'package:supertonic_audiobook/presentation/controllers/providers.dart';
+import 'package:supertonic_audiobook/presentation/l10n/app_localizations.dart';
 
 /// Mensaje de snackbar emitido por el controlador para que la pantalla lo
 /// muestre (y lo limpie con `ref.listen`).

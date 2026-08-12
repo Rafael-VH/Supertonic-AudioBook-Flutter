@@ -3,9 +3,9 @@ import 'dart:typed_data';
 
 import 'package:logger/logger.dart';
 
-import '../../domain/constants/producto.dart';
-import '../../domain/contracts/motor_tts.dart';
-import '../helpers/supertonic_helper.dart' as supertonic;
+import 'package:supertonic_audiobook/domain/constants/producto.dart';
+import 'package:supertonic_audiobook/domain/contracts/motor_tts.dart';
+import 'package:supertonic_audiobook/data/helpers/supertonic_helper.dart' as supertonic;
 
 final _log = Logger();
 

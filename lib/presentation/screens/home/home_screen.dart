@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../controllers/home_controller.dart';
-import '../../l10n/app_localizations.dart';
-import '../../theme/app_theme.dart';
-import '../../widgets/barra_progreso.dart';
-import 'card_registro.dart';
-import 'panel_entrada.dart';
-import 'panel_sintesis.dart';
-import '../settings_screen.dart';
+import 'package:supertonic_audiobook/presentation/controllers/home_controller.dart';
+import 'package:supertonic_audiobook/presentation/l10n/app_localizations.dart';
+import 'package:supertonic_audiobook/presentation/screens/home/card_registro.dart';
+import 'package:supertonic_audiobook/presentation/screens/home/panel_entrada.dart';
+import 'package:supertonic_audiobook/presentation/screens/home/panel_sintesis.dart';
+import 'package:supertonic_audiobook/presentation/screens/settings_screen.dart';
+import 'package:supertonic_audiobook/presentation/theme/app_theme.dart';
+import 'package:supertonic_audiobook/presentation/widgets/barra_progreso.dart';
 
 /// Umbral de ancho para mostrar los paneles lado a lado (Material 6.2, responsive).
 const int umbralAncho = 900;

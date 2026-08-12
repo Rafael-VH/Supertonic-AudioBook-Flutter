@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
-import '../../controllers/home_controller.dart';
-import '../../l10n/app_localizations.dart';
-import '../../widgets/archivo_tile.dart';
+import 'package:supertonic_audiobook/presentation/controllers/home_controller.dart';
+import 'package:supertonic_audiobook/presentation/l10n/app_localizations.dart';
+import 'package:supertonic_audiobook/presentation/widgets/archivo_tile.dart';
 
 /// Card de archivos encontrados con su lista de selección.
 class CardArchivos extends StatelessWidget {

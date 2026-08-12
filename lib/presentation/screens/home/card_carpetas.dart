@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../../controllers/home_controller.dart';
-import '../../l10n/app_localizations.dart';
+import 'package:supertonic_audiobook/presentation/controllers/home_controller.dart';
+import 'package:supertonic_audiobook/presentation/l10n/app_localizations.dart';
 
 /// Cards de carpetas de origen y salida.
 class CardCarpetas extends StatelessWidget {

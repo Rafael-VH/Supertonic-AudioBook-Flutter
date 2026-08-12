@@ -5,15 +5,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:just_audio_media_kit/just_audio_media_kit.dart';
 import 'package:path_provider/path_provider.dart';
 
-import 'app.dart';
-import 'data/config.dart';
-import 'data/modelo/modelo_manager.dart';
-import 'data/repositories/exportador_audio_ffmpeg.dart';
-import 'data/repositories/motor_tts.dart';
-import 'data/repositories/repositorio_archivos.dart';
-import 'data/repositories/repositorio_preferencias.dart';
-import 'data/repositories/reproductor_just_audio.dart';
-import 'presentation/controllers/providers.dart';
+import 'package:supertonic_audiobook/app.dart';
+import 'package:supertonic_audiobook/data/config.dart';
+import 'package:supertonic_audiobook/data/modelo/modelo_manager.dart';
+import 'package:supertonic_audiobook/data/repositories/exportador_audio_ffmpeg.dart';
+import 'package:supertonic_audiobook/data/repositories/motor_tts.dart';
+import 'package:supertonic_audiobook/data/repositories/repositorio_archivos.dart';
+import 'package:supertonic_audiobook/data/repositories/repositorio_preferencias.dart';
+import 'package:supertonic_audiobook/data/repositories/reproductor_just_audio.dart';
+import 'package:supertonic_audiobook/presentation/controllers/providers.dart';
 
 /// Composition root: único punto que importa `data/`.
 ///

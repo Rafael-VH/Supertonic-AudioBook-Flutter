@@ -1,8 +1,8 @@
 import 'package:logger/logger.dart';
 
-import '../constants/producto.dart';
-import '../contracts/exportador_audio.dart';
-import '../contracts/motor_tts.dart';
+import 'package:supertonic_audiobook/domain/constants/producto.dart';
+import 'package:supertonic_audiobook/domain/contracts/exportador_audio.dart';
+import 'package:supertonic_audiobook/domain/contracts/motor_tts.dart';
 
 final _log = Logger();
 

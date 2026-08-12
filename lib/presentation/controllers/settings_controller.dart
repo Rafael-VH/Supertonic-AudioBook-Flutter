@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../theme/paleta.dart';
-import 'providers.dart';
+import 'package:supertonic_audiobook/presentation/controllers/providers.dart';
+import 'package:supertonic_audiobook/presentation/theme/paleta.dart';
 
 /// Estado de los ajustes de interfaz (plan §6.3, claves exactas).
 class SettingsEstado {
