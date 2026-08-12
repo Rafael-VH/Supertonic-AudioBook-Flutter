@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -12,14 +14,14 @@ import 'package:supertonic_audiobook/presentation/theme/app_theme.dart';
 
 import '../../support/fakes.dart';
 
-Widget _harness({RepositorioArchivosFake? repositorio}) {
+Widget _harness({RepositorioArchivosFake? repositorio, MotorFake? motor}) {
   return ProviderScope(
     overrides: [
       repositorioPreferenciasProvider
           .overrideWithValue(PreferenciasMemoria()),
       repositorioArchivosProvider.overrideWithValue(
           repositorio ?? RepositorioArchivosFake(const [])),
-      motorTtsProvider.overrideWithValue(MotorFake()),
+      motorTtsProvider.overrideWithValue(motor ?? MotorFake()),
       exportadorAudioProvider.overrideWithValue(ExportadorFake()),
       reproductorAudioProvider.overrideWithValue(ReproductorFake()),
       carpetaBaseProvider.overrideWithValue('C:/base'),
@@ -45,11 +47,20 @@ Widget _harness({RepositorioArchivosFake? repositorio}) {
 }
 
 Future<void> _pump(WidgetTester tester,
-    {RepositorioArchivosFake? repositorio}) async {
+    {RepositorioArchivosFake? repositorio, MotorFake? motor}) async {
   tester.view.physicalSize = const Size(1280, 800);
   tester.view.devicePixelRatio = 1.0;
   addTearDown(tester.view.reset);
-  await tester.pumpWidget(_harness(repositorio: repositorio));
+  await tester.pumpWidget(_harness(repositorio: repositorio, motor: motor));
+}
+
+/// Tamaño de móvil compacto (ancho < umbral) con barra de acción inferior.
+Future<void> _pumpMovil(WidgetTester tester,
+    {RepositorioArchivosFake? repositorio, MotorFake? motor}) async {
+  tester.view.physicalSize = const Size(390, 844);
+  tester.view.devicePixelRatio = 1.0;
+  addTearDown(tester.view.reset);
+  await tester.pumpWidget(_harness(repositorio: repositorio, motor: motor));
 }
 
 void main() {
@@ -67,9 +78,9 @@ void main() {
     expect(find.text('Salida de audio'), findsOneWidget);
     expect(find.text('Examinar…'), findsNWidgets(2));
     expect(find.text('Archivos Encontrados'), findsOneWidget);
-    expect(find.text('Todo'), findsOneWidget);
-    expect(find.text('Nada'), findsOneWidget);
-    expect(find.text('Refrescar'), findsOneWidget);
+    expect(find.byTooltip('Todo'), findsOneWidget);
+    expect(find.byTooltip('Nada'), findsOneWidget);
+    expect(find.byTooltip('Refrescar'), findsOneWidget);
     expect(find.text('2 archivos'), findsOneWidget);
     expect(find.text('capitulo1.md'), findsOneWidget);
     expect(find.text('capitulo2.md'), findsOneWidget);
@@ -111,11 +122,11 @@ void main() {
 
     expect(find.text('1/3 seleccionados'), findsOneWidget);
 
-    await tester.tap(find.text('Todo'));
+    await tester.tap(find.byTooltip('Todo'));
     await tester.pumpAndSettle();
     expect(find.text('3/3 seleccionados'), findsOneWidget);
 
-    await tester.tap(find.text('Nada'));
+    await tester.tap(find.byTooltip('Nada'));
     await tester.pumpAndSettle();
     expect(find.text('3 archivos'), findsOneWidget);
   });
@@ -141,5 +152,45 @@ void main() {
 
     expect(find.text('Sin archivos'), findsNWidgets(2));
     expect(find.text('Listo.'), findsOneWidget);
+  });
+
+  testWidgets('en móvil la acción vive en la barra inferior persistente',
+      (tester) async {
+    await _pumpMovil(
+      tester,
+      repositorio: RepositorioArchivosFake(const [
+        Archivo('C:/libros/capitulo1.md'),
+        Archivo('C:/libros/capitulo2.md'),
+      ]),
+    );
+
+    expect(find.textContaining('Procesar'), findsOneWidget);
+    expect(find.textContaining('Cancelar'), findsNothing);
+    expect(find.byType(LinearProgressIndicator), findsNothing);
+    expect(find.text('Archivos Encontrados'), findsOneWidget);
+  });
+
+  testWidgets('en móvil la barra muestra Cancelar y progreso al ejecutar',
+      (tester) async {
+    final motor = MotorFake()..esperaVoz = Completer<void>();
+    await _pumpMovil(
+      tester,
+      repositorio: RepositorioArchivosFake(const [
+        Archivo('C:/libros/capitulo1.md'),
+      ]),
+      motor: motor,
+    );
+
+    await tester.tap(find.textContaining('Procesar'));
+    await tester.pump();
+
+    expect(find.textContaining('Cancelar'), findsOneWidget);
+    expect(find.byType(LinearProgressIndicator), findsOneWidget);
+    expect(find.text('0%'), findsOneWidget);
+
+    motor.esperaVoz!.complete();
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining('Cancelar'), findsNothing);
   });
 }

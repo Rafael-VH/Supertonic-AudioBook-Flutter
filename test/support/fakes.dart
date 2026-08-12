@@ -58,9 +58,14 @@ class RepositorioArchivosFake implements RepositorioArchivos {
 class MotorFake implements MotorTts {
   final List<String> vocesPedidas = [];
 
+  /// Si se define, `cambiarVoz` queda esperando hasta completarlo (para
+  /// simular un procesamiento en curso sin tocar el filesystem).
+  Completer<void>? esperaVoz;
+
   @override
   Future<void> cambiarVoz(String voz) async {
     vocesPedidas.add(voz);
+    if (esperaVoz != null) await esperaVoz!.future;
   }
 
   @override
