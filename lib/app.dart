@@ -20,6 +20,7 @@ class SupertonicApp extends ConsumerWidget {
 
     return MaterialApp(
       title: titulo,
+      debugShowCheckedModeBanner: false,
       theme: construirTema(oscuro: false, estilo: ajustes.estilo),
       darkTheme: construirTema(oscuro: true, estilo: ajustes.estilo),
       themeMode: ajustes.temaOscuro ? ThemeMode.dark : ThemeMode.light,
