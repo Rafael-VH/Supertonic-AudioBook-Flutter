@@ -1,9 +1,9 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:just_audio_media_kit/just_audio_media_kit.dart';
-import 'package:path_provider/path_provider.dart';
 
 import 'package:supertonic_audiobook/app.dart';
 import 'package:supertonic_audiobook/data/config.dart';
@@ -52,7 +52,7 @@ Future<void> main() async {
         carpetaBaseProvider.overrideWithValue(docsBase),
         modeloManagerProvider.overrideWithValue(ModeloManager()),
       ],
-      child: const SupertonicApp(),
+      child: const App(),
     ),
   );
 }

@@ -9,8 +9,8 @@ import 'package:supertonic_audiobook/presentation/screens/home/home_screen.dart'
 import 'package:supertonic_audiobook/presentation/screens/modelo_screen.dart';
 import 'package:supertonic_audiobook/presentation/theme/app_theme.dart';
 
-class SupertonicApp extends ConsumerWidget {
-  const SupertonicApp({super.key});
+class App extends ConsumerWidget {
+  const App({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
