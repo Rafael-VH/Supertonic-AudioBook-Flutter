@@ -6,7 +6,7 @@ import 'package:supertonic_audiobook/presentation/controllers/home_controller.da
 import 'package:supertonic_audiobook/presentation/l10n/app_localizations.dart';
 import 'package:supertonic_audiobook/presentation/screens/home/card_registro.dart';
 
-/// Panel de síntesis: opciones y registro (solo desktop).
+/// Panel de síntesis: opciones y registro (vista de tablet).
 class PanelSintesis extends StatelessWidget {
   const PanelSintesis({
     super.key,
@@ -70,7 +70,7 @@ class ExpansionOpciones extends StatelessWidget {
   }
 }
 
-/// Card de opciones de síntesis (desktop).
+/// Card de opciones de síntesis (vista de tablet).
 class _CardOpciones extends StatelessWidget {
   const _CardOpciones({required this.estado, required this.controller});
 

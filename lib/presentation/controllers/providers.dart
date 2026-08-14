@@ -48,8 +48,8 @@ final configTtsProvider = Provider<TtsConfig>(
 );
 
 /// Carpeta base de documentos (raíz de `archivos/` y `audio/`), inyectada
-/// desde la composición. El desktop usa `<carpeta_base>/archivos` y
-/// `<carpeta_base>/audio` como carpetas por defecto (paridad con `gui.py`).
+/// desde la composición. `<carpeta_base>/archivos` y `<carpeta_base>/audio`
+/// son las carpetas por defecto.
 final carpetaBaseProvider = Provider<String>(
   (_) => throw UnimplementedError('carpetaBaseProvider se inyecta en main.dart'),
 );

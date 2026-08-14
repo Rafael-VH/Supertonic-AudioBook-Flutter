@@ -1,5 +1,11 @@
 # Plan de Handoff — Portar Supertonic-AudioBook a Flutter multiplataforma
 
+> **⚠️ OBSOLETO (2026-08-14).** Este plan contemplaba soporte multiplataforma
+> (Android, iOS, Windows, Linux). La app es **móvil-only** (Android + iOS):
+> se eliminaron las plataformas Windows/Linux y las dependencias desktop.
+> Se conserva como referencia histórica de la portabilidad del pipeline.
+> Ver `README.md` y `docs/plan-mejora-ui.md` para el estado actual.
+
 > **Documento de HANDOFF AUTOCONTENIDO.** Está diseñado para construir la app
 > **Flutter multiplataforma (Android, iOS, Windows, Linux)** **sin acceso al
 > proyecto Python original**. Toda la

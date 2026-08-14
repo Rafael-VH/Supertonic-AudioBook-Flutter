@@ -1,5 +1,5 @@
 /// Texto y nombres de idiomas de voz — valores EXACTOS (plan §6.4, paridad
-/// con `app/presentation/gui.py` del desktop).
+/// con `app/presentation/gui.py`).
 library;
 
 /// Texto de muestra por idioma de voz (los idiomas sin entrada usan la clave

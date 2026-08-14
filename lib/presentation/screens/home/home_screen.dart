@@ -12,7 +12,6 @@ import 'package:supertonic_audiobook/presentation/widgets/barra_progreso.dart';
 
 /// Umbral de ancho para mostrar los paneles lado a lado (Material 6.2, responsive).
 const int umbralAncho = 900;
-
 /// Altura mínima del área del panel móvil para que la lista llene el alto;
 /// por debajo, el cuerpo apilado degrada a scroll para no desbordar.
 /// Escala con el texto del sistema: las cards crecen con textScale alto.
@@ -22,7 +21,7 @@ double _alturaMinimaPanelApilado(BuildContext context) =>
 /// Pantalla principal: carpetas, archivos `.md`, opciones de síntesis,
 /// registro y la acción de procesar.
 ///
-/// En desktop (>= [umbralAncho]) los paneles van lado a lado con scroll
+/// En tablet (>= [umbralAncho]) los paneles van lado a lado con scroll
 /// propio; en móvil se apilan con la lista de archivos como protagonista y
 /// una barra de acción inferior persistente (plan de mejora de interfaz).
 class HomeScreen extends ConsumerWidget {
@@ -84,7 +83,7 @@ class HomeScreen extends ConsumerWidget {
   }
 }
 
-/// Desktop: dos paneles lado a lado, cada uno con sus cards.
+/// Tablet: dos paneles lado a lado, cada uno con sus cards.
 class _CuerpoLadoAlado extends StatelessWidget {
   const _CuerpoLadoAlado({
     required this.estado,

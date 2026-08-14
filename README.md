@@ -2,11 +2,11 @@
 
 Lee archivos `.md`, los limpia, los segmenta y los convierte en audios con el motor [Supertonic 3](https://huggingface.co/spaces/Supertone/supertonic-3) (TTS on-device basado en ONNX Runtime), con voces sintéticas en 31 idiomas + auto. Sin nube. Sin API. Sin GPU.
 
-## Supertonic Flutter Example
+## Plataformas
 
-This example demonstrates how to use Supertonic 3 in a Flutter application using ONNX Runtime.
+- Android e iOS (aplicación móvil).
 
-> **Note:** This project uses the `flutter_onnxruntime` package ([https://pub.dev/packages/flutter_onnxruntime](https://pub.dev/packages/flutter_onnxruntime)). At the moment, only the macOS platform has been tested. Although the flutter_onnxruntime package supports several other platforms, they have not been tested in this project yet and may require additional verification.
+> **Note:** This project uses the `flutter_onnxruntime` package ([https://pub.dev/packages/flutter_onnxruntime](https://pub.dev/packages/flutter_onnxruntime)). At the moment, only the macOS platform has been tested by the vendor. Although the `flutter_onnxruntime` package supports several other platforms, they have not been tested in this project yet and may require additional verification.
 
 ## Multilingual Support
 

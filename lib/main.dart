@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:just_audio_media_kit/just_audio_media_kit.dart';
 
 import 'package:supertonic_audiobook/app.dart';
 import 'package:supertonic_audiobook/data/config.dart';
@@ -21,7 +20,6 @@ import 'package:supertonic_audiobook/presentation/controllers/providers.dart';
 /// `ProviderScope`; los widgets y controllers solo ven contratos de `domain/`.
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  JustAudioMediaKit.ensureInitialized();
   final docs = await getApplicationDocumentsDirectory();
   final soporte = await getApplicationSupportDirectory();
   final separador = Platform.pathSeparator;

@@ -9,7 +9,7 @@ const appVersion = '1.0.3';
 const modeloUrl = 'https://huggingface.co/Supertone/supertonic-3';
 const modeloGithubUrl = 'https://github.com/supertone-inc/supertonic';
 
-/// Sección "Acerca de" (paridad con el LabelFrame del desktop).
+/// Sección "Acerca de".
 class AcercaDeSection extends StatelessWidget {
   const AcercaDeSection({super.key});
 

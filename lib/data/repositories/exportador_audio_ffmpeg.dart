@@ -14,9 +14,9 @@ import '../../domain/contracts/exportador_audio.dart';
 /// el resto de los formatos se re-encodan desde un WAV temporal con FFmpeg.
 /// FFmpeg lee el WAV desde el archivo y vuelca el resultado también a
 /// archivo, por lo que nunca se carga el audio completo en memoria (streaming
-/// por bloques de la paridad desktop).
+/// por bloques).
 class ExportadorAudioFfmpeg implements ExportadorAudio {
-  /// Codecs de salida por formato (paridad con `sf.write` del desktop).
+  /// Codecs de salida por formato (paridad con `sf.write`).
   static const Map<String, String> _codecs = {
     'flac': 'flac',
     'ogg': 'libvorbis',

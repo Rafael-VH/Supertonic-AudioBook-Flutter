@@ -108,7 +108,7 @@ enum AppEstilo {
 
   const AppEstilo(this.id);
 
-  /// Identificador persistido (paridad con `ESTILOS` del desktop).
+  /// Identificador persistido (paridad con `ESTILOS`).
   final String id;
 
   static AppEstilo desdeId(String? id) {
@@ -145,7 +145,7 @@ class Paleta {
   });
 
   /// Combina la paleta base del tema con los overrides del estilo
-  /// (paridad con `_aplicar_tema` del desktop).
+  /// (paridad con `_aplicar_tema`).
   factory Paleta.para({required bool oscuro, required AppEstilo estilo}) {
     final base = Map<String, Color>.of(oscuro ? paletaOscura : paletaClara);
     if (estilo == AppEstilo.neumo) {

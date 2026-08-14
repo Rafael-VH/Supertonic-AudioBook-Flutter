@@ -19,7 +19,7 @@ class PreferenciasJsonLocal implements RepositorioPreferencias {
       final datos = jsonDecode(archivo.readAsStringSync());
       if (datos is Map<String, dynamic>) return datos.cast<String, Object>();
     } catch (_) {
-      // JSON corrupto → empezar de cero (paridad con el desktop).
+      // JSON corrupto → empezar de cero.
     }
     return {};
   }

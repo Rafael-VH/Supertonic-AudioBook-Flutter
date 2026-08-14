@@ -28,7 +28,6 @@ class _SmokeTtsScreenState extends State<SmokeTtsScreen> {
   String _estado = 'Listo';
   int _bytesDescargados = 0;
   int _bytesTotales = 0;
-  String? _ultimoWav;
   double? _rtf;
 
   @override
@@ -137,7 +136,6 @@ class _SmokeTtsScreenState extends State<SmokeTtsScreen> {
       setState(() {
         _sintetizando = false;
         _estado = 'Reproduciendo ${audioDur.toStringAsFixed(2)} s…';
-        _ultimoWav = ruta;
       });
 
       await _audioPlayer.setFilePath(ruta);
@@ -219,14 +217,6 @@ class _SmokeTtsScreenState extends State<SmokeTtsScreen> {
               ),
               label: const Text('Sintetizar y reproducir'),
             ),
-            if (_ultimoWav != null) ...[
-              const SizedBox(height: 8),
-              OutlinedButton.icon(
-                onPressed: activo ? null : _abrirWav,
-                icon: const Icon(Icons.folder_open),
-                label: const Text('Abrir WAV generado'),
-              ),
-            ],
             if (_rtf != null) ...[
               const SizedBox(height: 16),
               Card(
@@ -239,22 +229,9 @@ class _SmokeTtsScreenState extends State<SmokeTtsScreen> {
                 ),
               ),
             ],
-            const SizedBox(height: 16),
-            Text(
-              'Objetivo Fase 2: síntesis en Windows RTF ≈ 0.15. '
-              'Después: Android (device ARM64).',
-              style: Theme.of(context).textTheme.bodySmall,
-            ),
           ],
         ),
       ),
     );
-  }
-
-  Future<void> _abrirWav() async {
-    if (_ultimoWav == null) return;
-    try {
-      await Process.run('explorer.exe', [_ultimoWav!]);
-    } catch (_) {}
   }
 }

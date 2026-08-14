@@ -9,7 +9,7 @@ const int silenceSamples = 26460;
 /// Umbral de RAM para volcado parcial a disco (500 * 1024 * 1024).
 const int memoriaSafeMarginBytes = 524288000;
 
-/// Subtipo de audio por formato (paridad con `sf.SoundFile` del desktop).
+/// Subtipo de audio por formato (paridad con `sf.SoundFile`).
 const Map<String, String> subtiposAudio = {
   'wav': 'PCM_16',
   'flac': 'PCM_16',

@@ -38,7 +38,7 @@
 En <900 px el usuario llega a "Procesar" tras ~1500 px de scroll. El progreso queda bajo el pliegue: no se ve mientras se trabaja. **Fix: barra de acción persistente.**
 
 ### P0 — Scroll anidado y alturas fijas
-Lista fija 280 px + registro fijo 200 px dentro de un scroll general. En desktop, si hay 2 archivos queda aire muerto; con muchos, doble scroll confuso.
+Lista fija 280 px + registro fijo 200 px dentro de un scroll general. En tablet, si hay 2 archivos queda aire muerto; con muchos, doble scroll confuso.
 
 ### P1 — Selector de salida duplicado en percepción
 `salida_audio` vive en la card de entrada junto a `carpeta_origen`: es prerrequisito de la síntesis, no de la entrada. Confunde el flujo.
@@ -46,7 +46,7 @@ Lista fija 280 px + registro fijo 200 px dentro de un scroll general. En desktop
 ### P1 — Jerarquía de botones plana
 4 `FilledButton` con el mismo peso (2× Examinar, Escuchar, Procesar). M3 pide un solo botón lleno destacado. Escuchar (prueba) debería ser tonal.
 
-### P1 — Sin tope de ancho en desktop
+### P1 — Sin tope de ancho en tablet
 Por encima de ~1200 px las cards se estiran a todo el ancho; el patrón `ConstrainedBox(480)` de ModeloScreen no se reutiliza.
 
 ### P2 — Riesgos de overflow reales en 375 px
@@ -68,22 +68,24 @@ Por encima de ~1200 px las cards se estiran a todo el ancho; el patrón `Constra
 
 ## 3. Distribución objetivo por pantalla
 
-### Breakpoints (3 tiers, reemplaza el binario 900)
+### Breakpoints (2 tiers, la app es móvil-only: Android + iOS)
 
 | Tamaño | Umbral | Estructura |
 |---|---|---|
 | Móvil | <700 | columna única + **barra inferior persistente** |
-| Tablet | 700–1099 | carpetas en 2 columnas; 2 paneles con scroll independiente (archivos 3fr \| opciones+log 2fr) |
-| Desktop | ≥1100 | `Center`+`ConstrainedBox(~1200)`; paneles 55/45 con scroll propio |
+| Tablet | ≥700 | carpetas en 2 columnas; 2 paneles con scroll independiente (archivos 3fr \| opciones+log 2fr) |
+
+> Nota: el código actual usa `umbralAncho = 900` (paneles lado a lado por
+> encima; apilados por debajo). El tier de tablet queda como evolución opcional.
 
 ### HomeScreen
 
 1. **Barra inferior persistente (móvil)**: `SafeArea` + borde superior: `BarraProgreso` compacta (visible solo si `total > 0`) + `FilledButton` "Procesar" expandido; "Cancelar" (`OutlinedButton`) solo durante ejecución. Progreso SIEMPRE visible.
 2. **Mover salida a síntesis**: la card "Salida de audio" pasa a Opciones de síntesis (debajo de formatos), como `ListTile` + `FilledButton.tonal` "Examinar". Entrada queda solo con origen.
-3. **Lista de archivos sin altura fija**: móvil → la card ocupa el espacio libre (`Expanded`); desktop → `ListView.builder` llena el alto del panel. Sacar `dense: true`.
+3. **Lista de archivos sin altura fija**: móvil → la card ocupa el espacio libre (`Expanded`); tablet → `ListView.builder` llena el alto del panel. Sacar `dense: true`.
 4. **Jerarquía de acciones**: Procesar = único `FilledButton` (ícono `play_arrow`); Escuchar = `FilledButton.tonal`; Examinar ×2 = `OutlinedButton.icon`.
 5. **Opciones en `ExpansionTile` (móvil)** "Opciones de síntesis" colapsado por defecto → la lista es protagonista.
-6. **Registro en `ExpansionTile`** "Registro" colapsado; se auto-expande al ejecutar o en error. En desktop con altura adaptativa (~260 máx).
+6. **Registro en `ExpansionTile`** "Registro" colapsado; se auto-expande al ejecutar o en error. En tablet con altura adaptativa (~260 máx).
 7. **Estados ricos de lista**: vacío → ícono `folder_off` + texto + CTA "Examinar"; loading → `LinearProgressIndicator` en cabecera; error → texto color error + reintentar.
 8. **Voz sin overflow**: `DropdownButton(isExpanded: true)` + "modelo_supertonic" como `helperText`; labels `labelMedium` arriba de cada control.
 9. **Rutas**: `Tooltip` con ruta completa en ambos selectores y en cada tile; `ArchivoTile` con `subtitle` (directorio padre) + `secondary` icono.
@@ -95,7 +97,7 @@ Por encima de ~1200 px las cards se estiran a todo el ancho; el patrón `Constra
 2. Tema → `SwitchListTile` "Modo oscuro" (acción binaria, target grande).
 3. Estilo → 3 `RadioListTile` con `leading` + subtitle descriptivo (lee bien en móvil angosto).
 4. Idioma → mantener `SegmentedButton` (2 opciones, entra sin problema).
-5. Acerca de → enlaces como `ListTile` (leading `open_in_new`, alto 48+, `Divider`); en desktop opción `AboutDialog`.
+5. Acerca de → enlaces como `ListTile` (leading `open_in_new`, alto 48+, `Divider`); en tablet opción `AboutDialog`.
 6. Cards con subtítulo `bodySmall` de ayuda; separar "Acerca de" con `Divider`.
 
 ### ModeloScreen
@@ -122,14 +124,14 @@ De `flutter-fix-layout-issues`:
 - [x] Riesgo de "RenderFlex overflowed" en la Row de Voz (375 px) → `DropdownButton(isExpanded: true)` + `helperText`.
 - [x] Riesgo en header de Archivos (3 TextButton) → migrar a `IconButton` con tooltip (48 px).
 - [x] Lista/registro dentro de scroll: contener con `Expanded`/`ConstrainedBox` (ya hay `SizedBox` fijos; reemplazar).
-- [x] Probar en 360×640, 375×667, 768×1024, 1366×768 y fullscreen desktop.
+- [x] Probar en 360×640, 375×667, 768×1024 y fullscreen tablet.
 
 Reglas generales:
 
 - [x] Touch targets ≥48×48 dp en todo control (ArchivoTile, TextButton, enlaces Acerca de).
 - [x] Componentes estándar (Card, ListTile, ExpansionTile, FilledButton) antes que custom.
 - [x] `const` constructors donde aplique.
-- [x] Tokens centralizados: espaciado (4/8/12/16/24) y padding de card (12 móvil / 16 desktop) en el tema, no `SizedBox` sueltos.
+- [x] Tokens centralizados: espaciado (4/8/12/16/24) y padding de card (12 móvil / 16 tablet) en el tema, no `SizedBox` sueltos.
 - [x] Contraste AA en tema claro (subir tono de `texto_secundario`).
 - [x] `Semantics`/tooltips en iconos de acción; log con `SelectableText` (ya está).
 
@@ -137,8 +139,8 @@ Reglas generales:
 
 1. **Barra inferior persistente + sacar alturas fijas** (móvil: acción y progreso siempre visibles; elimina scroll anidado). Mayor impacto en comodidad.
 2. **Mover salida a síntesis + jerarquía de botones** (un solo `FilledButton` = Procesar; tonal/outlined el resto).
-3. **Lista con estados vacío/loading/error y scroll propio** en desktop; `ArchivoTile` sin `dense`, con `subtitle` y `Tooltip`.
+3. **Lista con estados vacío/loading/error y scroll propio** en tablet; `ArchivoTile` sin `dense`, con `subtitle` y `Tooltip`.
 4. **Settings**: `ConstrainedBox(640)` + Switch/Radio + enlaces 48 px.
 5. **Contraste** del texto secundario en tema claro.
 6. **Modelo**: scroll safety + % + `ConstrainedBox(280)` en botones.
-7. Validación final en los 4 viewports + resize en desktop + `flutter test`.
+7. Validación final en los 4 viewports + resize en tablet + `flutter test`.

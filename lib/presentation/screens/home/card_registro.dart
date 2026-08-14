@@ -4,7 +4,7 @@ import 'package:supertonic_audiobook/presentation/controllers/home_controller.da
 import 'package:supertonic_audiobook/presentation/l10n/app_localizations.dart';
 import 'package:supertonic_audiobook/presentation/widgets/barra_progreso.dart';
 
-/// Card de registro: log, estado, progreso y (desktop) botones de acción.
+/// Card de registro: log, estado, progreso y (vista de tablet) botones de acción.
 class CardRegistro extends StatelessWidget {
   const CardRegistro({
     super.key,

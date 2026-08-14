@@ -1,7 +1,7 @@
 /// Caso de uso puro: segmentación de texto apto para TTS.
 ///
 /// Paridad con `app/domain/use_cases/segmentar_texto.py`, incluyendo el
-/// comportamiento verificado del desktop ("doble punto" en la unión de
+/// comportamiento verificado ("doble punto" en la unión de
 /// oraciones y segmentos que exceden el límite).
 library;
 

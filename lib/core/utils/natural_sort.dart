@@ -1,4 +1,4 @@
-// Natural sort (port de `_natural_sort_key` del desktop, plan §5.4).
+// Natural sort (port de `_natural_sort_key`, plan §5.4).
 // Split del stem por (\d+) → tokens alternados texto/número; números como int.
 // Discriminador: 0 si el primer token es número, 1 si es texto.
 // Clave: (discriminador, tokens, stem). Ordenar con esa clave.

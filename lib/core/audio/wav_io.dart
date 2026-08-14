@@ -31,7 +31,7 @@ void escribirWav(
 ///
 /// Si el archivo no existe o pesa 0 bytes, escribe un WAV completo nuevo.
 /// Si no: anexa los samples crudos y parchea el header RIFF (`chunk_size` del
-/// RIFF y del chunk `data`) — port de `wav_append` del desktop.
+/// RIFF y del chunk `data`) — port de `wav_append`.
 void wavAppend(
   List<Float32List> fragmentos,
   String ruta, {

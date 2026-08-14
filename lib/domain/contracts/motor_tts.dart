@@ -21,7 +21,7 @@ abstract class MotorTts {
 
   /// Cambia la voz activa del modelo (re-carga su estilo de voz).
   ///
-  /// El modelo ONNX es único (paridad con `MotorSupertonic(voz=...)` del
-  /// desktop): cambiar de voz solo re-carga el `voice_styles/<voz>.json`.
+  /// El modelo ONNX es único (paridad con `MotorSupertonic(voz=...)`):
+  /// cambiar de voz solo re-carga el `voice_styles/<voz>.json`.
   Future<void> cambiarVoz(String voz);
 }

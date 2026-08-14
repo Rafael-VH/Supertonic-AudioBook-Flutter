@@ -20,7 +20,7 @@ class MensajeSnackbar {
   final bool esError;
 }
 
-/// Estado de la pantalla Home (paridad con `gui.py` del desktop).
+/// Estado de la pantalla Home (paridad con `gui.py`).
 class HomeEstado {
   const HomeEstado({
     required this.carpetaIn,
@@ -65,7 +65,7 @@ class HomeEstado {
   /// Línea de estado (vacío = "Listo." del i18n).
   final String estado;
 
-  /// Registro (log), truncado a 2500 líneas (paridad con el desktop).
+  /// Registro (log), truncado a 2500 líneas.
   final List<String> lineasLog;
 
   final MensajeSnackbar? snackbar;

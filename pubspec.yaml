@@ -23,8 +23,6 @@ dependencies:
   file_picker: ^11.0.3
   shared_preferences: ^2.5.5
   equatable: ^2.1.0
-  just_audio_media_kit: ^2.1.0
-  media_kit_libs_windows_audio: any
   ffmpeg_kit_flutter_new: ^4.6.2
   url_launcher: ^6.3.1
 

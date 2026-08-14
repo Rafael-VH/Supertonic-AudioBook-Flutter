@@ -183,7 +183,7 @@ class ProcesarArchivo {
       File(origen).renameSync(destino);
     } on FileSystemException catch (e) {
       // EACCES (13) en POSIX y ERROR_SHARING_VIOLATION (32) en Windows son el
-      // "archivo en uso" (paridad con la advertencia del desktop).
+      // "archivo en uso"; no se actualiza la salida en ese caso.
       if (e.osError?.errorCode == 13 || e.osError?.errorCode == 32) {
         _log.e("El archivo '$destino' está en uso por otra aplicación; no se actualizó.");
       }
