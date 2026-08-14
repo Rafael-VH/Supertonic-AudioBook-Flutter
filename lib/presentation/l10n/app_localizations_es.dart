@@ -150,10 +150,10 @@ class AppLocalizationsEs extends AppLocalizations {
   String get registro => 'Registro';
 
   @override
-  String get btn_procesar => '▶  Procesar';
+  String get btn_procesar => 'Procesar';
 
   @override
-  String get btn_cancelar => '■  Cancelar';
+  String get btn_cancelar => 'Cancelar';
 
   @override
   String get estado_listo => 'Listo.';
@@ -407,4 +407,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get dashboard_opcion3_desc => 'Nuevas funciones en camino.';
+
+  @override
+  String get carpetas => 'Carpetas';
 }

@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:supertonic_audiobook/presentation/controllers/home_controller.dart';
 import 'package:supertonic_audiobook/presentation/l10n/app_localizations.dart';
+import 'package:supertonic_audiobook/presentation/screens/home/card_archivos.dart';
+import 'package:supertonic_audiobook/presentation/screens/home/card_carpetas.dart';
 import 'package:supertonic_audiobook/presentation/screens/home/card_registro.dart';
 import 'package:supertonic_audiobook/presentation/screens/home/panel_entrada.dart';
 import 'package:supertonic_audiobook/presentation/screens/home/panel_sintesis.dart';
@@ -12,11 +14,6 @@ import 'package:supertonic_audiobook/presentation/widgets/barra_progreso.dart';
 
 /// Umbral de ancho para mostrar los paneles lado a lado (Material 6.2, responsive).
 const int umbralAncho = 900;
-/// Altura mínima del área del panel móvil para que la lista llene el alto;
-/// por debajo, el cuerpo apilado degrada a scroll para no desbordar.
-/// Escala con el texto del sistema: las cards crecen con textScale alto.
-double _alturaMinimaPanelApilado(BuildContext context) =>
-    400 * MediaQuery.textScalerOf(context).scale(1);
 
 /// Pantalla principal: carpetas, archivos `.md`, opciones de síntesis,
 /// registro y la acción de procesar.
@@ -123,8 +120,9 @@ class _CuerpoLadoAlado extends StatelessWidget {
   }
 }
 
-/// Móvil: la lista de archivos llena el alto; opciones y registro quedan
-/// colapsados y la acción principal vive en la barra inferior.
+/// Móvil: cuatro acordeones — carpetas, archivos, opciones y registro — con
+/// carpetas y archivos expandidos por defecto y la acción principal en la
+/// barra inferior persistente.
 class _CuerpoApilado extends StatelessWidget {
   const _CuerpoApilado({
     required this.estado,
@@ -138,40 +136,17 @@ class _CuerpoApilado extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Expanded(
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              if (constraints.maxHeight >= _alturaMinimaPanelApilado(context)) {
-                return Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-                  child: PanelEntrada(
-                    estado: estado,
-                    controller: controller,
-                    t: t,
-                    listaExpandida: true,
-                  ),
-                );
-              }
-              return SingleChildScrollView(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-                  child: PanelEntrada(
-                    estado: estado,
-                    controller: controller,
-                    t: t,
-                    listaExpandida: false,
-                  ),
-                ),
-              );
-            },
-          ),
-        ),
-        ExpansionOpciones(estado: estado, controller: controller, t: t),
-        ExpansionRegistro(estado: estado, controller: controller, t: t),
-        const SizedBox(height: 8),
-      ],
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          ExpansionCarpetas(estado: estado, controller: controller, t: t),
+          ExpansionArchivos(estado: estado, controller: controller, t: t),
+          ExpansionOpciones(estado: estado, controller: controller, t: t),
+          ExpansionRegistro(estado: estado, controller: controller, t: t),
+          const SizedBox(height: 8),
+        ],
+      ),
     );
   }
 }

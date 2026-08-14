@@ -763,6 +763,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'New features are on their way.'**
   String get dashboard_opcion3_desc;
+
+  /// No description provided for @carpetas.
+  ///
+  /// In en, this message translates to:
+  /// **'Folders'**
+  String get carpetas;
 }
 
 class _AppLocalizationsDelegate

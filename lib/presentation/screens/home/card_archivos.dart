@@ -4,10 +4,105 @@ import 'package:supertonic_audiobook/presentation/controllers/home_controller.da
 import 'package:supertonic_audiobook/presentation/l10n/app_localizations.dart';
 import 'package:supertonic_audiobook/presentation/widgets/archivo_tile.dart';
 
-/// Card de archivos encontrados con su lista de selección.
+/// Card de archivos encontrados con su lista de selección (vista de tablet).
 class CardArchivos extends StatelessWidget {
   const CardArchivos({
     super.key,
+    required this.estado,
+    required this.habilitado,
+    required this.listaExpandida,
+    required this.onRefrescar,
+    required this.onTodo,
+    required this.onNada,
+    required this.onAlternar,
+  });
+
+  final HomeEstado estado;
+  final bool habilitado;
+  final bool listaExpandida;
+  final VoidCallback onRefrescar;
+  final VoidCallback onTodo;
+  final VoidCallback onNada;
+  final ValueChanged<String> onAlternar;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context)!;
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              t.archivos_encontrados,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            const SizedBox(height: 8),
+            _ContenidoArchivos(
+              estado: estado,
+              habilitado: habilitado,
+              listaExpandida: listaExpandida,
+              onRefrescar: onRefrescar,
+              onTodo: onTodo,
+              onNada: onNada,
+              onAlternar: onAlternar,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Acordeón de archivos (móvil), expandido por defecto.
+class ExpansionArchivos extends StatelessWidget {
+  const ExpansionArchivos({
+    super.key,
+    required this.estado,
+    required this.controller,
+    required this.t,
+  });
+
+  final HomeEstado estado;
+  final HomeController controller;
+  final AppLocalizations t;
+
+  @override
+  Widget build(BuildContext context) {
+    final habilitado = !estado.ejecutando;
+    return Card(
+      margin: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+      child: ExpansionTile(
+        initiallyExpanded: true,
+        title: Text(
+          t.archivos_encontrados,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: Theme.of(context).textTheme.titleMedium,
+        ),
+        childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+        children: [
+          _ContenidoArchivos(
+            estado: estado,
+            habilitado: habilitado,
+            listaExpandida: false,
+            onRefrescar: controller.cargarArchivos,
+            onTodo: controller.seleccionarTodo,
+            onNada: controller.limpiarSeleccion,
+            onAlternar: controller.alternarSeleccion,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Contenido de la card de archivos: acciones, conteo, ayuda y lista.
+class _ContenidoArchivos extends StatelessWidget {
+  const _ContenidoArchivos({
     required this.estado,
     required this.habilitado,
     required this.listaExpandida,
@@ -56,55 +151,43 @@ class CardArchivos extends StatelessWidget {
             },
           );
 
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Row(
           children: [
-            Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    t.archivos_encontrados,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
-                ),
-                IconButton(
-                  tooltip: t.todo,
-                  visualDensity: VisualDensity.compact,
-                  icon: const Icon(Icons.done_all),
-                  onPressed: habilitado ? onTodo : null,
-                ),
-                IconButton(
-                  tooltip: t.nada,
-                  visualDensity: VisualDensity.compact,
-                  icon: const Icon(Icons.deselect),
-                  onPressed: habilitado ? onNada : null,
-                ),
-                IconButton(
-                  tooltip: t.refrescar,
-                  visualDensity: VisualDensity.compact,
-                  icon: const Icon(Icons.refresh),
-                  onPressed: habilitado ? onRefrescar : null,
-                ),
-              ],
+            const Spacer(),
+            IconButton(
+              tooltip: t.todo,
+              visualDensity: VisualDensity.compact,
+              icon: const Icon(Icons.done_all),
+              onPressed: habilitado ? onTodo : null,
             ),
-            Text(etiquetaConteo, style: Theme.of(context).textTheme.bodySmall),
-            Text(
-              t.ayuda_seleccion,
-              style: Theme.of(context).textTheme.bodySmall,
+            IconButton(
+              tooltip: t.nada,
+              visualDensity: VisualDensity.compact,
+              icon: const Icon(Icons.deselect),
+              onPressed: habilitado ? onNada : null,
             ),
-            const SizedBox(height: 8),
-            if (listaExpandida)
-              Expanded(child: lista)
-            else
-              SizedBox(height: 280, child: lista),
+            IconButton(
+              tooltip: t.refrescar,
+              visualDensity: VisualDensity.compact,
+              icon: const Icon(Icons.refresh),
+              onPressed: habilitado ? onRefrescar : null,
+            ),
           ],
         ),
-      ),
+        Text(etiquetaConteo, style: Theme.of(context).textTheme.bodySmall),
+        Text(
+          t.ayuda_seleccion,
+          style: Theme.of(context).textTheme.bodySmall,
+        ),
+        const SizedBox(height: 8),
+        if (listaExpandida)
+          Expanded(child: lista)
+        else
+          SizedBox(height: 280, child: lista),
+      ],
     );
   }
 }

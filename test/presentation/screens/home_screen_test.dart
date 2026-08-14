@@ -170,6 +170,35 @@ void main() {
     expect(find.text('Archivos Encontrados'), findsOneWidget);
   });
 
+  testWidgets('en móvil carpetas y archivos son acordeones expandidos',
+      (tester) async {
+    await _pumpMovil(
+      tester,
+      repositorio: RepositorioArchivosFake(const [
+        Archivo('C:/libros/capitulo1.md'),
+      ]),
+    );
+
+    expect(find.text('Carpetas'), findsOneWidget);
+    expect(find.text('Archivos Encontrados'), findsOneWidget);
+
+    await tester.tap(find.text('Carpetas'));
+    await tester.pumpAndSettle();
+    expect(find.text('Carpeta de origen'), findsNothing);
+
+    await tester.tap(find.text('Carpetas'));
+    await tester.pumpAndSettle();
+    expect(find.text('Carpeta de origen'), findsOneWidget);
+
+    await tester.tap(find.text('Archivos Encontrados'));
+    await tester.pumpAndSettle();
+    expect(find.text('capitulo1.md'), findsNothing);
+
+    await tester.tap(find.text('Archivos Encontrados'));
+    await tester.pumpAndSettle();
+    expect(find.text('capitulo1.md'), findsOneWidget);
+  });
+
   testWidgets('en móvil la barra muestra Cancelar y progreso al ejecutar',
       (tester) async {
     final motor = MotorFake()..esperaVoz = Completer<void>();

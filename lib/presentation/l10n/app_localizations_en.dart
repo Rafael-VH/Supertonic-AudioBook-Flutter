@@ -404,4 +404,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get dashboard_opcion3_desc => 'New features are on their way.';
+
+  @override
+  String get carpetas => 'Folders';
 }
