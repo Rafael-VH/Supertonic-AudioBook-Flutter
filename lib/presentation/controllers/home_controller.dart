@@ -4,6 +4,7 @@ import 'dart:math' as math;
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 import 'package:supertonic_audiobook/domain/constants/producto.dart';
 import 'package:supertonic_audiobook/domain/entities/archivo.dart';
@@ -165,7 +166,17 @@ class HomeController extends Notifier<HomeEstado> {
 
   // ------------------------------------------------------- carpetas y lista
 
+  /// Pide el permiso de acceso al almacenamiento compartido (Android) y
+  /// devuelve si el escaneo por `dart:io` puede leer la carpeta elegida.
+  Future<bool> _tieneAccesoAlmacenamiento() async {
+    if (!Platform.isAndroid) return true;
+    if (await Permission.manageExternalStorage.isGranted) return true;
+    final estado = await Permission.manageExternalStorage.request();
+    return estado.isGranted;
+  }
+
   Future<void> examinarCarpetaIn() async {
+    if (!await _tieneAccesoAlmacenamiento()) return;
     final carpeta = await FilePicker.getDirectoryPath();
     if (carpeta == null) return;
     state = state.copyWith(carpetaIn: carpeta);
@@ -173,6 +184,7 @@ class HomeController extends Notifier<HomeEstado> {
   }
 
   Future<void> examinarCarpetaOut() async {
+    if (!await _tieneAccesoAlmacenamiento()) return;
     final carpeta = await FilePicker.getDirectoryPath();
     if (carpeta == null) return;
     state = state.copyWith(carpetaOut: carpeta);
