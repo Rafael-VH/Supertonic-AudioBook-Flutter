@@ -12,7 +12,10 @@ import 'support/fakes.dart';
 
 /// Preferencias en memoria para los tests de widget (sin disco).
 class _PreferenciasMemoria implements RepositorioPreferencias {
-  final Map<String, Object> _datos = {};
+  _PreferenciasMemoria([Map<String, Object>? inicial])
+      : _datos = Map.of(inicial ?? {});
+
+  final Map<String, Object> _datos;
 
   @override
   Map<String, Object> cargar() => Map.of(_datos);
@@ -35,50 +38,95 @@ class _ArchivosVacios implements RepositorioArchivos {
   String leerArchivo(String ruta) => '';
 }
 
+/// Construye la app con dependencias falsas y preferencias opcionales.
+Widget _construirApp({Map<String, Object>? preferencias}) {
+  return ProviderScope(
+    overrides: [
+      repositorioPreferenciasProvider
+          .overrideWithValue(_PreferenciasMemoria(preferencias)),
+      repositorioArchivosProvider.overrideWithValue(_ArchivosVacios()),
+      carpetaBaseProvider.overrideWithValue('C:/base'),
+      modeloManagerProvider
+          .overrideWithValue(ModeloGestorFake(disponible: true)),
+    ],
+    child: const App(),
+  );
+}
+
+/// Salta el splash (1200 ms) y la transición de página.
+Future<void> _saltarSplash(WidgetTester tester) async {
+  await tester.pump();
+  await tester.pump(const Duration(milliseconds: 1300));
+  await tester.pumpAndSettle();
+}
+
 void main() {
-  testWidgets('La app arranca y muestra el título', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      ProviderScope(
-        overrides: [
-          repositorioPreferenciasProvider
-              .overrideWithValue(_PreferenciasMemoria()),
-          repositorioArchivosProvider.overrideWithValue(_ArchivosVacios()),
-          carpetaBaseProvider.overrideWithValue('C:/base'),
-          modeloManagerProvider
-              .overrideWithValue(ModeloGestorFake(disponible: true)),
-        ],
-        child: const SupertonicApp(),
-      ),
-    );
+  testWidgets('la primera ejecución muestra el onboarding',
+      (WidgetTester tester) async {
+    await tester.pumpWidget(_construirApp());
 
-    await tester.pump();
+    await _saltarSplash(tester);
 
-    expect(find.text('Supertonic-AudioBook — Conversor de archivos a audio'),
-        findsOneWidget);
+    expect(find.text('Cómo generar audio'), findsOneWidget);
+    expect(find.text('Descarga el modelo de voz'), findsOneWidget);
+  });
+
+  testWidgets('completar el onboarding lleva al dashboard',
+      (WidgetTester tester) async {
+    await tester.pumpWidget(_construirApp());
+
+    await _saltarSplash(tester);
+    await tester.tap(find.text('Siguiente'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Siguiente'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Siguiente'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Comenzar'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Supertonic'), findsWidgets);
+    expect(find.text('Convertir archivos a audio'), findsOneWidget);
+  });
+
+  testWidgets('con el onboarding visto arranca directo al dashboard',
+      (WidgetTester tester) async {
+    await tester.pumpWidget(_construirApp(preferencias: {
+      'onboarding_visto': true,
+    }));
+
+    await _saltarSplash(tester);
+
+    expect(find.text('Convertir archivos a audio'), findsOneWidget);
+    expect(find.text('¿Qué quieres hacer hoy?'), findsOneWidget);
   });
 
   testWidgets('el botón de ajustes abre la pantalla de configuración',
       (WidgetTester tester) async {
-    await tester.pumpWidget(
-      ProviderScope(
-        overrides: [
-          repositorioPreferenciasProvider
-              .overrideWithValue(_PreferenciasMemoria()),
-          repositorioArchivosProvider.overrideWithValue(_ArchivosVacios()),
-          carpetaBaseProvider.overrideWithValue('C:/base'),
-          modeloManagerProvider
-              .overrideWithValue(ModeloGestorFake(disponible: true)),
-        ],
-        child: const SupertonicApp(),
-      ),
-    );
+    await tester.pumpWidget(_construirApp(preferencias: {
+      'onboarding_visto': true,
+    }));
 
-    await tester.pump();
+    await _saltarSplash(tester);
     await tester.tap(find.byIcon(Icons.settings_outlined));
     await tester.pumpAndSettle();
 
     expect(find.text('Ajustes'), findsOneWidget);
     expect(find.text('Tema'), findsOneWidget);
     expect(find.text('Acerca de'), findsOneWidget);
+  });
+
+  testWidgets('Procesar desde el dashboard llega a la pantalla de conversión',
+      (WidgetTester tester) async {
+    await tester.pumpWidget(_construirApp(preferencias: {
+      'onboarding_visto': true,
+    }));
+
+    await _saltarSplash(tester);
+    await tester.tap(find.text('Convertir archivos a audio'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Supertonic-AudioBook — Conversor de archivos a audio'),
+        findsOneWidget);
   });
 }

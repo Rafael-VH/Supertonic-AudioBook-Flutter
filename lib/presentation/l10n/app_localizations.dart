@@ -631,6 +631,138 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Download error: {error}'**
   String modelo_error(String error);
+
+  /// No description provided for @splash_descripcion.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn your Markdown books into audiobooks'**
+  String get splash_descripcion;
+
+  /// No description provided for @onboarding_titulo.
+  ///
+  /// In en, this message translates to:
+  /// **'How to generate audio'**
+  String get onboarding_titulo;
+
+  /// No description provided for @onboarding_saltar.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip'**
+  String get onboarding_saltar;
+
+  /// No description provided for @onboarding_anterior.
+  ///
+  /// In en, this message translates to:
+  /// **'Back'**
+  String get onboarding_anterior;
+
+  /// No description provided for @onboarding_siguiente.
+  ///
+  /// In en, this message translates to:
+  /// **'Next'**
+  String get onboarding_siguiente;
+
+  /// No description provided for @onboarding_empezar.
+  ///
+  /// In en, this message translates to:
+  /// **'Get started'**
+  String get onboarding_empezar;
+
+  /// No description provided for @onboarding_paso1_titulo.
+  ///
+  /// In en, this message translates to:
+  /// **'Download the voice model'**
+  String get onboarding_paso1_titulo;
+
+  /// No description provided for @onboarding_paso1_descripcion.
+  ///
+  /// In en, this message translates to:
+  /// **'On the first run the app downloads a local voice model (~400 MB). It is a one-time, resumable download.'**
+  String get onboarding_paso1_descripcion;
+
+  /// No description provided for @onboarding_paso2_titulo.
+  ///
+  /// In en, this message translates to:
+  /// **'Select your files'**
+  String get onboarding_paso2_titulo;
+
+  /// No description provided for @onboarding_paso2_descripcion.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose the folder with your Markdown books. The app scans it and lists every file ready to convert.'**
+  String get onboarding_paso2_descripcion;
+
+  /// No description provided for @onboarding_paso3_titulo.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a voice'**
+  String get onboarding_paso3_titulo;
+
+  /// No description provided for @onboarding_paso3_descripcion.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose the voice you like and listen to a sample before you start.'**
+  String get onboarding_paso3_descripcion;
+
+  /// No description provided for @onboarding_paso4_titulo.
+  ///
+  /// In en, this message translates to:
+  /// **'Process the audio'**
+  String get onboarding_paso4_titulo;
+
+  /// No description provided for @onboarding_paso4_descripcion.
+  ///
+  /// In en, this message translates to:
+  /// **'Run the conversion. Each chapter is read aloud and exported as audio on your device.'**
+  String get onboarding_paso4_descripcion;
+
+  /// No description provided for @dashboard_titulo.
+  ///
+  /// In en, this message translates to:
+  /// **'Supertonic'**
+  String get dashboard_titulo;
+
+  /// No description provided for @dashboard_bienvenida.
+  ///
+  /// In en, this message translates to:
+  /// **'What do you want to do today?'**
+  String get dashboard_bienvenida;
+
+  /// No description provided for @dashboard_procesar.
+  ///
+  /// In en, this message translates to:
+  /// **'Convert files to audio'**
+  String get dashboard_procesar;
+
+  /// No description provided for @dashboard_procesar_desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a folder, choose a voice and export your Markdown books as audio.'**
+  String get dashboard_procesar_desc;
+
+  /// No description provided for @dashboard_opcion2.
+  ///
+  /// In en, this message translates to:
+  /// **'Coming soon'**
+  String get dashboard_opcion2;
+
+  /// No description provided for @dashboard_opcion2_desc.
+  ///
+  /// In en, this message translates to:
+  /// **'New features are on their way.'**
+  String get dashboard_opcion2_desc;
+
+  /// No description provided for @dashboard_opcion3.
+  ///
+  /// In en, this message translates to:
+  /// **'Coming soon'**
+  String get dashboard_opcion3;
+
+  /// No description provided for @dashboard_opcion3_desc.
+  ///
+  /// In en, this message translates to:
+  /// **'New features are on their way.'**
+  String get dashboard_opcion3_desc;
 }
 
 class _AppLocalizationsDelegate

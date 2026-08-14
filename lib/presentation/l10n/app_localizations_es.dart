@@ -335,4 +335,76 @@ class AppLocalizationsEs extends AppLocalizations {
   String modelo_error(String error) {
     return 'Error de descarga: $error';
   }
+
+  @override
+  String get splash_descripcion =>
+      'Convierte tus libros en Markdown a audiolibros';
+
+  @override
+  String get onboarding_titulo => 'Cómo generar audio';
+
+  @override
+  String get onboarding_saltar => 'Omitir';
+
+  @override
+  String get onboarding_anterior => 'Atrás';
+
+  @override
+  String get onboarding_siguiente => 'Siguiente';
+
+  @override
+  String get onboarding_empezar => 'Comenzar';
+
+  @override
+  String get onboarding_paso1_titulo => 'Descarga el modelo de voz';
+
+  @override
+  String get onboarding_paso1_descripcion =>
+      'En la primera ejecución la app descarga un modelo de voz local (~400 MB). Es una sola vez y se puede reanudar.';
+
+  @override
+  String get onboarding_paso2_titulo => 'Selecciona tus archivos';
+
+  @override
+  String get onboarding_paso2_descripcion =>
+      'Elige la carpeta con tus libros en Markdown. La app la escanea y lista cada archivo listo para convertir.';
+
+  @override
+  String get onboarding_paso3_titulo => 'Elige una voz';
+
+  @override
+  String get onboarding_paso3_descripcion =>
+      'Selecciona la voz que prefieras y escucha una muestra antes de empezar.';
+
+  @override
+  String get onboarding_paso4_titulo => 'Procesa el audio';
+
+  @override
+  String get onboarding_paso4_descripcion =>
+      'Ejecuta la conversión. Cada capítulo se lee en voz alta y se exporta como audio en tu dispositivo.';
+
+  @override
+  String get dashboard_titulo => 'Supertonic';
+
+  @override
+  String get dashboard_bienvenida => '¿Qué quieres hacer hoy?';
+
+  @override
+  String get dashboard_procesar => 'Convertir archivos a audio';
+
+  @override
+  String get dashboard_procesar_desc =>
+      'Elige una carpeta, una voz y exporta tus libros en Markdown como audio.';
+
+  @override
+  String get dashboard_opcion2 => 'Próximamente';
+
+  @override
+  String get dashboard_opcion2_desc => 'Nuevas funciones en camino.';
+
+  @override
+  String get dashboard_opcion3 => 'Próximamente';
+
+  @override
+  String get dashboard_opcion3_desc => 'Nuevas funciones en camino.';
 }

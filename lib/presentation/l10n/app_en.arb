@@ -241,5 +241,27 @@
     "placeholders": {
       "error": {"type": "String"}
     }
-  }
+  },
+  "splash_descripcion": "Turn your Markdown books into audiobooks",
+  "onboarding_titulo": "How to generate audio",
+  "onboarding_saltar": "Skip",
+  "onboarding_anterior": "Back",
+  "onboarding_siguiente": "Next",
+  "onboarding_empezar": "Get started",
+  "onboarding_paso1_titulo": "Download the voice model",
+  "onboarding_paso1_descripcion": "On the first run the app downloads a local voice model (~400 MB). It is a one-time, resumable download.",
+  "onboarding_paso2_titulo": "Select your files",
+  "onboarding_paso2_descripcion": "Choose the folder with your Markdown books. The app scans it and lists every file ready to convert.",
+  "onboarding_paso3_titulo": "Pick a voice",
+  "onboarding_paso3_descripcion": "Choose the voice you like and listen to a sample before you start.",
+  "onboarding_paso4_titulo": "Process the audio",
+  "onboarding_paso4_descripcion": "Run the conversion. Each chapter is read aloud and exported as audio on your device.",
+  "dashboard_titulo": "Supertonic",
+  "dashboard_bienvenida": "What do you want to do today?",
+  "dashboard_procesar": "Convert files to audio",
+  "dashboard_procesar_desc": "Pick a folder, choose a voice and export your Markdown books as audio.",
+  "dashboard_opcion2": "Coming soon",
+  "dashboard_opcion2_desc": "New features are on their way.",
+  "dashboard_opcion3": "Coming soon",
+  "dashboard_opcion3_desc": "New features are on their way."
 }

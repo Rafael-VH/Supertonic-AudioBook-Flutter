@@ -333,4 +333,75 @@ class AppLocalizationsEn extends AppLocalizations {
   String modelo_error(String error) {
     return 'Download error: $error';
   }
+
+  @override
+  String get splash_descripcion => 'Turn your Markdown books into audiobooks';
+
+  @override
+  String get onboarding_titulo => 'How to generate audio';
+
+  @override
+  String get onboarding_saltar => 'Skip';
+
+  @override
+  String get onboarding_anterior => 'Back';
+
+  @override
+  String get onboarding_siguiente => 'Next';
+
+  @override
+  String get onboarding_empezar => 'Get started';
+
+  @override
+  String get onboarding_paso1_titulo => 'Download the voice model';
+
+  @override
+  String get onboarding_paso1_descripcion =>
+      'On the first run the app downloads a local voice model (~400 MB). It is a one-time, resumable download.';
+
+  @override
+  String get onboarding_paso2_titulo => 'Select your files';
+
+  @override
+  String get onboarding_paso2_descripcion =>
+      'Choose the folder with your Markdown books. The app scans it and lists every file ready to convert.';
+
+  @override
+  String get onboarding_paso3_titulo => 'Pick a voice';
+
+  @override
+  String get onboarding_paso3_descripcion =>
+      'Choose the voice you like and listen to a sample before you start.';
+
+  @override
+  String get onboarding_paso4_titulo => 'Process the audio';
+
+  @override
+  String get onboarding_paso4_descripcion =>
+      'Run the conversion. Each chapter is read aloud and exported as audio on your device.';
+
+  @override
+  String get dashboard_titulo => 'Supertonic';
+
+  @override
+  String get dashboard_bienvenida => 'What do you want to do today?';
+
+  @override
+  String get dashboard_procesar => 'Convert files to audio';
+
+  @override
+  String get dashboard_procesar_desc =>
+      'Pick a folder, choose a voice and export your Markdown books as audio.';
+
+  @override
+  String get dashboard_opcion2 => 'Coming soon';
+
+  @override
+  String get dashboard_opcion2_desc => 'New features are on their way.';
+
+  @override
+  String get dashboard_opcion3 => 'Coming soon';
+
+  @override
+  String get dashboard_opcion3_desc => 'New features are on their way.';
 }

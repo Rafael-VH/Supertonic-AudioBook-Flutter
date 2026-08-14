@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:supertonic_audiobook/presentation/controllers/modelo_controller.dart';
 
 import 'package:supertonic_audiobook/presentation/controllers/settings_controller.dart';
 import 'package:supertonic_audiobook/presentation/l10n/app_localizations.dart';
-import 'package:supertonic_audiobook/presentation/screens/home/home_screen.dart';
-import 'package:supertonic_audiobook/presentation/screens/modelo_screen.dart';
+import 'package:supertonic_audiobook/presentation/screens/splash_screen.dart';
 import 'package:supertonic_audiobook/presentation/theme/app_theme.dart';
 
 class App extends ConsumerWidget {
@@ -24,7 +22,7 @@ class App extends ConsumerWidget {
       theme: construirTema(oscuro: false, estilo: ajustes.estilo),
       darkTheme: construirTema(oscuro: true, estilo: ajustes.estilo),
       themeMode: ajustes.temaOscuro ? ThemeMode.dark : ThemeMode.light,
-      home: const _ModeloGate(),
+      home: const SplashScreen(),
       locale: Locale(ajustes.idioma),
       supportedLocales: const [Locale('es'), Locale('en')],
       localizationsDelegates: const [
@@ -34,17 +32,5 @@ class App extends ConsumerWidget {
         GlobalCupertinoLocalizations.delegate,
       ],
     );
-  }
-}
-
-/// Entra a Home solo con el modelo listo; si falta, bloquea el arranque con el
-/// gate de descarga (`ModeloScreen`) hasta que se verifica o descarga.
-class _ModeloGate extends ConsumerWidget {
-  const _ModeloGate();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final estado = ref.watch(modeloControllerProvider);
-    return estado.listo ? const HomeScreen() : const ModeloScreen();
   }
 }

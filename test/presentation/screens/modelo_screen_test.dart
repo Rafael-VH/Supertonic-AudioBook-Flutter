@@ -39,11 +39,12 @@ Widget _harness(ModeloGestorFake gestor) {
   );
 }
 
-/// Harness de la app completa: el gate decide entre Home y ModeloScreen.
+/// Harness de la app completa: splash → dashboard → gate decide Home o Modelo.
 Widget _harnessApp(ModeloGestorFake gestor) {
   return ProviderScope(
     overrides: [
-      repositorioPreferenciasProvider.overrideWithValue(PreferenciasMemoria()),
+      repositorioPreferenciasProvider
+          .overrideWithValue(PreferenciasMemoria({'onboarding_visto': true})),
       repositorioArchivosProvider
           .overrideWithValue(RepositorioArchivosFake(const [])),
       motorTtsProvider.overrideWithValue(MotorFake()),
@@ -52,7 +53,7 @@ Widget _harnessApp(ModeloGestorFake gestor) {
       carpetaBaseProvider.overrideWithValue('C:/base'),
       modeloManagerProvider.overrideWithValue(gestor),
     ],
-    child: const SupertonicApp(),
+    child: const App(),
   );
 }
 
@@ -63,6 +64,15 @@ Future<void> _hasta(WidgetTester tester, String texto) async {
     if (tester.any(find.text(texto))) return;
   }
   fail('No apareció el texto "$texto"');
+}
+
+/// Salta el splash (1200 ms) y entra a Procesar desde el dashboard.
+Future<void> _arrancarYProcesar(WidgetTester tester) async {
+  await tester.pump();
+  await tester.pump(const Duration(milliseconds: 1300));
+  await tester.pumpAndSettle();
+  await tester.tap(find.text('Convertir archivos a audio'));
+  await tester.pumpAndSettle();
 }
 
 void main() {
@@ -125,6 +135,7 @@ void main() {
     testWidgets('con modelo en disco entra directo a Home', (tester) async {
       await tester.pumpWidget(_harnessApp(ModeloGestorFake(disponible: true)));
 
+      await _arrancarYProcesar(tester);
       await _hasta(tester, 'Carpeta de origen');
       expect(find.text('Descargar modelo'), findsNothing);
     });
@@ -133,6 +144,7 @@ void main() {
         (tester) async {
       await tester.pumpWidget(_harnessApp(ModeloGestorFake()));
 
+      await _arrancarYProcesar(tester);
       await _hasta(tester, 'Descargar modelo');
       expect(find.text('Carpeta de origen'), findsNothing);
     });
