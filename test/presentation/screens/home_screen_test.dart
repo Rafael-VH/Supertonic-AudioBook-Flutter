@@ -170,7 +170,7 @@ void main() {
     expect(find.text('Archivos Encontrados'), findsOneWidget);
   });
 
-  testWidgets('en móvil carpetas y archivos son acordeones expandidos',
+  testWidgets('en móvil los acordeones son exclusivos: uno abierto a la vez',
       (tester) async {
     await _pumpMovil(
       tester,
@@ -179,24 +179,34 @@ void main() {
       ]),
     );
 
+    // Carpetas abierto por defecto; archivos cerrado.
     expect(find.text('Carpetas'), findsOneWidget);
     expect(find.text('Archivos Encontrados'), findsOneWidget);
+    expect(find.text('Carpeta de origen'), findsOneWidget);
+    expect(find.text('capitulo1.md'), findsNothing);
 
-    await tester.tap(find.text('Carpetas'));
+    // Abrir archivos cierra carpetas (uno a la vez).
+    await tester.tap(find.text('Archivos Encontrados'));
     await tester.pumpAndSettle();
+    expect(find.text('capitulo1.md'), findsOneWidget);
     expect(find.text('Carpeta de origen'), findsNothing);
 
+    // Abrir carpetas de nuevo cierra archivos.
+    await tester.tap(find.text('Carpetas'));
+    await tester.pumpAndSettle();
+    expect(find.text('Carpeta de origen'), findsOneWidget);
+    expect(find.text('capitulo1.md'), findsNothing);
+
+    // Tocar el acordeón ya abierto no hace nada.
     await tester.tap(find.text('Carpetas'));
     await tester.pumpAndSettle();
     expect(find.text('Carpeta de origen'), findsOneWidget);
 
-    await tester.tap(find.text('Archivos Encontrados'));
+    // Tocar opciones cierra carpetas.
+    await tester.tap(find.text('Opciones de síntesis'));
     await tester.pumpAndSettle();
-    expect(find.text('capitulo1.md'), findsNothing);
-
-    await tester.tap(find.text('Archivos Encontrados'));
-    await tester.pumpAndSettle();
-    expect(find.text('capitulo1.md'), findsOneWidget);
+    expect(find.text('Voz'), findsOneWidget);
+    expect(find.text('Carpeta de origen'), findsNothing);
   });
 
   testWidgets('en móvil la barra muestra Cancelar y progreso al ejecutar',

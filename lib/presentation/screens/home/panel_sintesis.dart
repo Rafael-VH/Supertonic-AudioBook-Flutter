@@ -41,35 +41,6 @@ class PanelSintesis extends StatelessWidget {
   }
 }
 
-/// Opciones de síntesis colapsables (móvil).
-class ExpansionOpciones extends StatelessWidget {
-  const ExpansionOpciones({
-    super.key,
-    required this.estado,
-    required this.controller,
-    required this.t,
-  });
-
-  final HomeEstado estado;
-  final HomeController controller;
-  final AppLocalizations t;
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-      child: ExpansionTile(
-        title: Text(
-          t.opciones_sintesis,
-          style: Theme.of(context).textTheme.titleMedium,
-        ),
-        childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-        children: [_ContenidoOpciones(estado: estado, controller: controller)],
-      ),
-    );
-  }
-}
-
 /// Card de opciones de síntesis (vista de tablet).
 class _CardOpciones extends StatelessWidget {
   const _CardOpciones({required this.estado, required this.controller});
@@ -91,7 +62,7 @@ class _CardOpciones extends StatelessWidget {
               style: Theme.of(context).textTheme.titleMedium,
             ),
             const SizedBox(height: 12),
-            _ContenidoOpciones(estado: estado, controller: controller),
+            ContenidoOpciones(estado: estado, controller: controller),
           ],
         ),
       ),
@@ -100,8 +71,8 @@ class _CardOpciones extends StatelessWidget {
 }
 
 /// Contenido de las opciones de síntesis (formato, voz, sliders, idioma).
-class _ContenidoOpciones extends StatelessWidget {
-  const _ContenidoOpciones({required this.estado, required this.controller});
+class ContenidoOpciones extends StatelessWidget {
+  const ContenidoOpciones({super.key, required this.estado, required this.controller});
 
   final HomeEstado estado;
   final HomeController controller;

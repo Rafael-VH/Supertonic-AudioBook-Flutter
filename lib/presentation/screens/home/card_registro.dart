@@ -90,35 +90,13 @@ class CardRegistro extends StatelessWidget {
   }
 }
 
-/// Registro colapsable (móvil), autoexpandido durante la ejecución.
-class ExpansionRegistro extends StatelessWidget {
-  const ExpansionRegistro({
+/// Contenido del registro: log, estado y progreso.
+class ContenidoRegistro extends StatelessWidget {
+  const ContenidoRegistro({
     super.key,
     required this.estado,
     required this.controller,
-    required this.t,
   });
-
-  final HomeEstado estado;
-  final HomeController controller;
-  final AppLocalizations t;
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-      child: ExpansionTile(
-        title: Text(t.registro, style: Theme.of(context).textTheme.titleMedium),
-        childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-        children: [_ContenidoRegistro(estado: estado, controller: controller)],
-      ),
-    );
-  }
-}
-
-/// Contenido del registro: log, estado y progreso.
-class _ContenidoRegistro extends StatelessWidget {
-  const _ContenidoRegistro({required this.estado, required this.controller});
 
   final HomeEstado estado;
   final HomeController controller;

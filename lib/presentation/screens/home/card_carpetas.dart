@@ -32,7 +32,7 @@ class CardCarpetas extends StatelessWidget {
               style: Theme.of(context).textTheme.titleMedium,
             ),
             const SizedBox(height: 12),
-            _ContenidoCarpetas(
+            ContenidoCarpetas(
               estado: estado,
               habilitado: habilitado,
               onExaminarIn: onExaminarIn,
@@ -45,47 +45,10 @@ class CardCarpetas extends StatelessWidget {
   }
 }
 
-/// Acordeón de carpetas (móvil), expandido por defecto.
-class ExpansionCarpetas extends StatelessWidget {
-  const ExpansionCarpetas({
-    super.key,
-    required this.estado,
-    required this.controller,
-    required this.t,
-  });
-
-  final HomeEstado estado;
-  final HomeController controller;
-  final AppLocalizations t;
-
-  @override
-  Widget build(BuildContext context) {
-    final habilitado = !estado.ejecutando;
-    return Card(
-      margin: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-      child: ExpansionTile(
-        initiallyExpanded: true,
-        title: Text(
-          t.carpetas,
-          style: Theme.of(context).textTheme.titleMedium,
-        ),
-        childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-        children: [
-          _ContenidoCarpetas(
-            estado: estado,
-            habilitado: habilitado,
-            onExaminarIn: controller.examinarCarpetaIn,
-            onExaminarOut: controller.examinarCarpetaOut,
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 /// Contenido de las carpetas: origen y salida con su botón Examinar.
-class _ContenidoCarpetas extends StatelessWidget {
-  const _ContenidoCarpetas({
+class ContenidoCarpetas extends StatelessWidget {
+  const ContenidoCarpetas({
+    super.key,
     required this.estado,
     required this.habilitado,
     required this.onExaminarIn,

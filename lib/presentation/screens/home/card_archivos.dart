@@ -41,7 +41,7 @@ class CardArchivos extends StatelessWidget {
               style: Theme.of(context).textTheme.titleMedium,
             ),
             const SizedBox(height: 8),
-            _ContenidoArchivos(
+            ContenidoArchivos(
               estado: estado,
               habilitado: habilitado,
               listaExpandida: listaExpandida,
@@ -57,52 +57,10 @@ class CardArchivos extends StatelessWidget {
   }
 }
 
-/// Acordeón de archivos (móvil), expandido por defecto.
-class ExpansionArchivos extends StatelessWidget {
-  const ExpansionArchivos({
-    super.key,
-    required this.estado,
-    required this.controller,
-    required this.t,
-  });
-
-  final HomeEstado estado;
-  final HomeController controller;
-  final AppLocalizations t;
-
-  @override
-  Widget build(BuildContext context) {
-    final habilitado = !estado.ejecutando;
-    return Card(
-      margin: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-      child: ExpansionTile(
-        initiallyExpanded: true,
-        title: Text(
-          t.archivos_encontrados,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: Theme.of(context).textTheme.titleMedium,
-        ),
-        childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-        children: [
-          _ContenidoArchivos(
-            estado: estado,
-            habilitado: habilitado,
-            listaExpandida: false,
-            onRefrescar: controller.cargarArchivos,
-            onTodo: controller.seleccionarTodo,
-            onNada: controller.limpiarSeleccion,
-            onAlternar: controller.alternarSeleccion,
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 /// Contenido de la card de archivos: acciones, conteo, ayuda y lista.
-class _ContenidoArchivos extends StatelessWidget {
-  const _ContenidoArchivos({
+class ContenidoArchivos extends StatelessWidget {
+  const ContenidoArchivos({
+    super.key,
     required this.estado,
     required this.habilitado,
     required this.listaExpandida,
