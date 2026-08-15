@@ -3,8 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supertonic_audiobook/presentation/controllers/modelo_controller.dart';
 import 'package:supertonic_audiobook/presentation/l10n/app_localizations.dart';
 import 'package:supertonic_audiobook/presentation/screens/home/home_screen.dart';
-import 'package:supertonic_audiobook/presentation/screens/modelo_screen.dart';
-import 'package:supertonic_audiobook/presentation/screens/settings_screen.dart';
+import 'package:supertonic_audiobook/presentation/screens/modelo/modelo_screen.dart';
+import 'package:supertonic_audiobook/presentation/screens/settings/settings_screen.dart';
 
 /// Pantalla principal tras el onboarding. Muestra las tres funciones de la
 /// app: convertir archivos a audio (funcional) y dos en camino (placeholders).

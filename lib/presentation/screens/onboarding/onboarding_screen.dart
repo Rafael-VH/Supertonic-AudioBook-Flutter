@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supertonic_audiobook/presentation/controllers/providers.dart';
 import 'package:supertonic_audiobook/presentation/l10n/app_localizations.dart';
-import 'package:supertonic_audiobook/presentation/screens/dashboard_screen.dart';
+import 'package:supertonic_audiobook/presentation/screens/dashboard/dashboard_screen.dart';
 
 /// Onboarding de primera ejecución. Explica cómo generar audio en 4 pasos
 /// (modelo → archivos → voz → procesar) antes de entrar al dashboard.

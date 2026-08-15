@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:supertonic_audiobook/presentation/controllers/settings_controller.dart';
 import 'package:supertonic_audiobook/presentation/l10n/app_localizations.dart';
-import 'package:supertonic_audiobook/presentation/screens/splash_screen.dart';
+import 'package:supertonic_audiobook/presentation/screens/splash/splash_screen.dart';
 import 'package:supertonic_audiobook/presentation/theme/app_theme.dart';
 
 class App extends ConsumerWidget {

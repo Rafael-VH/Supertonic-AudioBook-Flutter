@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supertonic_audiobook/presentation/controllers/providers.dart';
 import 'package:supertonic_audiobook/presentation/l10n/app_localizations.dart';
-import 'package:supertonic_audiobook/presentation/screens/dashboard_screen.dart';
-import 'package:supertonic_audiobook/presentation/screens/onboarding_screen.dart';
+import 'package:supertonic_audiobook/presentation/screens/dashboard/dashboard_screen.dart';
+import 'package:supertonic_audiobook/presentation/screens/onboarding/onboarding_screen.dart';
 
 /// Pantalla de arranque. Muestra la marca mientras decide el destino:
 /// onboarding en la primera ejecución, dashboard en las siguientes.

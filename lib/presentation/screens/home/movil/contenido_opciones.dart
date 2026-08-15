@@ -1,78 +1,18 @@
 import 'package:flutter/material.dart';
+
 import 'package:supertonic_audiobook/domain/constants/producto.dart';
 import 'package:supertonic_audiobook/domain/use_cases/formato.dart';
 import 'package:supertonic_audiobook/presentation/constants/muestra_voz.dart';
 import 'package:supertonic_audiobook/presentation/controllers/home_controller.dart';
 import 'package:supertonic_audiobook/presentation/l10n/app_localizations.dart';
-import 'package:supertonic_audiobook/presentation/screens/home/card_registro.dart';
-
-/// Panel de síntesis: opciones y registro (vista de tablet).
-class PanelSintesis extends StatelessWidget {
-  const PanelSintesis({
-    super.key,
-    required this.estado,
-    required this.controller,
-    required this.t,
-    required this.conBotones,
-  });
-
-  final HomeEstado estado;
-  final HomeController controller;
-  final AppLocalizations t;
-  final bool conBotones;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          _CardOpciones(estado: estado, controller: controller),
-          const SizedBox(height: 16),
-          CardRegistro(
-            estado: estado,
-            controller: controller,
-            conBotones: conBotones,
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-/// Card de opciones de síntesis (vista de tablet).
-class _CardOpciones extends StatelessWidget {
-  const _CardOpciones({required this.estado, required this.controller});
-
-  final HomeEstado estado;
-  final HomeController controller;
-
-  @override
-  Widget build(BuildContext context) {
-    final t = AppLocalizations.of(context)!;
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(
-              t.opciones_sintesis,
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
-            const SizedBox(height: 12),
-            ContenidoOpciones(estado: estado, controller: controller),
-          ],
-        ),
-      ),
-    );
-  }
-}
 
 /// Contenido de las opciones de síntesis (formato, voz, sliders, idioma).
 class ContenidoOpciones extends StatelessWidget {
-  const ContenidoOpciones({super.key, required this.estado, required this.controller});
+  const ContenidoOpciones({
+    super.key,
+    required this.estado,
+    required this.controller,
+  });
 
   final HomeEstado estado;
   final HomeController controller;

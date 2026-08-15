@@ -7,7 +7,7 @@ import 'package:supertonic_audiobook/domain/contracts/repositorio_preferencias.d
 import 'package:supertonic_audiobook/presentation/controllers/providers.dart';
 import 'package:supertonic_audiobook/presentation/controllers/settings_controller.dart';
 import 'package:supertonic_audiobook/presentation/l10n/app_localizations.dart';
-import 'package:supertonic_audiobook/presentation/screens/settings_screen.dart';
+import 'package:supertonic_audiobook/presentation/screens/settings/settings_screen.dart';
 import 'package:supertonic_audiobook/presentation/theme/app_theme.dart';
 
 class _PreferenciasMemoria implements RepositorioPreferencias {
