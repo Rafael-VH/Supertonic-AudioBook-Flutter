@@ -371,13 +371,13 @@ abstract class AppLocalizations {
   /// No description provided for @btn_procesar.
   ///
   /// In en, this message translates to:
-  /// **'▶  Process'**
+  /// **'Process'**
   String get btn_procesar;
 
   /// No description provided for @btn_cancelar.
   ///
   /// In en, this message translates to:
-  /// **'■  Cancel'**
+  /// **'Cancel'**
   String get btn_cancelar;
 
   /// No description provided for @estado_listo.

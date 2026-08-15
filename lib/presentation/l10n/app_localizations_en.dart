@@ -148,10 +148,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get registro => 'Log';
 
   @override
-  String get btn_procesar => '▶  Process';
+  String get btn_procesar => 'Process';
 
   @override
-  String get btn_cancelar => '■  Cancel';
+  String get btn_cancelar => 'Cancel';
 
   @override
   String get estado_listo => 'Ready.';

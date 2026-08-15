@@ -51,8 +51,8 @@
   "log_muestra_fin": "    Sample ready. Playing...",
   "log_muestra_error": "    Could not generate or play the sample.",
   "registro": "Log",
-  "btn_procesar": "▶  Process",
-  "btn_cancelar": "■  Cancel",
+  "btn_procesar": "Process",
+  "btn_cancelar": "Cancel",
   "estado_listo": "Ready.",
   "estado_archivo": "File {i} of {n}: {nombre}",
   "@estado_archivo": {
