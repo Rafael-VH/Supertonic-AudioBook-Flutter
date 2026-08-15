@@ -10,6 +10,7 @@ import 'package:supertonic_audiobook/domain/entities/archivo.dart';
 import 'package:supertonic_audiobook/domain/use_cases/procesar_archivo.dart';
 import 'package:supertonic_audiobook/presentation/controllers/home_controller.dart';
 import 'package:supertonic_audiobook/presentation/controllers/providers.dart';
+import 'package:supertonic_audiobook/presentation/controllers/seleccion_controller.dart';
 import 'package:supertonic_audiobook/presentation/l10n/app_localizations.dart';
 
 import '../../support/fakes.dart';
@@ -69,6 +70,8 @@ class ProcesarArchivoStub extends ProcesarArchivo {
 }
 
 void main() {
+  AppLocalizations es() => lookupAppLocalizations(const Locale('es'));
+
   group('HomeController', () {
     late PreferenciasMemoria preferencias;
     late RepositorioArchivosFake repositorio;
@@ -76,8 +79,6 @@ void main() {
     late ExportadorFake exportador;
     late ReproductorFake reproductor;
     late ProcesarArchivoStub procesador;
-
-    AppLocalizations es() => lookupAppLocalizations(const Locale('es'));
 
     ProviderContainer crearContenedor() => ProviderContainer(
           overrides: [
@@ -343,6 +344,72 @@ void main() {
       expect(estado.progresoTotal, 1);
     });
 
+    test('cargarArchivosExternos reemplaza la lista y limpia la corrida',
+        () async {
+      baseFakes(archivos: const [
+        Archivo('C:/libros/a.md'),
+        Archivo('C:/libros/b.md'),
+      ]);
+
+      final container = crearContenedor();
+      final controller = container.read(homeControllerProvider.notifier);
+      controller.seleccionarTodo();
+      await controller.procesar(es());
+
+      expect(container.read(homeControllerProvider).lineasLog, isNotEmpty);
+
+      controller.cargarArchivosExternos(const [
+        Archivo('C:/sueltos/x.md'),
+        Archivo('C:/sueltos/y.md'),
+      ]);
+
+      final estado = container.read(homeControllerProvider);
+      expect(estado.archivos.map((a) => a.ruta), ['C:/sueltos/x.md', 'C:/sueltos/y.md']);
+      expect(estado.seleccion, isEmpty);
+      expect(estado.ejecutando, isFalse);
+      expect(estado.lineasLog, isEmpty);
+      expect(estado.snackbar, isNull);
+    });
+
+    test('cargarArchivosExternos conserva marcas de rutas que siguen', () {
+      baseFakes();
+
+      final container = crearContenedor();
+      final controller = container.read(homeControllerProvider.notifier);
+      controller.cargarArchivosExternos(const [
+        Archivo('C:/sueltos/a.md'),
+        Archivo('C:/sueltos/b.md'),
+      ]);
+      controller.alternarSeleccion('C:/sueltos/a.md');
+
+      controller.cargarArchivosExternos(const [
+        Archivo('C:/sueltos/a.md'),
+        Archivo('C:/sueltos/c.md'),
+      ]);
+
+      expect(container.read(homeControllerProvider).seleccion, {
+        'C:/sueltos/a.md',
+      });
+    });
+
+    test('quitarArchivoExterno elimina solo esa ruta', () {
+      baseFakes();
+
+      final container = crearContenedor();
+      final controller = container.read(homeControllerProvider.notifier);
+      controller.cargarArchivosExternos(const [
+        Archivo('C:/sueltos/a.md'),
+        Archivo('C:/sueltos/b.md'),
+      ]);
+
+      controller.quitarArchivoExterno('C:/sueltos/a.md');
+
+      expect(
+        container.read(homeControllerProvider).archivos.map((a) => a.ruta),
+        ['C:/sueltos/b.md'],
+      );
+    });
+
     testWidgets('escuchar sintetiza y reproduce la muestra', (tester) async {
       tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
         const MethodChannel('plugins.flutter.io/path_provider'),
@@ -362,6 +429,74 @@ void main() {
       expect(estado.lineasLog, contains(t.log_muestra_fin));
       expect(reproductor.rutas, hasLength(1));
       expect(motor.vocesPedidas, ['M1']);
+    });
+  });
+
+  group('SeleccionController', () {
+    late PreferenciasMemoria preferencias;
+    late RepositorioArchivosFake repositorio;
+    late MotorFake motor;
+    late ExportadorFake exportador;
+    late ReproductorFake reproductor;
+    late ProcesarArchivoStub procesador;
+
+    ProviderContainer crearContenedor() => ProviderContainer(
+          overrides: [
+            repositorioPreferenciasProvider.overrideWithValue(preferencias),
+            repositorioArchivosProvider.overrideWithValue(repositorio),
+            motorTtsProvider.overrideWithValue(motor),
+            exportadorAudioProvider.overrideWithValue(exportador),
+            reproductorAudioProvider.overrideWithValue(reproductor),
+            procesarArchivoProvider.overrideWithValue(procesador),
+            carpetaBaseProvider.overrideWithValue('C:/base'),
+          ],
+        );
+
+    void baseFakes({List<Archivo>? archivos}) {
+      preferencias = PreferenciasMemoria();
+      repositorio = RepositorioArchivosFake(archivos ?? const []);
+      motor = MotorFake();
+      exportador = ExportadorFake();
+      reproductor = ReproductorFake();
+      procesador = ProcesarArchivoStub(
+        motor: motor,
+        archivos: repositorio,
+        exportador: exportador,
+        silencioMuestras: 0,
+        memoriaSafeMarginBytes: 0,
+      );
+    }
+
+    test('build arranca con lista vacía aunque la carpeta por defecto tenga archivos',
+        () {
+      baseFakes(archivos: const [Archivo('C:/base/archivos/a.md')]);
+
+      final container = crearContenedor();
+      final estado = container.read(seleccionControllerProvider);
+
+      expect(estado.archivos, isEmpty);
+    });
+
+    test('cargarArchivosExternos alimenta la lista y procesa', () async {
+      baseFakes();
+
+      final container = crearContenedor();
+      final controller = container.read(seleccionControllerProvider.notifier);
+      controller.cargarArchivosExternos(const [
+        Archivo('C:/sueltos/a.md'),
+        Archivo('C:/sueltos/b.md'),
+      ]);
+
+      await controller.procesar(es());
+
+      final estado = container.read(seleccionControllerProvider);
+      expect(estado.ejecutando, isFalse);
+      expect(estado.estado, es().estado_listo_n(2, es().tiempo_seg(0)));
+      expect(procesador.llamadas, hasLength(2));
+      expect(
+        procesador.llamadas.first.rutaBase,
+        'C:/base${Platform.pathSeparator}audio${Platform.pathSeparator}a',
+      );
     });
   });
 }

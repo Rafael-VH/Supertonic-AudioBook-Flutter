@@ -89,6 +89,7 @@ class HomeEstado {
     String? estado,
     List<String>? lineasLog,
     MensajeSnackbar? snackbar,
+    bool clearSnackbar = false,
   }) {
     return HomeEstado(
       carpetaIn: carpetaIn ?? this.carpetaIn,
@@ -109,7 +110,7 @@ class HomeEstado {
       lineasLog: lineasLog ?? this.lineasLog,
       // El snackbar solo cambia cuando el controller emite uno nuevo; el resto
       // de las actualizaciones lo conservan.
-      snackbar: snackbar ?? this.snackbar,
+      snackbar: clearSnackbar ? null : (snackbar ?? this.snackbar),
     );
   }
 }
@@ -198,6 +199,31 @@ class HomeController extends Notifier<HomeEstado> {
     state = state.copyWith(
       archivos: archivos,
       seleccion: state.seleccion.where(rutas.contains).toSet(),
+    );
+  }
+
+  /// Reemplaza la lista con archivos elegidos por el buscador de archivos
+  /// (pantalla de selección), preservando las marcas que aún existen y
+  /// limpiando el estado de una corrida anterior.
+  void cargarArchivosExternos(List<Archivo> archivos) {
+    final rutas = archivos.map((a) => a.ruta).toSet();
+    state = state.copyWith(
+      archivos: archivos,
+      seleccion: state.seleccion.where(rutas.contains).toSet(),
+      ejecutando: false,
+      cancelar: false,
+      progresoActual: 0,
+      progresoTotal: 0,
+      estado: '',
+      lineasLog: const [],
+      clearSnackbar: true,
+    );
+  }
+
+  /// Quita un archivo externo de la lista (botón quitar de la selección).
+  void quitarArchivoExterno(String ruta) {
+    cargarArchivosExternos(
+      [...state.archivos.where((a) => a.ruta != ruta)],
     );
   }
 
