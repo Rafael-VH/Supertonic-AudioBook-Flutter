@@ -743,13 +743,13 @@ abstract class AppLocalizations {
   /// No description provided for @dashboard_opcion2.
   ///
   /// In en, this message translates to:
-  /// **'Coming soon'**
+  /// **'Process loose files'**
   String get dashboard_opcion2;
 
   /// No description provided for @dashboard_opcion2_desc.
   ///
   /// In en, this message translates to:
-  /// **'New features are on their way.'**
+  /// **'Pick one or more .md files from anywhere and convert them to audio.'**
   String get dashboard_opcion2_desc;
 
   /// No description provided for @dashboard_opcion3.
@@ -769,6 +769,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Folders'**
   String get carpetas;
+
+  /// No description provided for @seleccion_titulo.
+  ///
+  /// In en, this message translates to:
+  /// **'Process loose files'**
+  String get seleccion_titulo;
+
+  /// No description provided for @seleccion_sin_archivos.
+  ///
+  /// In en, this message translates to:
+  /// **'You haven\'t picked any files yet.'**
+  String get seleccion_sin_archivos;
+
+  /// No description provided for @seleccion_buscando.
+  ///
+  /// In en, this message translates to:
+  /// **'Opening the file picker…'**
+  String get seleccion_buscando;
+
+  /// No description provided for @seleccion_elegir.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick files…'**
+  String get seleccion_elegir;
+
+  /// No description provided for @seleccion_agregar.
+  ///
+  /// In en, this message translates to:
+  /// **'Add more'**
+  String get seleccion_agregar;
+
+  /// No description provided for @seleccion_quitar.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get seleccion_quitar;
+
+  /// No description provided for @seleccion_error_picker.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not open the file picker.'**
+  String get seleccion_error_picker;
+
+  /// No description provided for @seleccion_modelo_aviso.
+  ///
+  /// In en, this message translates to:
+  /// **'The voice model is not downloaded yet. You need to download it before processing these files.'**
+  String get seleccion_modelo_aviso;
+
+  /// No description provided for @seleccion_ir_modelo.
+  ///
+  /// In en, this message translates to:
+  /// **'Go download the model'**
+  String get seleccion_ir_modelo;
 }
 
 class _AppLocalizationsDelegate

@@ -7,67 +7,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:supertonic_audiobook/domain/entities/archivo.dart';
-import 'package:supertonic_audiobook/domain/use_cases/procesar_archivo.dart';
 import 'package:supertonic_audiobook/presentation/controllers/home_controller.dart';
 import 'package:supertonic_audiobook/presentation/controllers/providers.dart';
 import 'package:supertonic_audiobook/presentation/controllers/seleccion_controller.dart';
 import 'package:supertonic_audiobook/presentation/l10n/app_localizations.dart';
 
 import '../../support/fakes.dart';
-
-/// Stub de [ProcesarArchivo] que registra los argumentos y permite
-/// bloquear/avanzar el procesamiento para probar cancelación y progreso.
-class ProcesarArchivoStub extends ProcesarArchivo {
-  ProcesarArchivoStub({
-    required super.motor,
-    required super.archivos,
-    required super.exportador,
-    required super.silencioMuestras,
-    required super.memoriaSafeMarginBytes,
-  });
-
-  final List<
-      ({
-        Archivo archivo,
-        String rutaBase,
-        int steps,
-        double speed,
-        List<String> formatos,
-        String lang,
-      })> llamadas = [];
-
-  /// Si se define, `procesar` espera a que se complete antes de avanzar.
-  Future<void> Function()? espera;
-
-  /// Llamado antes de resolverse, para inyectar onProgreso/debeDetenerse.
-  void Function(void Function(int, int) onProgreso, bool Function() detener)?
-      alProcesar;
-
-  @override
-  Future<void> procesar(
-    Archivo archivo,
-    String rutaBase, {
-    required int steps,
-    required double speed,
-    required List<String> formatos,
-    String lang = 'es',
-    void Function(int actual, int total)? onProgreso,
-    bool Function()? debeDetenerse,
-  }) async {
-    llamadas.add((
-      archivo: archivo,
-      rutaBase: rutaBase,
-      steps: steps,
-      speed: speed,
-      formatos: formatos,
-      lang: lang,
-    ));
-    await espera?.call();
-    if (alProcesar != null && onProgreso != null && debeDetenerse != null) {
-      alProcesar!(onProgreso, debeDetenerse);
-    }
-  }
-}
 
 void main() {
   AppLocalizations es() => lookupAppLocalizations(const Locale('es'));

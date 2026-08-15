@@ -260,9 +260,18 @@
   "dashboard_bienvenida": "What do you want to do today?",
   "dashboard_procesar": "Convert files to audio",
   "dashboard_procesar_desc": "Pick a folder, choose a voice and export your Markdown books as audio.",
-  "dashboard_opcion2": "Coming soon",
-  "dashboard_opcion2_desc": "New features are on their way.",
+  "dashboard_opcion2": "Process loose files",
+  "dashboard_opcion2_desc": "Pick one or more .md files from anywhere and convert them to audio.",
   "dashboard_opcion3": "Coming soon",
   "dashboard_opcion3_desc": "New features are on their way.",
-  "carpetas": "Folders"
+  "carpetas": "Folders",
+  "seleccion_titulo": "Process loose files",
+  "seleccion_sin_archivos": "You haven't picked any files yet.",
+  "seleccion_buscando": "Opening the file picker…",
+  "seleccion_elegir": "Pick files…",
+  "seleccion_agregar": "Add more",
+  "seleccion_quitar": "Remove",
+  "seleccion_error_picker": "Could not open the file picker.",
+  "seleccion_modelo_aviso": "The voice model is not downloaded yet. You need to download it before processing these files.",
+  "seleccion_ir_modelo": "Go download the model"
 }

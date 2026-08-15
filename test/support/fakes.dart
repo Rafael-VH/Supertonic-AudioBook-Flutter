@@ -2,6 +2,9 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:file_picker/file_picker.dart';
+import 'package:file_picker/src/platform/file_picker_platform_interface.dart';
+
 import 'package:supertonic_audiobook/domain/contracts/exportador_audio.dart';
 import 'package:supertonic_audiobook/domain/contracts/modelo_gestor.dart';
 import 'package:supertonic_audiobook/domain/contracts/motor_tts.dart';
@@ -9,6 +12,7 @@ import 'package:supertonic_audiobook/domain/contracts/repositorio_archivos.dart'
 import 'package:supertonic_audiobook/domain/contracts/repositorio_preferencias.dart';
 import 'package:supertonic_audiobook/domain/contracts/reproductor_audio.dart';
 import 'package:supertonic_audiobook/domain/entities/archivo.dart';
+import 'package:supertonic_audiobook/domain/use_cases/procesar_archivo.dart';
 
 /// Preferencias en memoria para los tests (sin disco).
 class PreferenciasMemoria implements RepositorioPreferencias {
@@ -148,5 +152,93 @@ class ModeloGestorFake implements ModeloGestor {
   @override
   void cancelar() {
     cancelaciones++;
+  }
+}
+
+/// Buscador de archivos falso: devuelve [resultado] sin tocar la plataforma.
+class FilePickerFake extends FilePickerPlatform {
+  FilePickerFake(this.resultado);
+
+  FilePickerResult? resultado;
+
+  int llamadas = 0;
+  FileType? ultimoTipo;
+  List<String>? ultimasExtensiones;
+  bool? ultimoMultiple;
+
+  @override
+  Future<FilePickerResult?> pickFiles({
+    String? dialogTitle,
+    String? initialDirectory,
+    FileType type = FileType.any,
+    List<String>? allowedExtensions,
+    Function(FilePickerStatus)? onFileLoading,
+    int compressionQuality = 0,
+    bool allowMultiple = false,
+    bool withData = false,
+    bool withReadStream = false,
+    bool lockParentWindow = false,
+    bool readSequential = false,
+    bool cancelUploadOnWindowBlur = true,
+  }) async {
+    llamadas++;
+    ultimoTipo = type;
+    ultimasExtensiones = allowedExtensions;
+    ultimoMultiple = allowMultiple;
+    return resultado;
+  }
+}
+
+/// Stub de [ProcesarArchivo] que registra los argumentos y permite
+/// bloquear/avanzar el procesamiento para probar cancelación y progreso.
+class ProcesarArchivoStub extends ProcesarArchivo {
+  ProcesarArchivoStub({
+    required super.motor,
+    required super.archivos,
+    required super.exportador,
+    required super.silencioMuestras,
+    required super.memoriaSafeMarginBytes,
+  });
+
+  final List<
+      ({
+        Archivo archivo,
+        String rutaBase,
+        int steps,
+        double speed,
+        List<String> formatos,
+        String lang,
+      })> llamadas = [];
+
+  /// Si se define, `procesar` espera a que se complete antes de avanzar.
+  Future<void> Function()? espera;
+
+  /// Llamado antes de resolverse, para inyectar onProgreso/debeDetenerse.
+  void Function(void Function(int, int) onProgreso, bool Function() detener)?
+      alProcesar;
+
+  @override
+  Future<void> procesar(
+    Archivo archivo,
+    String rutaBase, {
+    required int steps,
+    required double speed,
+    required List<String> formatos,
+    String lang = 'es',
+    void Function(int actual, int total)? onProgreso,
+    bool Function()? debeDetenerse,
+  }) async {
+    llamadas.add((
+      archivo: archivo,
+      rutaBase: rutaBase,
+      steps: steps,
+      speed: speed,
+      formatos: formatos,
+      lang: lang,
+    ));
+    await espera?.call();
+    if (alProcesar != null && onProgreso != null && debeDetenerse != null) {
+      alProcesar!(onProgreso, debeDetenerse);
+    }
   }
 }

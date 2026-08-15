@@ -1,3 +1,4 @@
+import 'package:file_picker/src/platform/file_picker_platform_interface.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -128,5 +129,24 @@ void main() {
 
     expect(find.text('Supertonic-AudioBook — Conversor de archivos a audio'),
         findsOneWidget);
+  });
+
+  testWidgets('el segundo botón del dashboard llega a la selección de archivos',
+      (WidgetTester tester) async {
+    FilePickerPlatform.instance = FilePickerFake(null);
+    addTearDown(() {
+      FilePickerPlatform.instance = FilePickerFake(null);
+    });
+
+    await tester.pumpWidget(_construirApp(preferencias: {
+      'onboarding_visto': true,
+    }));
+
+    await _saltarSplash(tester);
+    await tester.tap(find.text('Procesar archivos sueltos'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Procesar archivos sueltos'), findsOneWidget);
+    expect(find.text('Todavía no elegiste archivos.'), findsOneWidget);
   });
 }

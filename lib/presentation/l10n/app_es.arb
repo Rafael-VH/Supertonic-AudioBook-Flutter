@@ -260,9 +260,18 @@
   "dashboard_bienvenida": "¿Qué quieres hacer hoy?",
   "dashboard_procesar": "Convertir archivos a audio",
   "dashboard_procesar_desc": "Elige una carpeta, una voz y exporta tus libros en Markdown como audio.",
-  "dashboard_opcion2": "Próximamente",
-  "dashboard_opcion2_desc": "Nuevas funciones en camino.",
+  "dashboard_opcion2": "Procesar archivos sueltos",
+  "dashboard_opcion2_desc": "Elegí uno o más archivos .md de cualquier lugar y convertilos en audio.",
   "dashboard_opcion3": "Próximamente",
   "dashboard_opcion3_desc": "Nuevas funciones en camino.",
-  "carpetas": "Carpetas"
+  "carpetas": "Carpetas",
+  "seleccion_titulo": "Procesar archivos sueltos",
+  "seleccion_sin_archivos": "Todavía no elegiste archivos.",
+  "seleccion_buscando": "Abriendo el buscador de archivos…",
+  "seleccion_elegir": "Elegir archivos…",
+  "seleccion_agregar": "Agregar más",
+  "seleccion_quitar": "Quitar",
+  "seleccion_error_picker": "No se pudo abrir el buscador de archivos.",
+  "seleccion_modelo_aviso": "El modelo de voz todavía no está descargado. Para procesar estos archivos primero tenés que descargarlo.",
+  "seleccion_ir_modelo": "Ir a descargar el modelo"
 }

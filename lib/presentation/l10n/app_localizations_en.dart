@@ -394,10 +394,11 @@ class AppLocalizationsEn extends AppLocalizations {
       'Pick a folder, choose a voice and export your Markdown books as audio.';
 
   @override
-  String get dashboard_opcion2 => 'Coming soon';
+  String get dashboard_opcion2 => 'Process loose files';
 
   @override
-  String get dashboard_opcion2_desc => 'New features are on their way.';
+  String get dashboard_opcion2_desc =>
+      'Pick one or more .md files from anywhere and convert them to audio.';
 
   @override
   String get dashboard_opcion3 => 'Coming soon';
@@ -407,4 +408,32 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get carpetas => 'Folders';
+
+  @override
+  String get seleccion_titulo => 'Process loose files';
+
+  @override
+  String get seleccion_sin_archivos => 'You haven\'t picked any files yet.';
+
+  @override
+  String get seleccion_buscando => 'Opening the file picker…';
+
+  @override
+  String get seleccion_elegir => 'Pick files…';
+
+  @override
+  String get seleccion_agregar => 'Add more';
+
+  @override
+  String get seleccion_quitar => 'Remove';
+
+  @override
+  String get seleccion_error_picker => 'Could not open the file picker.';
+
+  @override
+  String get seleccion_modelo_aviso =>
+      'The voice model is not downloaded yet. You need to download it before processing these files.';
+
+  @override
+  String get seleccion_ir_modelo => 'Go download the model';
 }

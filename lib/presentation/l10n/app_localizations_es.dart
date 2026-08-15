@@ -150,10 +150,10 @@ class AppLocalizationsEs extends AppLocalizations {
   String get registro => 'Registro';
 
   @override
-  String get btn_procesar => 'Procesar';
+  String get btn_procesar => '▶  Procesar';
 
   @override
-  String get btn_cancelar => 'Cancelar';
+  String get btn_cancelar => '■  Cancelar';
 
   @override
   String get estado_listo => 'Listo.';
@@ -397,10 +397,11 @@ class AppLocalizationsEs extends AppLocalizations {
       'Elige una carpeta, una voz y exporta tus libros en Markdown como audio.';
 
   @override
-  String get dashboard_opcion2 => 'Próximamente';
+  String get dashboard_opcion2 => 'Procesar archivos sueltos';
 
   @override
-  String get dashboard_opcion2_desc => 'Nuevas funciones en camino.';
+  String get dashboard_opcion2_desc =>
+      'Elegí uno o más archivos .md de cualquier lugar y convertilos en audio.';
 
   @override
   String get dashboard_opcion3 => 'Próximamente';
@@ -410,4 +411,33 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get carpetas => 'Carpetas';
+
+  @override
+  String get seleccion_titulo => 'Procesar archivos sueltos';
+
+  @override
+  String get seleccion_sin_archivos => 'Todavía no elegiste archivos.';
+
+  @override
+  String get seleccion_buscando => 'Abriendo el buscador de archivos…';
+
+  @override
+  String get seleccion_elegir => 'Elegir archivos…';
+
+  @override
+  String get seleccion_agregar => 'Agregar más';
+
+  @override
+  String get seleccion_quitar => 'Quitar';
+
+  @override
+  String get seleccion_error_picker =>
+      'No se pudo abrir el buscador de archivos.';
+
+  @override
+  String get seleccion_modelo_aviso =>
+      'El modelo de voz todavía no está descargado. Para procesar estos archivos primero tenés que descargarlo.';
+
+  @override
+  String get seleccion_ir_modelo => 'Ir a descargar el modelo';
 }

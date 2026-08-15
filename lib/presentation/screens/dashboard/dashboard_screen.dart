@@ -5,7 +5,8 @@ import 'package:supertonic_audiobook/presentation/l10n/app_localizations.dart';
 import 'package:supertonic_audiobook/presentation/routing/app_router.dart';
 
 /// Pantalla principal tras el onboarding. Muestra las tres funciones de la
-/// app: convertir archivos a audio (funcional) y dos en camino (placeholders).
+/// app: convertir archivos a audio, procesar archivos sueltos (ambas
+/// funcionales) y una en camino (placeholder).
 class DashboardScreen extends ConsumerWidget {
   const DashboardScreen({super.key});
 
@@ -51,7 +52,7 @@ class DashboardScreen extends ConsumerWidget {
                   icono: Icons.library_music_outlined,
                   titulo: t.dashboard_opcion2,
                   descripcion: t.dashboard_opcion2_desc,
-                  onTap: null,
+                  onTap: () => context.push(Rutas.seleccion),
                 ),
                 const SizedBox(height: 16),
                 _BotonFuncion(
