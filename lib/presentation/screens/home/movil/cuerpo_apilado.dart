@@ -5,8 +5,8 @@ import 'package:supertonic_audiobook/presentation/l10n/app_localizations.dart';
 import 'package:supertonic_audiobook/presentation/screens/home/movil/acordeon_movil.dart';
 import 'package:supertonic_audiobook/presentation/screens/home/movil/contenido_archivos.dart';
 import 'package:supertonic_audiobook/presentation/screens/home/movil/contenido_carpetas.dart';
-import 'package:supertonic_audiobook/presentation/screens/home/movil/contenido_opciones.dart';
-import 'package:supertonic_audiobook/presentation/screens/home/movil/contenido_registro.dart';
+import 'package:supertonic_audiobook/presentation/widgets/contenido_opciones.dart';
+import 'package:supertonic_audiobook/presentation/widgets/contenido_registro.dart';
 
 /// Móvil: acordeones exclusivos (uno abierto a la vez ocupando el alto) con
 /// carpetas expandido por defecto y la acción principal en la barra inferior

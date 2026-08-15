@@ -12,11 +12,16 @@ class BarraAccion extends StatelessWidget {
     required this.estado,
     required this.controller,
     required this.t,
+    this.onProcesar,
   });
 
   final HomeEstado estado;
   final HomeController controller;
   final AppLocalizations t;
+
+  /// Callback alternativo al pulsar **Procesar** (p. ej. el gate del modelo
+  /// en la pantalla de selección). Si es null se usa `controller.procesar`.
+  final VoidCallback? onProcesar;
 
   @override
   Widget build(BuildContext context) {
@@ -44,7 +49,7 @@ class BarraAccion extends StatelessWidget {
                     child: FilledButton.icon(
                       onPressed: estado.ejecutando
                           ? null
-                          : () => controller.procesar(t),
+                          : (onProcesar ?? () => controller.procesar(t)),
                       icon: const Icon(Icons.play_arrow),
                       label: Text(t.btn_procesar),
                     ),

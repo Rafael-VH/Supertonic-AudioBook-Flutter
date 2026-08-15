@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:supertonic_audiobook/presentation/controllers/home_controller.dart';
 import 'package:supertonic_audiobook/presentation/l10n/app_localizations.dart';
-import 'package:supertonic_audiobook/presentation/screens/home/movil/contenido_opciones.dart';
+import 'package:supertonic_audiobook/presentation/widgets/contenido_opciones.dart';
 
 /// Card de opciones de síntesis (vista de tablet).
 class CardOpciones extends StatelessWidget {
