@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:supertonic_audiobook/presentation/controllers/modelo_controller.dart';
+import 'package:go_router/go_router.dart';
 import 'package:supertonic_audiobook/presentation/l10n/app_localizations.dart';
-import 'package:supertonic_audiobook/presentation/screens/home/home_screen.dart';
-import 'package:supertonic_audiobook/presentation/screens/modelo/modelo_screen.dart';
-import 'package:supertonic_audiobook/presentation/screens/settings/settings_screen.dart';
+import 'package:supertonic_audiobook/presentation/routing/app_router.dart';
 
 /// Pantalla principal tras el onboarding. Muestra las tres funciones de la
 /// app: convertir archivos a audio (funcional) y dos en camino (placeholders).
@@ -23,13 +21,7 @@ class DashboardScreen extends ConsumerWidget {
           IconButton(
             icon: const Icon(Icons.settings_outlined),
             tooltip: t.ajustes,
-            onPressed: () {
-              Navigator.of(context).push(
-                MaterialPageRoute<void>(
-                  builder: (_) => const SettingsScreen(),
-                ),
-              );
-            },
+            onPressed: () => context.push(Rutas.settings),
           ),
         ],
       ),
@@ -52,13 +44,7 @@ class DashboardScreen extends ConsumerWidget {
                   icono: Icons.auto_awesome_outlined,
                   titulo: t.dashboard_procesar,
                   descripcion: t.dashboard_procesar_desc,
-                  onTap: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute<void>(
-                        builder: (_) => const _ModeloGate(),
-                      ),
-                    );
-                  },
+                  onTap: () => context.push(Rutas.home),
                 ),
                 const SizedBox(height: 16),
                 _BotonFuncion(
@@ -158,17 +144,5 @@ class _BotonFuncion extends StatelessWidget {
         ),
       ),
     );
-  }
-}
-
-/// Entra al procesamiento solo con el modelo listo; si falta, bloquea con el
-/// gate de descarga (`ModeloScreen`) hasta que se verifica o descarga.
-class _ModeloGate extends ConsumerWidget {
-  const _ModeloGate();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final estado = ref.watch(modeloControllerProvider);
-    return estado.listo ? const HomeScreen() : const ModeloScreen();
   }
 }

@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:supertonic_audiobook/presentation/controllers/providers.dart';
 import 'package:supertonic_audiobook/presentation/l10n/app_localizations.dart';
-import 'package:supertonic_audiobook/presentation/screens/dashboard/dashboard_screen.dart';
+import 'package:supertonic_audiobook/presentation/routing/app_router.dart';
 
 /// Onboarding de primera ejecución. Explica cómo generar audio en 4 pasos
 /// (modelo → archivos → voz → procesar) antes de entrar al dashboard.
@@ -32,9 +33,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     final datos = prefs.cargar();
     datos['onboarding_visto'] = true;
     prefs.guardar(datos);
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute<void>(builder: (_) => const DashboardScreen()),
-    );
+    context.go(Rutas.dashboard);
   }
 
   @override

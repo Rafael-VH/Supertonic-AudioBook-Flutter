@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:supertonic_audiobook/presentation/controllers/settings_controller.dart';
 import 'package:supertonic_audiobook/presentation/l10n/app_localizations.dart';
-import 'package:supertonic_audiobook/presentation/screens/splash/splash_screen.dart';
+import 'package:supertonic_audiobook/presentation/routing/app_router.dart';
 import 'package:supertonic_audiobook/presentation/theme/app_theme.dart';
 
 class App extends ConsumerWidget {
@@ -16,13 +16,13 @@ class App extends ConsumerWidget {
     final titulo = AppLocalizations.of(context)?.ventana_titulo ??
         'Supertonic-AudioBook';
 
-    return MaterialApp(
+    return MaterialApp.router(
       title: titulo,
       debugShowCheckedModeBanner: false,
       theme: construirTema(oscuro: false, estilo: ajustes.estilo),
       darkTheme: construirTema(oscuro: true, estilo: ajustes.estilo),
       themeMode: ajustes.temaOscuro ? ThemeMode.dark : ThemeMode.light,
-      home: const SplashScreen(),
+      routerConfig: ref.watch(appRouterProvider),
       locale: Locale(ajustes.idioma),
       supportedLocales: const [Locale('es'), Locale('en')],
       localizationsDelegates: const [

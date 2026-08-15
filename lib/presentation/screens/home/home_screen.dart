@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import 'package:supertonic_audiobook/presentation/controllers/home_controller.dart';
 import 'package:supertonic_audiobook/presentation/l10n/app_localizations.dart';
+import 'package:supertonic_audiobook/presentation/routing/app_router.dart';
 import 'package:supertonic_audiobook/presentation/screens/home/movil/barra_accion.dart';
 import 'package:supertonic_audiobook/presentation/screens/home/movil/cuerpo_apilado.dart';
 import 'package:supertonic_audiobook/presentation/screens/home/tablet/cuerpo_lado_alado.dart';
-import 'package:supertonic_audiobook/presentation/screens/settings/settings_screen.dart';
 import 'package:supertonic_audiobook/presentation/theme/app_theme.dart';
 
 /// Umbral de ancho para mostrar los paneles lado a lado (Material 6.2, responsive).
@@ -53,13 +54,7 @@ class HomeScreen extends ConsumerWidget {
           IconButton(
             icon: const Icon(Icons.settings_outlined),
             tooltip: t.ajustes,
-            onPressed: () {
-              Navigator.of(context).push(
-                MaterialPageRoute<void>(
-                  builder: (_) => const SettingsScreen(),
-                ),
-              );
-            },
+            onPressed: () => context.push(Rutas.settings),
           ),
         ],
       ),

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:supertonic_audiobook/presentation/controllers/providers.dart';
 import 'package:supertonic_audiobook/presentation/l10n/app_localizations.dart';
-import 'package:supertonic_audiobook/presentation/screens/dashboard/dashboard_screen.dart';
-import 'package:supertonic_audiobook/presentation/screens/onboarding/onboarding_screen.dart';
+import 'package:supertonic_audiobook/presentation/routing/app_router.dart';
 
 /// Pantalla de arranque. Muestra la marca mientras decide el destino:
 /// onboarding en la primera ejecución, dashboard en las siguientes.
@@ -28,11 +28,9 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
     if (!mounted) return;
     final prefs = ref.read(repositorioPreferenciasProvider).cargar();
     final destino = prefs['onboarding_visto'] == true
-        ? const DashboardScreen()
-        : const OnboardingScreen();
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute<void>(builder: (_) => destino),
-    );
+        ? Rutas.dashboard
+        : Rutas.onboarding;
+    context.go(destino);
   }
 
   @override
