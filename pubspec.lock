@@ -162,7 +162,7 @@ packages:
     source: hosted
     version: "1.3.3"
   fdb_helper:
-    dependency: "direct dev"
+    dependency: "direct main"
     description:
       name: fdb_helper
       sha256: "60be657cffe8d85644adf8a563254ea8d2e80a874ae9077b5b27eb197223b068"
