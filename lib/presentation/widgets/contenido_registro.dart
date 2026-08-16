@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:supertonic_audiobook/presentation/controllers/home_controller.dart';
 import 'package:supertonic_audiobook/presentation/l10n/app_localizations.dart';
 import 'package:supertonic_audiobook/presentation/widgets/barra_progreso.dart';
+import 'package:supertonic_audiobook/presentation/widgets/vista_log.dart';
 
 /// Contenido del registro: log, estado y progreso.
 class ContenidoRegistro extends StatelessWidget {
@@ -30,15 +31,7 @@ class ContenidoRegistro extends StatelessWidget {
           padding: const EdgeInsets.all(8),
           child: estado.lineasLog.isEmpty
               ? const SizedBox.shrink()
-              : SingleChildScrollView(
-                  reverse: true,
-                  child: SelectableText(
-                    estado.lineasLog.reversed.join('\n'),
-                    style: Theme.of(
-                      context,
-                    ).textTheme.bodySmall?.copyWith(fontFamily: 'monospace'),
-                  ),
-                ),
+              : VistaLog(lineas: estado.lineasLog),
         ),
         const SizedBox(height: 12),
         Text(

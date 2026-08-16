@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:supertonic_audiobook/presentation/controllers/home_controller.dart';
 import 'package:supertonic_audiobook/presentation/l10n/app_localizations.dart';
 import 'package:supertonic_audiobook/presentation/widgets/barra_progreso.dart';
+import 'package:supertonic_audiobook/presentation/widgets/vista_log.dart';
 
 /// Card de registro: log, estado, progreso y (vista de tablet) botones de acción.
 class CardRegistro extends StatelessWidget {
@@ -37,15 +38,7 @@ class CardRegistro extends StatelessWidget {
               padding: const EdgeInsets.all(8),
               child: estado.lineasLog.isEmpty
                   ? const SizedBox.shrink()
-                  : SingleChildScrollView(
-                      reverse: true,
-                      child: SelectableText(
-                        estado.lineasLog.reversed.join('\n'),
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          fontFamily: 'monospace',
-                        ),
-                      ),
-                    ),
+                  : VistaLog(lineas: estado.lineasLog),
             ),
             const SizedBox(height: 12),
             Text(
@@ -63,7 +56,9 @@ class CardRegistro extends StatelessWidget {
                 children: [
                   Expanded(
                     child: FilledButton.icon(
-                      onPressed: estado.ejecutando
+                      // Bloqueado durante la ejecución o mientras se prueba
+                      // la voz: el motor TTS no soporta síntesis concurrentes.
+                      onPressed: (estado.ejecutando || estado.probandoVoz)
                           ? null
                           : () => controller.procesar(t),
                       icon: const Icon(Icons.play_arrow),
