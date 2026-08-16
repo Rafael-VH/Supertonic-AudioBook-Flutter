@@ -205,8 +205,13 @@ class HomeController extends Notifier<HomeEstado> {
 
   /// Reemplaza la lista con archivos elegidos por el buscador de archivos
   /// (pantalla de selección), preservando las marcas que aún existen y
-  /// limpiando el estado de una corrida anterior.
+  /// limpiando el estado de una corrida anterior. Si hay procesamiento o una
+  /// muestra de voz en vuelo el reemplazo (y el borrado de
+  /// [quitarArchivoExterno], que pasa por acá) se ignora: el reset
+  /// destructivo dejaría inerte una cancelación en vuelo y habilitaría una
+  /// segunda corrida concurrente sobre el mismo motor TTS.
   void cargarArchivosExternos(List<Archivo> archivos) {
+    if (state.ejecutando || state.probandoVoz) return;
     final rutas = archivos.map((a) => a.ruta).toSet();
     state = state.copyWith(
       archivos: archivos,
@@ -223,8 +228,11 @@ class HomeController extends Notifier<HomeEstado> {
 
   /// Agrega archivos elegidos por el buscador a la selección existente
   /// (botón **Agregar**), fusionando sin duplicados por ruta y preservando
-  /// las marcas previas.
+  /// las marcas previas. No toca el estado de una corrida en curso: si hay
+  /// procesamiento activo el tap se ignora (el motor TTS no soporta
+  /// concurrencia y no debe limpiarse una cancelación en vuelo ni el log).
   void agregarArchivosExternos(List<Archivo> archivos) {
+    if (state.ejecutando) return;
     final porRuta = <String, Archivo>{
       for (final a in state.archivos) a.ruta: a,
       for (final a in archivos) a.ruta: a,
@@ -234,13 +242,6 @@ class HomeController extends Notifier<HomeEstado> {
     state = state.copyWith(
       archivos: fusionados,
       seleccion: state.seleccion.where(rutas.contains).toSet(),
-      ejecutando: false,
-      cancelar: false,
-      progresoActual: 0,
-      progresoTotal: 0,
-      estado: '',
-      lineasLog: const [],
-      clearSnackbar: true,
     );
   }
 
@@ -314,8 +315,10 @@ class HomeController extends Notifier<HomeEstado> {
           );
       await ref.read(reproductorAudioProvider).reproducir(ruta);
       _appendLog(t.log_muestra_fin);
-    } catch (_) {
-      _appendLog(t.log_muestra_error);
+    } catch (exc) {
+      // SintetizarMuestra relanza la causa real: se reporta en el log para
+      // que el fallo no quede mudo (p. ej. motor no disponible, ruta ilegible).
+      _appendLog('${t.log_muestra_error}: $exc');
     } finally {
       state = state.copyWith(probandoVoz: false);
     }

@@ -358,6 +358,71 @@ void main() {
       );
     });
 
+    test('quitarArchivoExterno se ignora durante una corrida en curso',
+        () async {
+      baseFakes(archivos: const [
+        Archivo('C:/libros/a.md'),
+        Archivo('C:/libros/b.md'),
+      ]);
+
+      final container = crearContenedor();
+      final controller = container.read(homeControllerProvider.notifier);
+      final t = es();
+      final liberar = Completer<void>();
+      procesador.espera = () => liberar.future;
+
+      final futuro = controller.procesar(t);
+      await Future<void>.delayed(Duration.zero);
+      expect(container.read(homeControllerProvider).ejecutando, isTrue);
+
+      // X (quitar) en plena corrida: no debe resetear la corrida (cancelar
+      // quedaría inerte, el log se borraría y Procesar se re-habilitaría
+      // para una segunda corrida concurrente sobre el mismo TTS).
+      controller.quitarArchivoExterno('C:/libros/a.md');
+
+      final durante = container.read(homeControllerProvider);
+      expect(durante.ejecutando, isTrue);
+      expect(durante.cancelar, isFalse);
+      expect(durante.archivos, hasLength(2));
+      expect(durante.lineasLog, isNotEmpty);
+
+      liberar.complete();
+      await futuro;
+
+      // La corrida terminó sin que el borrado se aplicara a mitad de camino.
+      final estado = container.read(homeControllerProvider);
+      expect(estado.archivos, hasLength(2));
+      expect(estado.ejecutando, isFalse);
+      expect(estado.estado, t.estado_listo_n(2, t.tiempo_seg(0)));
+    });
+
+    test('cargarArchivosExternos no resetea el estado durante una corrida',
+        () async {
+      baseFakes(archivos: const [
+        Archivo('C:/libros/a.md'),
+        Archivo('C:/libros/b.md'),
+      ]);
+
+      final container = crearContenedor();
+      final controller = container.read(homeControllerProvider.notifier);
+      final t = es();
+      final liberar = Completer<void>();
+      procesador.espera = () => liberar.future;
+
+      final futuro = controller.procesar(t);
+      await Future<void>.delayed(Duration.zero);
+
+      controller.cargarArchivosExternos(const [Archivo('C:/sueltos/x.md')]);
+
+      final durante = container.read(homeControllerProvider);
+      expect(durante.ejecutando, isTrue);
+      expect(durante.archivos, hasLength(2));
+      expect(durante.lineasLog, isNotEmpty);
+
+      liberar.complete();
+      await futuro;
+    });
+
     testWidgets('escuchar sintetiza y reproduce la muestra', (tester) async {
       tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
         const MethodChannel('plugins.flutter.io/path_provider'),
