@@ -7,7 +7,8 @@ plugins {
 
 android {
     namespace = "com.thundertier.supertonic_audiobook"
-    compileSdk = flutter.compileSdkVersion
+    // permission_handler_android exige compileSdk 37 (Flutter 3.44 usa 36).
+    compileSdk = 37
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
@@ -27,6 +28,15 @@ android {
     }
 
     buildTypes {
+        debug {
+            // D8 (sin R8) corrompe los métodos unsigned de kotlin-stdlib 2.3.x en este device (VerifyError
+            // sumOfULong). R8 lo reescribe bien; por eso debug usa el mismo pipeline que release.
+            isMinifyEnabled = true
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro",
+            )
+        }
         release {
             // TODO: Add your own signing config for the release build.
             // Signing with the debug keys for now, so `flutter run --release` works.
