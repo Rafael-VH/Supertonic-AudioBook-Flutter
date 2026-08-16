@@ -127,5 +127,34 @@ void main() {
 
       expect(gestor.descargas, 0);
     });
+
+    test(
+        'una verificación que termina tarde no pisa el estado de descarga',
+        () async {
+      gestor = ModeloGestorFake()
+        ..verificacionLenta = Completer<void>()
+        ..espera = Completer<void>();
+      final contenedor = crearContenedor();
+      // build() lanzó _verificar, que quedó pendiente.
+      await Future<void>.delayed(Duration.zero);
+
+      final controller = contenedor.read(modeloControllerProvider.notifier);
+      final futuro = controller.descargar();
+      await estabilizar();
+      expect(contenedor.read(modeloControllerProvider).descargando, true);
+
+      // La verificación termina DESPUÉS de que la descarga arrancó: su
+      // resultado no debe pisar `descargando: true`.
+      gestor.verificacionLenta!.complete();
+      await estabilizar();
+
+      final estado = contenedor.read(modeloControllerProvider);
+      expect(estado.descargando, true);
+      expect(estado.listo, false);
+
+      gestor.espera!.complete();
+      await futuro;
+      expect(contenedor.read(modeloControllerProvider).listo, true);
+    });
   });
 }

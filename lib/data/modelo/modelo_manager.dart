@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:isolate';
 
 import 'package:crypto/crypto.dart';
 import 'package:dio/dio.dart';
@@ -69,10 +70,16 @@ class ModeloManager implements ModeloGestor {
 
   final Dio _dio;
 
+  /// Lista de archivos a garantizar; inyectable para pruebas (por defecto
+  /// los publicados en el repo HF).
+  final List<ArchivoModelo> _archivos;
+
   /// Descarga activa, para poder cancelarla desde la presentación.
   CancelToken? _activo;
 
-  ModeloManager({Dio? dio}) : _dio = dio ?? Dio();
+  ModeloManager({Dio? dio, List<ArchivoModelo>? archivos})
+      : _dio = dio ?? Dio(),
+        _archivos = archivos ?? archivosModelo;
 
   Future<Directory> _directorioModelo() async {
     final soporte = await getApplicationSupportDirectory();
@@ -93,12 +100,12 @@ class ModeloManager implements ModeloGestor {
     final raiz = await _directorioModelo();
     final token = _activo = CancelToken();
     try {
-      final totalBytes = archivosModelo
+      final totalBytes = _archivos
           .map((a) => a.tamanoBytes)
           .fold<int>(0, (sum, n) => sum + n);
       var descargados = 0;
 
-      for (final archivo in archivosModelo) {
+      for (final archivo in _archivos) {
         final destino =
             File('${raiz.path}${Platform.pathSeparator}${archivo.ruta}');
         await destino.parent.create(recursive: true);
@@ -126,8 +133,10 @@ class ModeloManager implements ModeloGestor {
                 yaDescargados: descargados, totalBytes: totalBytes);
             final verificada = await _verificar(part, archivo);
             if (!verificada) {
-              throw Exception(
-                  'Integridad fallida para ${archivo.ruta} (SHA-256 o tamaño no coincide)');
+              // El .part quedó corrupto (descarga truncada del servidor, o
+              // contenido basura): se descarta y se reintenta desde cero.
+              await part.delete();
+              continue;
             }
             await part.rename(destino.path);
             ok = true;
@@ -135,6 +144,8 @@ class ModeloManager implements ModeloGestor {
             if (e.type == DioExceptionType.cancel) {
               rethrow;
             }
+            // Error de red: se conserva el .part para reintentar resumiendo
+            // (Range). Solo se abandona tras agotar los intentos.
             if (intentos >= 3) rethrow;
           }
         }
@@ -153,7 +164,7 @@ class ModeloManager implements ModeloGestor {
   @override
   Future<bool> verificarDisponible() async {
     final raiz = await _directorioModelo();
-    for (final archivo in archivosModelo) {
+    for (final archivo in _archivos) {
       final destino =
           File('${raiz.path}${Platform.pathSeparator}${archivo.ruta}');
       if (!await _estaVerificado(destino, archivo)) return false;
@@ -218,9 +229,15 @@ class ModeloManager implements ModeloGestor {
     return _esJsonValido(part);
   }
 
+  /// SHA-256 de [archivo] calculado en un isolate de trabajo: los ONNX
+  /// pesan cientos de MB y el hashing no debe congelar la UI. Se pasa la
+  /// ruta (un [File] no es enviable entre isolates) y se reabre adentro.
   Future<String> _hashSha256(File archivo) async {
-    final digest = await sha256.bind(archivo.openRead()).first;
-    return digest.toString();
+    final ruta = archivo.path;
+    return Isolate.run(() async {
+      final digest = await sha256.bind(File(ruta).openRead()).first;
+      return digest.toString();
+    });
   }
 
   bool _esJsonValido(File archivo) {

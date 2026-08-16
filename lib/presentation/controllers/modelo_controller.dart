@@ -78,10 +78,15 @@ class ModeloController extends Notifier<ModeloEstado> {
   }
 
   /// Comprueba el disco sin descargar y publica el estado resultante.
+  ///
+  /// Fire-and-forget desde [build]: si el usuario ya inició la descarga antes
+  /// de que la verificación termine, su resultado se descarta (no debe pisar
+  /// `descargando: true` con un estado idle).
   Future<void> _verificar() async {
     final gestor = ref.read(modeloManagerProvider);
     final ok = await gestor.verificarDisponible();
     if (!ref.mounted) return;
+    if (_descargaEnCurso || state.descargando) return;
     state = ok
         ? const ModeloEstado(listo: true)
         : const ModeloEstado(verificando: false);
