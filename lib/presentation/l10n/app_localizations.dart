@@ -785,8 +785,20 @@ abstract class AppLocalizations {
   /// No description provided for @dashboard_modelos.
   ///
   /// In en, this message translates to:
-  /// **'Models: '**
+  /// **'Models'**
   String get dashboard_modelos;
+
+  /// No description provided for @dashboard_modelo_descargar.
+  ///
+  /// In en, this message translates to:
+  /// **'Download model'**
+  String get dashboard_modelo_descargar;
+
+  /// No description provided for @dashboard_modelo_descargando.
+  ///
+  /// In en, this message translates to:
+  /// **'downloading…'**
+  String get dashboard_modelo_descargando;
 
   /// No description provided for @dashboard_modelo_descargado.
   ///

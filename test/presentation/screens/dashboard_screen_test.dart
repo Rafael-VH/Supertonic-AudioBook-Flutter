@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:supertonic_audiobook/presentation/controllers/modelo_controller.dart';
 import 'package:supertonic_audiobook/presentation/controllers/providers.dart';
 import 'package:supertonic_audiobook/presentation/l10n/app_localizations.dart';
 import 'package:supertonic_audiobook/presentation/routing/app_router.dart';
@@ -56,8 +57,10 @@ Widget _harness(
 }
 
 /// Harness con router mínimo: la card Biblioteca navega con `context.push`
-/// (DASH-1) y necesita un GoRouter real.
-Widget _harnessRouter(ModeloGestorFake gestor) {
+/// (DASH-1) y el CTA de descarga con `context.push(Rutas.modelo, extra)`
+/// (DASH-6) — ambos necesitan un GoRouter real. Con [conRutaModelo] se
+/// agrega `/modelo` capturando el `extra` para verificar el origen.
+Widget _harnessRouter(ModeloGestorFake gestor, {bool conRutaModelo = false}) {
   final router = GoRouter(
     initialLocation: Rutas.dashboard,
     routes: [
@@ -69,6 +72,12 @@ Widget _harnessRouter(ModeloGestorFake gestor) {
         path: Rutas.biblioteca,
         builder: (_, __) => const _DestinoPrueba('Destino /biblioteca'),
       ),
+      if (conRutaModelo)
+        GoRoute(
+          path: Rutas.modelo,
+          builder: (_, state) =>
+              _DestinoPrueba('Destino /modelo extra=${state.extra}'),
+        ),
     ],
   );
   return ProviderScope(
@@ -102,6 +111,17 @@ Future<void> _pump(
   tester.view.devicePixelRatio = 1.0;
   addTearDown(tester.view.reset);
   await tester.pumpWidget(_harness(gestor, preferencias: preferencias));
+}
+
+/// Inicia la descarga del modelo desde el test. El CTA del dashboard solo
+/// navega a `/modelo` (la descarga la dispara `ModeloScreen`), así que para
+/// probar los estados de la Card se invoca al controller directamente a
+/// través del ProviderScope del harness.
+void _iniciarDescarga(WidgetTester tester) {
+  final container = ProviderScope.containerOf(
+    tester.element(find.byType(DashboardScreen)),
+  );
+  unawaited(container.read(modeloControllerProvider.notifier).descargar());
 }
 
 void main() {
@@ -284,7 +304,8 @@ void main() {
       await tester.pumpAndSettle();
 
       final cards = tester.widgetList<Card>(find.byType(Card)).toList();
-      expect(cards.length, 3);
+      // 3 cards de función + la Card de estado del modelo (WO-4b).
+      expect(cards.length, 4);
       for (final card in cards) {
         expect(
           card.color,
@@ -343,6 +364,135 @@ void main() {
       expect(icono.color, paleta.primarioSombra);
     },
   );
+
+  // ─── WO-4b: Card de estado del modelo (DASH-5/6/7/10) ───────────────────
+
+  testWidgets(
+    'durante la descarga muestra progreso veraz y sin CTA (DASH-5/DASH-6)',
+    (tester) async {
+      final gestor = ModeloGestorFake()..espera = Completer<void>();
+      await _pump(tester, gestor);
+      await tester.pumpAndSettle();
+
+      // Estado idle: el CTA de descarga está disponible.
+      expect(find.text('Descargar modelo'), findsOneWidget);
+
+      _iniciarDescarga(tester);
+      await tester.pump();
+
+      // Progreso real (nunca "sin descargar") y sin CTA (sin doble descarga).
+      expect(find.byType(LinearProgressIndicator), findsOneWidget);
+      expect(find.text('1 MB de 10 MB'), findsOneWidget);
+      expect(find.text('Modelos: descargando…'), findsOneWidget);
+      expect(find.text('Modelos: sin descargar'), findsNothing);
+      expect(find.text('Descargar modelo'), findsNothing);
+
+      // Al completar la descarga, la Card pasa a "descargado".
+      gestor.espera!.complete();
+      await tester.pumpAndSettle();
+      expect(find.text('Modelos: descargado'), findsOneWidget);
+      expect(find.byType(LinearProgressIndicator), findsNothing);
+    },
+  );
+
+  testWidgets(
+    'tras un error de descarga muestra el mensaje y el CTA vuelve (DASH-5)',
+    (tester) async {
+      final gestor = ModeloGestorFake(fallar: true);
+      await _pump(tester, gestor);
+      await tester.pumpAndSettle();
+
+      _iniciarDescarga(tester);
+      await tester.pumpAndSettle();
+
+      expect(
+        find.text('Error de descarga: Exception: fallo simulado'),
+        findsOneWidget,
+      );
+      expect(find.text('Descargar modelo'), findsOneWidget);
+      expect(find.text('Modelos: sin descargar'), findsNothing);
+      expect(find.byType(LinearProgressIndicator), findsNothing);
+    },
+  );
+
+  testWidgets(
+    'el CTA navega a /modelo con el origen /dashboard y mide 48 de alto '
+    '(DASH-6)',
+    (tester) async {
+      tester.view.physicalSize = const Size(1280, 800);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
+      await tester.pumpWidget(
+        _harnessRouter(ModeloGestorFake(), conRutaModelo: true),
+      );
+      await tester.pumpAndSettle();
+
+      final cta = find.text('Descargar modelo');
+      expect(cta, findsOneWidget);
+      final tamCta = tester.getSize(find.byType(FilledButton));
+      expect(tamCta.height, greaterThanOrEqualTo(48));
+
+      await tester.tap(cta);
+      await tester.pumpAndSettle();
+
+      expect(find.text('Destino /modelo extra=/dashboard'), findsOneWidget);
+    },
+  );
+
+  testWidgets('el refresh de la Card mide al menos 48×48 (DASH-6/DASH-10)', (
+    tester,
+  ) async {
+    await _pump(tester, ModeloGestorFake());
+    await tester.pumpAndSettle();
+
+    final tam = tester.getSize(find.byTooltip('Refrescar'));
+    expect(tam.width, greaterThanOrEqualTo(48));
+    expect(tam.height, greaterThanOrEqualTo(48));
+  });
+
+  testWidgets('los ticks del modelo no reconstruyen hero ni cards (DASH-7)', (
+    tester,
+  ) async {
+    final gestor = ModeloGestorFake()..espera = Completer<void>();
+    await _pump(tester, gestor);
+    await tester.pumpAndSettle();
+
+    // Referencias a los elementos del hero y de una card de función ANTES de
+    // la descarga: si el dashboard se reconstruyera en cada tick, el elemento
+    // recibiría un widget nuevo y la identidad cambiaría.
+    final elementoHero = tester.element(find.text('¿Qué quieres hacer hoy?'));
+    final widgetHeroAntes = elementoHero.widget;
+    final elementoCard = tester.element(
+      find.text('Convertir archivos a audio'),
+    );
+    final widgetCardAntes = elementoCard.widget;
+
+    _iniciarDescarga(tester);
+    await tester.pump();
+
+    // El tick SÍ llegó (el progreso se renderiza): la Card está viva y el
+    // watch aislado funciona.
+    expect(find.text('1 MB de 10 MB'), findsOneWidget);
+
+    // Pero el hero y las cards de función NO se reconstruyeron.
+    expect(
+      identical(elementoHero.widget, widgetHeroAntes),
+      isTrue,
+      reason: 'el hero no debe reconstruirse en cada tick del modelo',
+    );
+    expect(
+      identical(elementoCard.widget, widgetCardAntes),
+      isTrue,
+      reason: 'las cards de función no deben reconstruirse en cada tick',
+    );
+
+    gestor.espera!.complete();
+    await tester.pumpAndSettle();
+
+    expect(find.text('Modelos: descargado'), findsOneWidget);
+    expect(identical(elementoHero.widget, widgetHeroAntes), isTrue);
+    expect(identical(elementoCard.widget, widgetCardAntes), isTrue);
+  });
 }
 
 /// Círculos decorativos de los iconos de las cards de función (accento

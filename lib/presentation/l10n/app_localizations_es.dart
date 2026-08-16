@@ -424,7 +424,13 @@ class AppLocalizationsEs extends AppLocalizations {
       'Volvé a escuchar los audiolibros que ya generaste.';
 
   @override
-  String get dashboard_modelos => 'Modelos: ';
+  String get dashboard_modelos => 'Modelos';
+
+  @override
+  String get dashboard_modelo_descargar => 'Descargar modelo';
+
+  @override
+  String get dashboard_modelo_descargando => 'descargando…';
 
   @override
   String get dashboard_modelo_descargado => 'descargado';

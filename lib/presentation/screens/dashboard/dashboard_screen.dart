@@ -20,16 +20,16 @@ const double _alturaCardGrid = 168;
 /// Pantalla principal tras el onboarding. Muestra un hero de bienvenida
 /// (DASH-8) y las tres funciones de la app como cards del `cardTheme` global
 /// con acentos `PaletaExt` (DASH-3): convertir archivos, procesar sueltos y
-/// la Biblioteca activa (DASH-1).
-class DashboardScreen extends ConsumerWidget {
+/// la Biblioteca activa (DASH-1). El estado del modelo NO se observa acá:
+/// vive aislado en `_CardEstadoModelo` (DASH-7).
+class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final t = AppLocalizations.of(context)!;
     final texto = Theme.of(context).textTheme;
     final colores = Theme.of(context).colorScheme;
-    final modelo = ref.watch(modeloControllerProvider);
     final dosColumnas = MediaQuery.sizeOf(context).width >= _umbralGrid;
 
     return Scaffold(
@@ -101,11 +101,7 @@ class DashboardScreen extends ConsumerWidget {
                   ],
                 ),
                 const SizedBox(height: 16),
-                _FilaEstadoModelo(
-                  estado: modelo,
-                  onVerificar: () =>
-                      ref.read(modeloControllerProvider.notifier).verificar(),
-                ),
+                const _CardEstadoModelo(),
               ],
             ),
           ),
@@ -198,22 +194,24 @@ class _CardFuncion extends StatelessWidget {
   }
 }
 
-/// Línea de estado del modelo: veredicto actual ("descargado" / "sin
-/// descargar") con un botón para re-verificar en disco. Discreta: texto chico
-/// sobre `onSurfaceVariant`. (La elevación a Card con CTA/progreso es WO-4b.)
-class _FilaEstadoModelo extends StatelessWidget {
-  const _FilaEstadoModelo({required this.estado, required this.onVerificar});
-
-  final ModeloEstado estado;
-  final VoidCallback onVerificar;
+/// Card de estado del modelo: único lugar del dashboard que observa
+/// `modeloControllerProvider` (DASH-7, watch aislado con `select()` implícito
+/// al vivir en su propio widget). Misma familia visual que `_CardFuncion`
+/// (cardTheme + PaletaExt, sin color/shape/elevación propios).
+///
+/// El contenido refleja el estado VERAZ (DASH-5): `descargando` muestra el
+/// progreso real (nunca "sin descargar"), `verificando` un spinner, `listo`
+/// "descargado" y `error` el mensaje con el CTA de reintento disponible.
+/// El CTA navega a `/modelo` con el origen (DASH-6, el redirect formal es
+/// WO-5) y el refresh mide ≥48×48 (DASH-10).
+class _CardEstadoModelo extends ConsumerWidget {
+  const _CardEstadoModelo();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final t = AppLocalizations.of(context)!;
-    final colores = Theme.of(context).colorScheme;
-    final estilo = Theme.of(
-      context,
-    ).textTheme.bodySmall?.copyWith(color: colores.onSurfaceVariant);
+    final texto = Theme.of(context).textTheme;
+    final estado = ref.watch(modeloControllerProvider);
 
     // Al arrancar con preferencia guardada, `listo` llega antes de que la
     // verificación de fondo termine: no mostrar el spinner sobre un
@@ -224,31 +222,83 @@ class _FilaEstadoModelo extends StatelessWidget {
       estadoTexto = t.dashboard_modelo_verificando;
     } else if (estado.listo) {
       estadoTexto = t.dashboard_modelo_descargado;
+    } else if (estado.descargando) {
+      estadoTexto = t.dashboard_modelo_descargando;
     } else {
       estadoTexto = t.dashboard_modelo_sin_descargar;
     }
 
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        if (verificando)
-          const SizedBox(
-            width: 16,
-            height: 16,
-            child: CircularProgressIndicator(strokeWidth: 2),
-          )
-        else
-          IconButton(
-            icon: const Icon(Icons.refresh, size: 16),
-            tooltip: t.refrescar,
-            onPressed: onVerificar,
-            visualDensity: VisualDensity.compact,
-            padding: EdgeInsets.zero,
-            constraints: const BoxConstraints(minWidth: 24, minHeight: 24),
-          ),
-        const SizedBox(width: 8),
-        Text('${t.dashboard_modelos}$estadoTexto', style: estilo),
-      ],
+    // CTA visible cuando el modelo no está listo y no hay nada en curso
+    // (DASH-6). Tras un error el CTA vuelve a estar disponible para
+    // reintentar (DASH-5).
+    final mostrarCta = !estado.listo && !estado.descargando && !verificando;
+
+    return Card(
+      margin: EdgeInsets.zero,
+      clipBehavior: Clip.antiAlias,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    // Con error, el mensaje ocupa el título (más veraz que un
+                    // "sin descargar" contradictorio al lado del error).
+                    estado.error != null && !estado.descargando
+                        ? t.modelo_error(estado.error!)
+                        : '${t.dashboard_modelos}: $estadoTexto',
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: texto.titleMedium,
+                  ),
+                ),
+                if (verificando)
+                  const SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                else if (!estado.descargando)
+                  IconButton(
+                    icon: const Icon(Icons.refresh),
+                    tooltip: t.refrescar,
+                    onPressed: () =>
+                        ref.read(modeloControllerProvider.notifier).verificar(),
+                    constraints: const BoxConstraints(
+                      minWidth: 48,
+                      minHeight: 48,
+                    ),
+                  ),
+              ],
+            ),
+            if (estado.descargando) ...[
+              const SizedBox(height: 12),
+              LinearProgressIndicator(value: estado.progreso),
+              const SizedBox(height: 8),
+              Text(
+                t.modelo_progreso(estado.bytesMb, estado.totalMb),
+                style: texto.bodySmall,
+              ),
+            ],
+            if (mostrarCta) ...[
+              const SizedBox(height: 12),
+              FilledButton.icon(
+                icon: const Icon(Icons.download),
+                label: Text(t.dashboard_modelo_descargar),
+                style: FilledButton.styleFrom(
+                  minimumSize: const Size(64, 48),
+                ),
+                onPressed: () =>
+                    context.push(Rutas.modelo, extra: Rutas.dashboard),
+              ),
+            ],
+          ],
+        ),
+      ),
     );
   }
 }

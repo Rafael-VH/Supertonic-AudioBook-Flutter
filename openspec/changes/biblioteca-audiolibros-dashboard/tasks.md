@@ -98,10 +98,10 @@ Chain strategy: pending
 
 **Objetivo**: `_CardEstadoModelo` con watch aislado, CTA descarga, progreso veraz, refresh ≥48dp, texto compuesto sin espacio embebido (DASH-5/6/7/10).
 
-- [ ] WO-4b.1 RED: en `dashboard_screen_test.dart` — progreso durante descarga sin "sin descargar" (DASH-5); error → mensaje + CTA disponible (DASH-5); CTA navega a `/modelo` con extra y desaparece descargando (DASH-6); refresh ≥48×48 vía `tester.getSize` (DASH-6/10); contador de builds: ticks no reconstruyen hero ni cards (DASH-7).
-- [ ] WO-4b.2 GREEN: `lib/presentation/screens/dashboard/dashboard_screen.dart` — `_FilaEstadoModelo`→`_CardEstadoModelo` `ConsumerWidget`; `DashboardScreen` deja de watch `modeloControllerProvider`; CTA `context.push(Rutas.modelo, extra: Rutas.dashboard)`; `LinearProgressIndicator` + `modelo_progreso`; refresh `BoxConstraints(minWidth: 48, minHeight: 48)`; texto `'${t.dashboard_modelos}: $estadoTexto'`.
-- [ ] WO-4b.3 GREEN: ARB es/en — `dashboard_modelos` → "Modelos" (sin ": "), +`dashboard_modelo_descargar` (mismo commit que el widget).
-- [ ] Done: tests verdes + analyze limpio.
+- [x] WO-4b.1 RED: en `dashboard_screen_test.dart` — progreso durante descarga sin "sin descargar" (DASH-5); error → mensaje + CTA disponible (DASH-5); CTA navega a `/modelo` con extra y desaparece descargando (DASH-6); refresh ≥48×48 vía `tester.getSize` (DASH-6/10); contador de builds: ticks no reconstruyen hero ni cards (DASH-7).
+- [x] WO-4b.2 GREEN: `lib/presentation/screens/dashboard/dashboard_screen.dart` — `_FilaEstadoModelo`→`_CardEstadoModelo` `ConsumerWidget`; `DashboardScreen` deja de watch `modeloControllerProvider`; CTA `context.push(Rutas.modelo, extra: Rutas.dashboard)`; `LinearProgressIndicator` + `modelo_progreso`; refresh `BoxConstraints(minWidth: 48, minHeight: 48)`; texto `'${t.dashboard_modelos}: $estadoTexto'`.
+- [x] WO-4b.3 GREEN: ARB es/en — `dashboard_modelos` → "Modelos" (sin ": "), +`dashboard_modelo_descargar` (mismo commit que el widget).
+- [x] Done: tests verdes + analyze limpio.
 
 ## WO-5 — Router: redirect generalizado (~180 líneas)
 
