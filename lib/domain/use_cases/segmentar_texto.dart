@@ -65,6 +65,17 @@ List<String> segmentarTexto(String textoPlano) {
     final subfrases = _dividirEnOraciones(p);
     var bufferFrase = '';
     for (final frase in subfrases) {
+      // Una frase que SOLA excede el límite no se puede acumular: se parte
+      // por palabras para no emitir un segmento de >maxCharsPerSegment (ni
+      // un vacío intermedio).
+      if (frase.length + 2 > maxCharsPerSegment) {
+        if (bufferFrase.isNotEmpty) {
+          resultado.add(bufferFrase.trim());
+          bufferFrase = '';
+        }
+        resultado.addAll(_partirFraseLarga(frase));
+        continue;
+      }
       if (bufferFrase.length + frase.length + 2 <= maxCharsPerSegment) {
         bufferFrase += '$frase. ';
       } else {
@@ -76,4 +87,44 @@ List<String> segmentarTexto(String textoPlano) {
   }
 
   return resultado;
+}
+
+/// Parte [frase] (que excede el límite de segmento) por palabras, devolviendo
+/// segmentos que no superan `maxCharsPerSegment`.
+///
+/// Si una sola palabra supera el límite (p.ej. una URL o un hash), se parte
+/// por caracteres como último recurso para nunca emitir un segmento más largo
+/// que el máximo que acepta el TTS.
+List<String> _partirFraseLarga(String frase) {
+  final palabras = frase.split(' ');
+  final partes = <String>[];
+  var buffer = '';
+  for (final palabra in palabras) {
+    if (buffer.isEmpty) {
+      buffer = palabra;
+    } else if (buffer.length + palabra.length + 1 <= maxCharsPerSegment) {
+      buffer += ' $palabra';
+    } else {
+      partes.add(buffer.trim());
+      buffer = palabra;
+    }
+    if (buffer.length > maxCharsPerSegment) {
+      partes.addAll(_partirPalabra(buffer));
+      buffer = '';
+    }
+  }
+  if (buffer.isNotEmpty) partes.add(buffer.trim());
+  return partes;
+}
+
+/// Parte una palabra sin espacios que sola excede el límite.
+List<String> _partirPalabra(String palabra) {
+  final partes = <String>[];
+  for (var i = 0; i < palabra.length; i += maxCharsPerSegment) {
+    final fin = i + maxCharsPerSegment < palabra.length
+        ? i + maxCharsPerSegment
+        : palabra.length;
+    partes.add(palabra.substring(i, fin));
+  }
+  return partes;
 }

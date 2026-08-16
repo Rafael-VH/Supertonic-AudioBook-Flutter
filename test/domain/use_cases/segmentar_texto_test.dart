@@ -36,5 +36,20 @@ void main() {
     test('el párrafo corto se mantiene entero', () {
       expect(segmentarTexto('Hola mundo.'), ['Hola mundo.']);
     });
+
+    test('una frase que excede el límite se parte sin emitir vacíos', () {
+      // Sin puntos: `_dividirEnOraciones` devuelve la frase entera como una
+      // sola subfrase de >maxCharsPerSegment.
+      final fraseLarga = 'a' * (maxCharsPerSegment + 100);
+      final resultado = segmentarTexto(fraseLarga);
+
+      expect(resultado, isNotEmpty);
+      expect(resultado, everyElement(isNotEmpty));
+      for (final segmento in resultado) {
+        expect(segmento.length, lessThanOrEqualTo(maxCharsPerSegment));
+      }
+      // No se pierde texto: la unión reconstruye la frase original.
+      expect(resultado.join(' ').replaceAll(' ', ''), fraseLarga);
+    });
   });
 }
