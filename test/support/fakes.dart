@@ -16,8 +16,7 @@ import 'package:supertonic_audiobook/domain/use_cases/procesar_archivo.dart';
 
 /// Preferencias en memoria para los tests (sin disco).
 class PreferenciasMemoria implements RepositorioPreferencias {
-  PreferenciasMemoria([Map<String, Object>? inicial])
-      : _datos = {...?inicial};
+  PreferenciasMemoria([Map<String, Object>? inicial]) : _datos = {...?inicial};
 
   final Map<String, Object> _datos;
 
@@ -97,13 +96,19 @@ class ExportadorFake implements ExportadorAudio {
 
   @override
   Future<void> escribirAudio(
-      List<Float32List> fragmentos, String ruta, String formato) async {
+    List<Float32List> fragmentos,
+    String ruta,
+    String formato,
+  ) async {
     escritos.add('$ruta.$formato');
   }
 
   @override
   Future<void> convertirDesdeWav(
-      String rutaWav, String rutaDestino, String formato) async {}
+    String rutaWav,
+    String rutaDestino,
+    String formato,
+  ) async {}
 
   @override
   Future<double> duracionAudio(String ruta) async => 1.0;
@@ -126,6 +131,10 @@ class ReproductorFake implements ReproductorAudio {
   bool pausado = false;
   bool detenido = false;
   bool reanudado = false;
+
+  /// True si el stream de estado tiene oyentes activos (el controller
+  /// cancela su suscripción al hacer dispose).
+  bool get tieneOyentes => _estado.hasListener;
 
   /// Emite un estado sin pasar por los métodos (simula el fin del audio o
   /// el inicio de la reproducción).
@@ -255,21 +264,23 @@ class ProcesarArchivoStub extends ProcesarArchivo {
   });
 
   final List<
-      ({
-        Archivo archivo,
-        String rutaBase,
-        int steps,
-        double speed,
-        List<String> formatos,
-        String lang,
-      })> llamadas = [];
+    ({
+      Archivo archivo,
+      String rutaBase,
+      int steps,
+      double speed,
+      List<String> formatos,
+      String lang,
+    })
+  >
+  llamadas = [];
 
   /// Si se define, `procesar` espera a que se complete antes de avanzar.
   Future<void> Function()? espera;
 
   /// Llamado antes de resolverse, para inyectar onProgreso/debeDetenerse.
   void Function(void Function(int, int) onProgreso, bool Function() detener)?
-      alProcesar;
+  alProcesar;
 
   /// Resultado devuelto por `procesar` (por defecto `ok`).
   ResultadoProceso resultado = ResultadoProceso.ok;

@@ -72,9 +72,9 @@ Chain strategy: pending
 
 **Objetivo**: estado de biblioteca con toggle play/pausa/reanudar, cambio de tile, error → idle y detener al salir (D3/BIB-3/BIB-5).
 
-- [ ] WO-2.1 RED: `test/presentation/controllers/biblioteca_controller_test.dart` — build `carpeta_out`/fallback; toggle pausa→reanuda; cambio de tile; error de `reproducir` → idle+error; dispose cancela sub y llama `detener`.
-- [ ] WO-2.2 GREEN: `lib/presentation/controllers/biblioteca_controller.dart` (nuevo: `BibliotecaEstado` + copyWith, `BibliotecaController`, `bibliotecaControllerProvider`; `ref.listen` del stream; `ref.onDispose` cancela sub + `detener`).
-- [ ] Done: tests verdes + analyze limpio + grep sin `just_audio` en `lib/presentation` (BIB-6).
+- [x] WO-2.1 RED: `test/presentation/controllers/biblioteca_controller_test.dart` — build `carpeta_out`/fallback; toggle pausa→reanuda; cambio de tile; error de `reproducir` → idle+error; dispose cancela sub y llama `detener`.
+- [x] WO-2.2 GREEN: `lib/presentation/controllers/biblioteca_controller.dart` (nuevo: `BibliotecaEstado` + copyWith, `BibliotecaController`, `bibliotecaControllerProvider`; `ref.listen` del stream; `ref.onDispose` cancela sub + `detener`).
+- [x] Done: tests verdes + analyze limpio + grep sin `just_audio` en `lib/presentation` (BIB-6).
 
 ## WO-3 — BibliotecaScreen + ruta + claves biblioteca_* (~310 líneas)
 
