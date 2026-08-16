@@ -18,6 +18,8 @@ class SintetizarMuestra {
 
   /// Sintetiza [texto] con los pasos/velocidad por defecto del producto y
   /// escribe el resultado en [ruta]. Devuelve [ruta] (exista o no el archivo).
+  /// Lanza la causa real si la síntesis falla: el llamador es quien decide
+  /// cómo reportarla al usuario.
   Future<String> generar(
     String texto, {
     String lang = defaultLang,
@@ -34,6 +36,7 @@ class SintetizarMuestra {
       _log.i('  → Muestra escrita en $ruta (${wav.length} muestras).');
     } catch (exc) {
       _log.e('Error al sintetizar la muestra: $exc');
+      rethrow;
     }
     return ruta;
   }

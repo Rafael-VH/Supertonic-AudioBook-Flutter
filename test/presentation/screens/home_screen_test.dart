@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -231,5 +232,49 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.textContaining('Cancelar'), findsNothing);
+  });
+
+  testWidgets('Procesar queda deshabilitado mientras se prueba la voz',
+      (tester) async {
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+      const MethodChannel('plugins.flutter.io/path_provider'),
+      (call) async => 'C:/temp',
+    );
+    final motor = MotorFake()..esperaVoz = Completer<void>();
+    await _pumpMovil(
+      tester,
+      repositorio: RepositorioArchivosFake(const [
+        Archivo('C:/libros/capitulo1.md'),
+      ]),
+      motor: motor,
+    );
+
+    // Abre el acordeón de opciones y deja la muestra en vuelo: probandoVoz
+    // = true mientras cambiarVoz está bloqueado.
+    await tester.tap(find.text('Opciones de síntesis'));
+    await tester.pumpAndSettle();
+    await tester.ensureVisible(find.text('Escuchar'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Escuchar'));
+    await tester.pump();
+    expect(find.textContaining('Cancelar'), findsNothing);
+    final boton = tester.widget<FilledButton>(
+      find.ancestor(
+        of: find.text('Procesar'),
+        matching: find.byType(FilledButton),
+      ),
+    );
+    expect(boton.enabled, isFalse);
+
+    // Al terminar la muestra, Procesar vuelve a estar disponible.
+    motor.esperaVoz!.complete();
+    await tester.pumpAndSettle();
+    final boton2 = tester.widget<FilledButton>(
+      find.ancestor(
+        of: find.text('Procesar'),
+        matching: find.byType(FilledButton),
+      ),
+    );
+    expect(boton2.enabled, isTrue);
   });
 }

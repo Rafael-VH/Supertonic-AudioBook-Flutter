@@ -276,6 +276,16 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
+  String log_archivo_omitido(int i, int n, String nombre) {
+    return '⏭ Archivo $i/$n omitido: $nombre (sin contenido de audio).';
+  }
+
+  @override
+  String log_archivo_error(int i, int n, String nombre) {
+    return '✖ Archivo $i/$n con error: $nombre (no se pudo leer).';
+  }
+
+  @override
   String log_completado(int n, String tiempo) {
     return '✔ PROCESAMIENTO COMPLETADO: $n archivo(s) en $tiempo.';
   }

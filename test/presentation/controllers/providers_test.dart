@@ -113,6 +113,7 @@ void main() {
         configTtsProvider.overrideWithValue((
           silencioMuestras: silenceSamples,
           memoriaSafeMarginBytes: memoriaSafeMarginBytes,
+          topeMovilBytes: memoriaSafeMarginBytesMovil,
         )),
       ]);
       addTearDown(contenedor.dispose);
@@ -120,6 +121,7 @@ void main() {
       final config = contenedor.read(configTtsProvider);
       expect(config.silencioMuestras, 26460);
       expect(config.memoriaSafeMarginBytes, 524288000);
+      expect(config.topeMovilBytes, 67108864);
     });
 
     test(
@@ -142,6 +144,7 @@ void main() {
         configTtsProvider.overrideWithValue((
           silencioMuestras: silenceSamples,
           memoriaSafeMarginBytes: memoriaSafeMarginBytes,
+          topeMovilBytes: memoriaSafeMarginBytesMovil,
         )),
       ]);
       addTearDown(contenedor.dispose);

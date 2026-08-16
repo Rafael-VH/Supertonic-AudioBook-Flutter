@@ -129,10 +129,17 @@ class ModeloGestorFake implements ModeloGestor {
   int cancelaciones = 0;
   Completer<void>? espera;
 
+  /// Si se define, `verificarDisponible` espera antes de resolver (para
+  /// simular la carrera con una descarga iniciada mientras se verifica).
+  Completer<void>? verificacionLenta;
+
   static const int _mb = 1 << 20;
 
   @override
-  Future<bool> verificarDisponible() async => disponible;
+  Future<bool> verificarDisponible() async {
+    if (verificacionLenta != null) await verificacionLenta!.future;
+    return disponible;
+  }
 
   @override
   Future<Directory> asegurarModelo({
@@ -198,6 +205,7 @@ class ProcesarArchivoStub extends ProcesarArchivo {
     required super.exportador,
     required super.silencioMuestras,
     required super.memoriaSafeMarginBytes,
+    required super.topeMovilBytes,
   });
 
   final List<
@@ -217,8 +225,11 @@ class ProcesarArchivoStub extends ProcesarArchivo {
   void Function(void Function(int, int) onProgreso, bool Function() detener)?
       alProcesar;
 
+  /// Resultado devuelto por `procesar` (por defecto `ok`).
+  ResultadoProceso resultado = ResultadoProceso.ok;
+
   @override
-  Future<void> procesar(
+  Future<ResultadoProceso> procesar(
     Archivo archivo,
     String rutaBase, {
     required int steps,
@@ -240,5 +251,6 @@ class ProcesarArchivoStub extends ProcesarArchivo {
     if (alProcesar != null && onProgreso != null && debeDetenerse != null) {
       alProcesar!(onProgreso, debeDetenerse);
     }
+    return resultado;
   }
 }

@@ -31,6 +31,7 @@ void main() {
       exportador: exportador,
       silencioMuestras: 0,
       memoriaSafeMarginBytes: 0,
+      topeMovilBytes: 0,
     );
     picker = FilePickerFake(
       rutas == null

@@ -11,7 +11,11 @@ import 'package:supertonic_audiobook/domain/use_cases/sintetizar_muestra.dart';
 
 /// Parámetros técnicos del pipeline de síntesis (plan §5.1), inyectados desde
 /// la composición (`main.dart`). El caso de uso los recibe en el constructor.
-typedef TtsConfig = ({int silencioMuestras, int memoriaSafeMarginBytes});
+typedef TtsConfig = ({
+  int silencioMuestras,
+  int memoriaSafeMarginBytes,
+  int topeMovilBytes,
+});
 
 /// Contratos de `domain/` inyectados desde `main.dart` (composición).
 ///
@@ -70,6 +74,7 @@ final procesarArchivoProvider = Provider<ProcesarArchivo>((ref) {
     exportador: ref.watch(exportadorAudioProvider),
     silencioMuestras: config.silencioMuestras,
     memoriaSafeMarginBytes: config.memoriaSafeMarginBytes,
+    topeMovilBytes: config.topeMovilBytes,
   );
 });
 

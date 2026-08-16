@@ -8,6 +8,7 @@ import 'package:permission_handler/permission_handler.dart';
 
 import 'package:supertonic_audiobook/domain/constants/producto.dart';
 import 'package:supertonic_audiobook/domain/entities/archivo.dart';
+import 'package:supertonic_audiobook/domain/use_cases/procesar_archivo.dart';
 import 'package:supertonic_audiobook/presentation/constants/muestra_voz.dart';
 import 'package:supertonic_audiobook/presentation/controllers/providers.dart';
 import 'package:supertonic_audiobook/presentation/l10n/app_localizations.dart';
@@ -220,6 +221,29 @@ class HomeController extends Notifier<HomeEstado> {
     );
   }
 
+  /// Agrega archivos elegidos por el buscador a la selección existente
+  /// (botón **Agregar**), fusionando sin duplicados por ruta y preservando
+  /// las marcas previas.
+  void agregarArchivosExternos(List<Archivo> archivos) {
+    final porRuta = <String, Archivo>{
+      for (final a in state.archivos) a.ruta: a,
+      for (final a in archivos) a.ruta: a,
+    };
+    final fusionados = porRuta.values.toList();
+    final rutas = porRuta.keys.toSet();
+    state = state.copyWith(
+      archivos: fusionados,
+      seleccion: state.seleccion.where(rutas.contains).toSet(),
+      ejecutando: false,
+      cancelar: false,
+      progresoActual: 0,
+      progresoTotal: 0,
+      estado: '',
+      lineasLog: const [],
+      clearSnackbar: true,
+    );
+  }
+
   /// Quita un archivo externo de la lista (botón quitar de la selección).
   void quitarArchivoExterno(String ruta) {
     cargarArchivosExternos(
@@ -307,9 +331,11 @@ class HomeController extends Notifier<HomeEstado> {
   }
 
   /// Inicia el procesamiento de los archivos seleccionados (o todos si no
-  /// hay marcas), persistiendo antes las claves de §6.3.
+  /// hay marcas), persistiendo antes las claves de §6.3. Se bloquea mientras
+  /// hay una corrida en curso o una muestra de voz reproduciéndose: el motor
+  /// TTS no soporta síntesis concurrentes.
   Future<void> procesar(AppLocalizations t) async {
-    if (state.ejecutando) return;
+    if (state.ejecutando || state.probandoVoz) return;
 
     _guardarPreferencias();
 
@@ -381,7 +407,7 @@ class HomeController extends Notifier<HomeEstado> {
         );
         _appendLog(t.log_archivo(i + 1, totalArchivos, archivo.nombre));
         try {
-          await useCase.procesar(
+          final resultado = await useCase.procesar(
             archivo,
             '$salida${Platform.pathSeparator}${archivo.titulo}',
             steps: steps,
@@ -391,8 +417,18 @@ class HomeController extends Notifier<HomeEstado> {
             onProgreso: (actual, total) => _onProgreso(t, actual, total),
             debeDetenerse: () => state.cancelar,
           );
-          _appendLog(t.log_archivo_fin(i + 1, totalArchivos));
-          exitos++;
+          switch (resultado) {
+            case ResultadoProceso.ok:
+              _appendLog(t.log_archivo_fin(i + 1, totalArchivos));
+              exitos++;
+            case ResultadoProceso.omitido:
+              _appendLog(
+                  t.log_archivo_omitido(i + 1, totalArchivos, archivo.nombre));
+            case ResultadoProceso.error:
+              errores++;
+              _appendLog(
+                  t.log_archivo_error(i + 1, totalArchivos, archivo.nombre));
+          }
         } catch (exc) {
           errores++;
           _appendLog('Error en ${archivo.nombre}: $exc');

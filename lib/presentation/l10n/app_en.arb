@@ -178,6 +178,22 @@
       "n": {"type": "int"}
     }
   },
+  "log_archivo_omitido": "⏭ File {i}/{n} skipped: {nombre} (no audio content).",
+  "@log_archivo_omitido": {
+    "placeholders": {
+      "i": {"type": "int"},
+      "n": {"type": "int"},
+      "nombre": {"type": "String"}
+    }
+  },
+  "log_archivo_error": "✖ File {i}/{n} failed: {nombre} (could not be read).",
+  "@log_archivo_error": {
+    "placeholders": {
+      "i": {"type": "int"},
+      "n": {"type": "int"},
+      "nombre": {"type": "String"}
+    }
+  },
   "log_completado": "✔ PROCESSING COMPLETED: {n} file(s) in {tiempo}.",
   "@log_completado": {
     "placeholders": {

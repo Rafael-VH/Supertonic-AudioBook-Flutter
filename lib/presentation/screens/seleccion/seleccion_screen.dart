@@ -52,7 +52,7 @@ class _SeleccionScreenState extends ConsumerState<SeleccionScreen> {
       if (archivos.isNotEmpty) {
         ref
             .read(seleccionControllerProvider.notifier)
-            .cargarArchivosExternos(archivos);
+            .agregarArchivosExternos(archivos);
       }
     } catch (_) {
       if (!mounted) return;

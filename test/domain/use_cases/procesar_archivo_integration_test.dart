@@ -75,6 +75,7 @@ ProcesarArchivo _caso(
     exportador: ExportadorAudioFfmpeg(),
     silencioMuestras: silencio,
     memoriaSafeMarginBytes: margenMemoria,
+    topeMovilBytes: margenMemoria,
   );
 }
 
@@ -96,7 +97,7 @@ void main() {
       final caso = _caso(motor, _FakeRepositorio('${_parrafoLargo()}\n\n${_parrafoLargo()}'));
       final progresos = <int>[];
 
-      await caso.procesar(
+      final resultado = await caso.procesar(
         Archivo('${temp.path}/in.md'),
         '${temp.path}/salida',
         steps: 5,
@@ -105,6 +106,7 @@ void main() {
         onProgreso: (procesados, total) => progresos.add(procesados),
       );
 
+      expect(resultado, ResultadoProceso.ok);
       final ruta = '${temp.path}/salida.wav';
       expect(File(ruta).existsSync(), isTrue);
       // 2 segmentos de 1 s = 2.0 s (sin silencio intermedio).
@@ -149,7 +151,7 @@ void main() {
               '${_parrafoLargo()}\n\n${_parrafoLargo()}\n\n${_parrafoLargo()}'));
       var vueltas = 0;
 
-      await caso.procesar(
+      final resultado = await caso.procesar(
         Archivo('${temp.path}/in.md'),
         '${temp.path}/salida',
         steps: 5,
@@ -159,10 +161,39 @@ void main() {
       );
 
       // Se sintetizó 1 segmento; el resto nunca se procesó.
+      expect(resultado, ResultadoProceso.ok);
       expect(motor.llamadas, 1);
       final ruta = '${temp.path}/salida.wav';
       expect(File(ruta).existsSync(), isTrue);
       expect(duracionWav(ruta), closeTo(1.0, 1e-6));
+    });
+
+    test('cancelar conserva el output previo y publica solo destinos nuevos',
+        () async {
+      // Output previo COMPLETO (9 s) de una corrida anterior.
+      final previo = '${temp.path}/salida.wav';
+      escribirWav([_audio(9.0)], previo);
+
+      final motor = _FakeMotor();
+      final caso = _caso(
+          motor,
+          _FakeRepositorio(
+              '${_parrafoLargo()}\n\n${_parrafoLargo()}\n\n${_parrafoLargo()}'));
+      var vueltas = 0;
+
+      await caso.procesar(
+        Archivo('${temp.path}/in.md'),
+        '${temp.path}/salida',
+        steps: 5,
+        speed: 1.1,
+        formatos: ['wav'],
+        debeDetenerse: () => ++vueltas > 1,
+      );
+
+      // Solo se sintetizó 1 segmento (1 s) y el destino YA existía: la
+      // cancelación no debe pisar el audio previo con el truncado.
+      expect(motor.llamadas, 1);
+      expect(duracionWav(previo), closeTo(9.0, 1e-6));
     });
 
     test('vuelca a disco por límite de memoria y arma el WAV final', () async {
@@ -187,38 +218,41 @@ void main() {
       final motor = _FakeMotor();
       // Un bloque de código se elimina completo → el texto queda vacío.
       final caso = _caso(motor, _FakeRepositorio('```\nbloque\n```'));
-      await caso.procesar(
+      final resultado = await caso.procesar(
         Archivo('${temp.path}/in.md'),
         '${temp.path}/salida',
         steps: 5,
         speed: 1.1,
         formatos: ['wav'],
       );
+      expect(resultado, ResultadoProceso.omitido);
       expect(motor.llamadas, 0);
       expect(File('${temp.path}/salida.wav').existsSync(), isFalse);
     });
 
-    test('no lanza si el archivo de entrada no se puede leer', () async {
+    test('devuelve error si el archivo de entrada no se puede leer', () async {
       final caso = _caso(_FakeMotor(), _FakeRepositorio('ERROR'));
-      await caso.procesar(
+      final resultado = await caso.procesar(
         Archivo('${temp.path}/in.md'),
         '${temp.path}/salida',
         steps: 5,
         speed: 1.1,
         formatos: ['wav'],
       );
+      expect(resultado, ResultadoProceso.error);
       expect(File('${temp.path}/salida.wav').existsSync(), isFalse);
     });
 
     test('si el motor no genera audio, no publica nada', () async {
       final caso = _caso(_FakeMotor(vaciar: true), _FakeRepositorio('Texto.'));
-      await caso.procesar(
+      final resultado = await caso.procesar(
         Archivo('${temp.path}/in.md'),
         '${temp.path}/salida',
         steps: 5,
         speed: 1.1,
         formatos: ['wav'],
       );
+      expect(resultado, ResultadoProceso.omitido);
       expect(File('${temp.path}/salida.wav').existsSync(), isFalse);
     });
 
@@ -261,15 +295,17 @@ void main() {
       expect(duracionWav(ruta), closeTo(1.0, 1e-6));
     });
 
-    test('con el motor caído devuelve la ruta sin crear archivo', () async {
+    test('con el motor caído relanza el error sin crear archivo', () async {
       final caso = SintetizarMuestra(
         motor: _FakeMotor(fallar: true),
         exportador: exportador,
       );
       final ruta = '${temp.path}/muestra.wav';
-      final resultado = await caso.generar('Hola', ruta: ruta);
 
-      expect(resultado, ruta);
+      expect(
+        () => caso.generar('Hola', ruta: ruta),
+        throwsA(isA<Exception>()),
+      );
       expect(File(ruta).existsSync(), isFalse);
     });
 

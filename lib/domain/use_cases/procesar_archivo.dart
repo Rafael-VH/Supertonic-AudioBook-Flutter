@@ -13,6 +13,14 @@ import 'package:supertonic_audiobook/domain/use_cases/segmentar_texto.dart';
 
 final _log = Logger();
 
+/// Resultado de convertir un archivo con [ProcesarArchivo.procesar].
+///
+/// Un archivo que no se pudo leer es un [error] (el caller debe reportarlo);
+/// uno que queda sin contenido tras limpiar se [omitido] (no cuenta como
+/// éxito ni como error). Las excepciones de síntesis/exportación siguen
+/// propagándose: el caller las cuenta como errores.
+enum ResultadoProceso { ok, omitido, error }
+
 /// Orquesta la conversión de un archivo Markdown a audios.
 ///
 /// Paridad con `app/domain/use_cases/procesar_archivo.py`: depende SOLO de
@@ -25,6 +33,7 @@ class ProcesarArchivo {
     required this._exportador,
     required this._silencioMuestras,
     required this._memoriaSafeMarginBytes,
+    required this._topeMovilBytes,
   });
 
   final MotorTts _motor;
@@ -33,14 +42,46 @@ class ProcesarArchivo {
   final int _silencioMuestras;
   final int _memoriaSafeMarginBytes;
 
+  /// Presupuesto de RAM para retener fragmentos en móvil (inyectado desde la
+  /// composición; el dominio no conoce valores de `data/`).
+  final int _topeMovilBytes;
+
+  /// Presupuesto efectivo de RAM para retener fragmentos antes de volcar a
+  /// disco. En móvil se usa [topeMovil] (heap chico → OOM con 500 MiB);
+  /// en desktop se mantiene [memoriaSafeMarginBytes]. Pura: se testea sin
+  /// device.
+  static int presupuestoMemoria({
+    required int memoriaSafeMarginBytes,
+    required bool esMovil,
+    required int topeMovil,
+  }) {
+    if (!esMovil) return memoriaSafeMarginBytes;
+    return memoriaSafeMarginBytes < topeMovil
+        ? memoriaSafeMarginBytes
+        : topeMovil;
+  }
+
+  /// Verdadero en Android/iOS: el heap disponible es mucho menor que el de
+  /// desktop y acumular cientos de MiB de Float32 provoca OOM.
+  bool get _esMovil =>
+      Platform.isAndroid || Platform.isIOS;
+
   /// Convierte [archivo] en audios en los formatos pedidos.
+  ///
+  /// Devuelve [ResultadoProceso.ok] si se publicó al menos una salida;
+  /// [ResultadoProceso.error] si el archivo no se pudo leer (sin lanzar, el
+  /// resultado comunica el fallo) y [ResultadoProceso.omitido] si tras
+  /// limpiar no quedó contenido o el motor no generó audio. Las demás fallas
+  /// (motor, exportador, publicación) se lanzan y el caller las cuenta.
   ///
   /// Cada salida se publica por separado y de forma atómica (renombrado de
   /// archivo temporal), solo después de generarla por completo. Si la corrida
   /// se cancela o falla durante la síntesis, el output previo de cada formato
-  /// queda intacto. En la fase de publicación el WAV va último: si falla un
-  /// formato no-WAV, el WAV previo no se reemplaza.
-  Future<void> procesar(
+  /// queda intacto: al cancelar solo se publican salidas cuyo destino no
+  /// existía previamente, para no pisar audio completo con audio truncado.
+  /// En la fase de publicación el WAV va último: si falla un formato no-WAV,
+  /// el WAV previo no se reemplaza.
+  Future<ResultadoProceso> procesar(
     Archivo archivo,
     String rutaBase, {
     required int steps,
@@ -60,12 +101,12 @@ class ProcesarArchivo {
       textoPlano = limpiarMarkdown(_archivos.leerArchivo(archivo.ruta));
     } catch (exc) {
       _log.e("No se pudo leer '${archivo.ruta}': $exc");
-      return;
+      return ResultadoProceso.error;
     }
 
     if (textoPlano.trim().isEmpty) {
       _log.w('El archivo está vacío después de limpiar. Se omite.');
-      return;
+      return ResultadoProceso.omitido;
     }
 
     // --- Segmentar ---
@@ -90,6 +131,11 @@ class ProcesarArchivo {
 
     // --- Sintetizar incrementalmente ---
     _log.i('Generando voz sintética...');
+    final presupuesto = presupuestoMemoria(
+      memoriaSafeMarginBytes: _memoriaSafeMarginBytes,
+      esMovil: _esMovil,
+      topeMovil: _topeMovilBytes,
+    );
     final fragmentos = <Float32List>[];
     var memoriaAcumulada = 0;
     var parcialEscrito = false;
@@ -114,7 +160,7 @@ class ProcesarArchivo {
         memoriaAcumulada += _silencioMuestras * 4;
 
         // Si acumulamos mucha RAM, volcamos a disco.
-        if (memoriaAcumulada > _memoriaSafeMarginBytes) {
+        if (memoriaAcumulada > presupuesto) {
           _log.i('Volcando a disco por límite de memoria...');
           await _exportador.wavAppend(fragmentos, rutaWavTrabajo);
           fragmentos.clear();
@@ -129,7 +175,7 @@ class ProcesarArchivo {
 
       if (fragmentos.isEmpty && !parcialEscrito) {
         _log.e('No se generó ningún fragmento de audio.');
-        return;
+        return ResultadoProceso.omitido;
       }
 
       // --- Exportar ---
@@ -156,8 +202,15 @@ class ProcesarArchivo {
       }
 
       // Fase 2: publicar. El WAV se publica al final: si un formato falla,
-      // no queda un WAV nuevo con el resto de los formatos viejos.
+      // no queda un WAV nuevo con el resto de los formatos viejos. Al
+      // cancelar, un destino que ya existía (de una corrida anterior) se
+      // conserva: nunca se pisa audio completo con el truncado de la corrida
+      // cancelada (semántica prometida en el docstring).
       for (final par in ordenPublicacion(salidas)) {
+        if (cancelado && File(par.$2).existsSync()) {
+          _log.w("Cancelado: se conserva el output previo '${par.$2}'.");
+          continue;
+        }
         _publicar(par.$1, par.$2, temporales);
       }
     } finally {
@@ -175,6 +228,7 @@ class ProcesarArchivo {
       final duracion = await _exportador.duracionAudio(ruta);
       _log.i('  + ${File(ruta).uri.pathSegments.last} (${formato.toUpperCase()}): ${duracion.toStringAsFixed(1)} s');
     }
+    return ResultadoProceso.ok;
   }
 
   /// Publica [origen] como [destino] solo en éxito.

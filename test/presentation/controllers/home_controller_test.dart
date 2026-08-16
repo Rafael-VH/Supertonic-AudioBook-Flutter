@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:supertonic_audiobook/domain/entities/archivo.dart';
+import 'package:supertonic_audiobook/domain/use_cases/procesar_archivo.dart';
 import 'package:supertonic_audiobook/presentation/controllers/home_controller.dart';
 import 'package:supertonic_audiobook/presentation/controllers/providers.dart';
 import 'package:supertonic_audiobook/presentation/controllers/seleccion_controller.dart';
@@ -49,6 +50,7 @@ void main() {
         exportador: exportador,
         silencioMuestras: 0,
         memoriaSafeMarginBytes: 0,
+        topeMovilBytes: 0,
       );
     }
 
@@ -75,6 +77,7 @@ void main() {
         exportador: exportador,
         silencioMuestras: 0,
         memoriaSafeMarginBytes: 0,
+        topeMovilBytes: 0,
       );
 
       final container = crearContenedor();
@@ -375,6 +378,65 @@ void main() {
       expect(reproductor.rutas, hasLength(1));
       expect(motor.vocesPedidas, ['M1']);
     });
+
+    test('procesar se bloquea mientras probandoVoz', () async {
+      baseFakes(archivos: const [Archivo('C:/libros/a.md')]);
+      final container = crearContenedor();
+      final controller = container.read(homeControllerProvider.notifier);
+      final t = es();
+
+      // Deja la muestra en vuelo: cambiarVoz queda esperando y la corrida
+      // del TTS no debe solaparse con la síntesis del procesamiento.
+      motor.esperaVoz = Completer<void>();
+      final futuroEscuchar = controller.escuchar(t);
+      await Future<void>.delayed(Duration.zero);
+      expect(container.read(homeControllerProvider).probandoVoz, isTrue);
+
+      await controller.procesar(t);
+
+      expect(procesador.llamadas, isEmpty);
+      expect(container.read(homeControllerProvider).ejecutando, isFalse);
+
+      motor.esperaVoz!.complete();
+      await futuroEscuchar;
+    });
+
+    test('procesar cuenta omitidos sin éxito ni error', () async {
+      baseFakes(archivos: const [
+        Archivo('C:/libros/a.md'),
+        Archivo('C:/libros/b.md'),
+      ]);
+      final container = crearContenedor();
+      final controller = container.read(homeControllerProvider.notifier);
+      final t = es();
+      procesador.resultado = ResultadoProceso.omitido;
+
+      await controller.procesar(t);
+
+      final estado = container.read(homeControllerProvider);
+      expect(estado.estado, t.estado_listo_n(0, t.tiempo_seg(0)));
+      expect(estado.lineasLog, contains(t.log_archivo_omitido(1, 2, 'a.md')));
+      expect(estado.lineasLog, contains(t.log_archivo_omitido(2, 2, 'b.md')));
+      expect(estado.lineasLog, isNot(contains(t.log_archivo_fin(1, 2))));
+    });
+
+    test('procesar cuenta errores devueltos por el use case', () async {
+      baseFakes(archivos: const [
+        Archivo('C:/libros/a.md'),
+        Archivo('C:/libros/b.md'),
+      ]);
+      final container = crearContenedor();
+      final controller = container.read(homeControllerProvider.notifier);
+      final t = es();
+      procesador.resultado = ResultadoProceso.error;
+
+      await controller.procesar(t);
+
+      final estado = container.read(homeControllerProvider);
+      expect(estado.estado, t.estado_con_errores(0, 2, 2));
+      expect(estado.snackbar?.esError, isTrue);
+      expect(estado.lineasLog, contains(t.log_archivo_error(1, 2, 'a.md')));
+    });
   });
 
   group('SeleccionController', () {
@@ -409,6 +471,7 @@ void main() {
         exportador: exportador,
         silencioMuestras: 0,
         memoriaSafeMarginBytes: 0,
+        topeMovilBytes: 0,
       );
     }
 

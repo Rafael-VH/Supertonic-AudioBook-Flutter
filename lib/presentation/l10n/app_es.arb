@@ -178,6 +178,22 @@
       "n": {"type": "int"}
     }
   },
+  "log_archivo_omitido": "⏭ Archivo {i}/{n} omitido: {nombre} (sin contenido de audio).",
+  "@log_archivo_omitido": {
+    "placeholders": {
+      "i": {"type": "int"},
+      "n": {"type": "int"},
+      "nombre": {"type": "String"}
+    }
+  },
+  "log_archivo_error": "✖ Archivo {i}/{n} con error: {nombre} (no se pudo leer).",
+  "@log_archivo_error": {
+    "placeholders": {
+      "i": {"type": "int"},
+      "n": {"type": "int"},
+      "nombre": {"type": "String"}
+    }
+  },
   "log_completado": "✔ PROCESAMIENTO COMPLETADO: {n} archivo(s) en {tiempo}.",
   "@log_completado": {
     "placeholders": {

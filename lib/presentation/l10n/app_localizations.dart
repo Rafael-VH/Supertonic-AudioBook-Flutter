@@ -548,6 +548,18 @@ abstract class AppLocalizations {
   /// **'✔ File {i}/{n} finished.'**
   String log_archivo_fin(int i, int n);
 
+  /// No description provided for @log_archivo_omitido.
+  ///
+  /// In en, this message translates to:
+  /// **'⏭ File {i}/{n} skipped: {nombre} (no audio content).'**
+  String log_archivo_omitido(int i, int n, String nombre);
+
+  /// No description provided for @log_archivo_error.
+  ///
+  /// In en, this message translates to:
+  /// **'✖ File {i}/{n} failed: {nombre} (could not be read).'**
+  String log_archivo_error(int i, int n, String nombre);
+
   /// No description provided for @log_completado.
   ///
   /// In en, this message translates to:

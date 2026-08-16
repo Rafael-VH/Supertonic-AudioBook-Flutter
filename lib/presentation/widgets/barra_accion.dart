@@ -47,7 +47,9 @@ class BarraAccion extends StatelessWidget {
                 children: [
                   Expanded(
                     child: FilledButton.icon(
-                      onPressed: estado.ejecutando
+                      // Bloqueado durante la ejecución o mientras se prueba
+                      // la voz: el motor TTS no soporta síntesis concurrentes.
+                      onPressed: (estado.ejecutando || estado.probandoVoz)
                           ? null
                           : (onProcesar ?? () => controller.procesar(t)),
                       icon: const Icon(Icons.play_arrow),

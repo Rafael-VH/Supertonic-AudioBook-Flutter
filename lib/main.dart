@@ -54,6 +54,7 @@ Future<void> main() async {
         configTtsProvider.overrideWithValue((
           silencioMuestras: silenceSamples,
           memoriaSafeMarginBytes: memoriaSafeMarginBytes,
+          topeMovilBytes: memoriaSafeMarginBytesMovil,
         )),
         carpetaBaseProvider.overrideWithValue(docsBase),
         modeloManagerProvider.overrideWithValue(ModeloManager()),
