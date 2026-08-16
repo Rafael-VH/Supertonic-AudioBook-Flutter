@@ -84,12 +84,16 @@ void main() {
     expect(adapter.rangos, [null]);
   });
 
-  test('un .part corrupto se descarta y se reintenta desde cero', () async {
+  test(
+      'un .part del tamaño completo y corrupto se descarta y se baja desde '
+      'cero', () async {
     final json = _jsonDe(8253);
     final adapter = _AdaptadorFalso(json);
 
-    // Descarga previa truncada: el .part tiene el tamaño correcto pero el
-    // contenido es basura (no parsea como JSON).
+    // Descarga previa corrupta de tamaño íntegro (p. ej. app cerrada tras una
+    // bajada inválida): reanudar con `Range: bytes=8253-` es insatisfacible
+    // (el servidor respondería 416) y el fallo se repetiría sin recuperación.
+    // El .part debe descartarse y volver a bajarse desde cero.
     final part = destinoArchivo('onnx/tts.json.part');
     await part.parent.create(recursive: true);
     await part.writeAsString('x' * 8253);
@@ -105,8 +109,56 @@ void main() {
     expect(destino.existsSync(), isTrue);
     expect(destino.readAsStringSync(), json);
     expect(part.existsSync(), isFalse);
+    // Sin Range: el .part íntegro se descartó antes de intentar resumir.
+    expect(adapter.rangos, [null]);
+  });
+
+  test('un .part parcial corrupto se descarta tras verificar y se reintenta',
+      () async {
+    final json = _jsonDe(8253);
+    final adapter = _AdaptadorFalso(json);
+
+    // Descarga previa truncada (parcial): se reanuda con Range, la
+    // verificación descubre el contenido corrupto y se reintenta desde cero.
+    final part = destinoArchivo('onnx/tts.json.part');
+    await part.parent.create(recursive: true);
+    await part.writeAsString('x' * 100);
+
+    final manager = ModeloManager(
+      dio: Dio()..httpClientAdapter = adapter,
+      archivos: const [jsonConfig],
+    );
+
+    await manager.asegurarModelo();
+
+    final destino = destinoArchivo('onnx/tts.json');
+    expect(destino.existsSync(), isTrue);
+    expect(destino.readAsStringSync(), json);
+    expect(part.existsSync(), isFalse);
     // 1er intento resumiendo (Range) + 2º intento completo desde cero.
-    expect(adapter.rangos, ['bytes=8253-', null]);
+    expect(adapter.rangos, ['bytes=100-', null]);
+  });
+
+  test('corrupción persistente tras 3 intentos lanza y no publica el destino',
+      () async {
+    // El servidor devuelve SIEMPRE basura del tamaño correcto: cada intento
+    // descarga, la verificación falla y el .part se descarta. Al agotar los
+    // reintentos la corrupción debe ser un error visible, no un éxito mudo.
+    final adapter = _AdaptadorFalso('x' * 8253);
+    final manager = ModeloManager(
+      dio: Dio()..httpClientAdapter = adapter,
+      archivos: const [jsonConfig],
+    );
+
+    await expectLater(
+      manager.asegurarModelo(),
+      throwsA(isA<ModeloCorruptoException>()),
+    );
+
+    expect(destinoArchivo('onnx/tts.json').existsSync(), isFalse);
+    expect(destinoArchivo('onnx/tts.json.part').existsSync(), isFalse);
+    // 3 reintentos completos desde cero (sin Range: el .part se descartó).
+    expect(adapter.rangos, [null, null, null]);
   });
 
   test('verifica el SHA-256 de un binario calculándolo en un isolate',

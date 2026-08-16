@@ -156,5 +156,59 @@ void main() {
       await futuro;
       expect(contenedor.read(modeloControllerProvider).listo, true);
     });
+
+    test(
+        'una verificación obsoleta no pisa `listo` si la descarga terminó '
+        'mientras hasheaba', () async {
+      gestor = ModeloGestorFake()..verificacionLenta = Completer<void>();
+      final contenedor = crearContenedor();
+      // build() lanzó _verificar, que quedó pendiente.
+      await Future<void>.delayed(Duration.zero);
+
+      // La descarga arranca y TERMINA (sin bloqueos) antes de que la
+      // verificación resuelva: publica `listo` con ambas flags en false.
+      final controller = contenedor.read(modeloControllerProvider.notifier);
+      await controller.descargar();
+      expect(contenedor.read(modeloControllerProvider).listo, true);
+
+      // La verificación (que vio el disco vacío) termina tarde: su veredicto
+      // pre-descarga no debe borrar `listo`.
+      gestor.verificacionLenta!.complete();
+      await estabilizar();
+
+      final estado = contenedor.read(modeloControllerProvider);
+      expect(estado.listo, true);
+      expect(estado.descargando, false);
+      expect(estado.verificando, false);
+      expect(estado.error, isNull);
+    });
+
+    test(
+        'una verificación obsoleta no borra el error de una descarga '
+        'fallida', () async {
+      gestor = ModeloGestorFake(fallar: true)
+        ..verificacionLenta = Completer<void>();
+      final contenedor = crearContenedor();
+      // build() lanzó _verificar, que quedó pendiente.
+      await Future<void>.delayed(Duration.zero);
+
+      // La descarga arranca y FALLA antes de que la verificación resuelva:
+      // publica `error` con `descargando: false`.
+      final controller = contenedor.read(modeloControllerProvider.notifier);
+      await controller.descargar();
+      expect(contenedor.read(modeloControllerProvider).error, isNotNull);
+
+      // La verificación (que vio el disco vacío) termina tarde: su veredicto
+      // pre-descarga no debe pisar el estado con error ni dejar el gate
+      // "idle" como si el fallo no hubiera pasado.
+      gestor.verificacionLenta!.complete();
+      await estabilizar();
+
+      final estado = contenedor.read(modeloControllerProvider);
+      expect(estado.error, isNotNull);
+      expect(estado.descargando, false);
+      expect(estado.listo, false);
+      expect(estado.verificando, false);
+    });
   });
 }

@@ -81,12 +81,22 @@ class ModeloController extends Notifier<ModeloEstado> {
   ///
   /// Fire-and-forget desde [build]: si el usuario ya inició la descarga antes
   /// de que la verificación termine, su resultado se descarta (no debe pisar
-  /// `descargando: true` con un estado idle).
+  /// `descargando: true` con un estado idle). También se descarta si la
+  /// descarga ya terminó mientras la verificación hasheaba: el veredicto
+  /// pre-descarga (tomado con el disco vacío) no debe borrar `listo` ni el
+  /// `error` de una descarga que falló en el ínterin.
   Future<void> _verificar() async {
     final gestor = ref.read(modeloManagerProvider);
     final ok = await gestor.verificarDisponible();
     if (!ref.mounted) return;
     if (_descargaEnCurso || state.descargando) return;
+    // Carrera opuesta: la descarga pudo completarse (y publicar `listo`)
+    // durante la espera de arriba; esta verificación quedó obsoleta.
+    if (state.listo) return;
+    // La descarga pudo FALLAR (publicó `error`, `descargando: false`) mientras
+    // la verificación hasheaba: su veredicto pre-descarga no debe borrar el
+    // error terminal ni dejar el gate "idle" como si nada hubiera pasado.
+    if (state.error != null) return;
     state = ok
         ? const ModeloEstado(listo: true)
         : const ModeloEstado(verificando: false);

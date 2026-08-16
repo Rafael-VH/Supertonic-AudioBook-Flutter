@@ -17,6 +17,18 @@ class ArchivoModelo {
   const ArchivoModelo(this.ruta, this.tamanoBytes, this.sha256);
 }
 
+/// El archivo sigue corrupto tras agotar los reintentos: la integridad del
+/// modelo no está garantizada y la descarga falla de forma visible (nunca se
+/// publica `listo` con un modelo incompleto).
+class ModeloCorruptoException implements Exception {
+  ModeloCorruptoException(this.mensaje);
+
+  final String mensaje;
+
+  @override
+  String toString() => mensaje;
+}
+
 /// Archivos del repo https://huggingface.co/Supertone/supertonic-3
 /// Los SHA-256 de los ONNX son los `lfs.oid` publicados por HF.
 /// JSONs y estilos de voz no tienen hash publicado: se validan por tamaño
@@ -150,6 +162,16 @@ class ModeloManager implements ModeloGestor {
           }
         }
 
+        if (!ok) {
+          // Corrupción persistente: tras 3 intentos el .part nunca verificó
+          // (tamaño o hash). No caer en silencio: sin el archivo íntegro el
+          // modelo no es usable y el controlador debe mostrarlo como error.
+          throw ModeloCorruptoException(
+            'El modelo sigue corrupto tras $intentos intentos para '
+            '${archivo.ruta}',
+          );
+        }
+
         descargados += archivo.tamanoBytes;
         onProgreso?.call(descargados, totalBytes, archivo.ruta);
       }
@@ -197,7 +219,17 @@ class ModeloManager implements ModeloGestor {
     required int totalBytes,
   }) async {
     final url = '$urlBase/${archivo.ruta}';
-    final inicio = await part.exists() ? await part.length() : 0;
+    var inicio = await part.exists() ? await part.length() : 0;
+    if (inicio >= archivo.tamanoBytes) {
+      // Un `.part` con el tamaño completo no se puede reanudar: `Range:
+      // bytes=<tamano>-` no es satisfacible (el servidor responde 416) y, si
+      // el contenido quedó corrupto (p. ej. app cerrada tras una bajada
+      // íntegra pero inválida), el fallo se repetiría en todos los intentos
+      // sin forma de recuperarse. Se descarta y se vuelve a descargar desde
+      // cero.
+      await part.delete();
+      inicio = 0;
+    }
 
     await _dio.download(
       url,
