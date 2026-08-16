@@ -24,6 +24,12 @@ abstract final class Rutas {
   static const biblioteca = '/biblioteca';
 }
 
+/// Orígenes admitidos para el redirect del gate del modelo (D5): el modelo se
+/// solicita desde `/home` (gate normal), `/dashboard` (CTA de la card) o
+/// `/seleccion` (procesar archivos sueltos). Cualquier otro origen cae al
+/// fallback `/home`.
+const _origenesValidos = {Rutas.home, Rutas.dashboard, Rutas.seleccion};
+
 /// Notifica a go_router que re-evalúe los redirects cuando cambia el modelo.
 class _RefrescoModelo extends ChangeNotifier {
   void refrescar() => notifyListeners();
@@ -32,18 +38,13 @@ class _RefrescoModelo extends ChangeNotifier {
 /// Router declarativo. Concentra la navegación y los gates:
 /// - `/` nunca se visita: [SplashScreen] decide entre onboarding y dashboard.
 /// - El gate del modelo: `/home` sin modelo redirige a `/modelo`, y al quedar
-///   listo vuelve solo a `/home` (antes era el widget privado `_ModeloGate`).
-///   La pantalla de selección no tiene gate: solo avisa al procesar (decisión
-///   del usuario), y si viene de `/seleccion` el redirect vuelve ahí.
+///   listo vuelve al origen conocido (`/home`, `/dashboard` o `/seleccion`,
+///   ver `_origenesValidos`) o a `/home` como fallback (antes era el widget
+///   privado `_ModeloGate`). La pantalla de selección no tiene gate: solo
+///   avisa al procesar (decisión del usuario).
 final appRouterProvider = Provider<GoRouter>((ref) {
   final refresco = _RefrescoModelo();
-  ref.listen(
-    modeloControllerProvider.select((s) => s.listo),
-    (previo, _) => refresco.refrescar(),
-  );
-  ref.onDispose(refresco.dispose);
-
-  return GoRouter(
+  final router = GoRouter(
     initialLocation: Rutas.splash,
     refreshListenable: refresco,
     redirect: (context, state) {
@@ -51,9 +52,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       final listo = ref.read(modeloControllerProvider).listo;
       if (destino == Rutas.home && !listo) return Rutas.modelo;
       if (destino == Rutas.modelo && listo) {
-        // Volver a donde se pidió el modelo: /seleccion (procesar archivos
-        // sueltos) o /home (gate normal).
-        return state.extra == Rutas.seleccion ? Rutas.seleccion : Rutas.home;
+        // Volver a donde se pidió el modelo (DASH-4): `/seleccion` (procesar
+        // archivos sueltos), `/dashboard` (CTA de la card) o `/home` (gate
+        // normal). Origen desconocido → fallback `/home`.
+        final origen = state.extra;
+        if (origen is String && _origenesValidos.contains(origen)) {
+          return origen;
+        }
+        return Rutas.home;
       }
       return null;
     },
@@ -80,4 +86,25 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(path: Rutas.settings, builder: (_, __) => const SettingsScreen()),
     ],
   );
+
+  // Al quedar listo con `/modelo` como ruta tope, el redirect (W-1) decide el
+  // destino. go_router solo re-evalúa redirects al re-parsear la URI, y una
+  // ruta imperativa (el push del CTA del dashboard, D7) no cambia la URI
+  // (re-parsea la base `/dashboard`): se re-navega a `/modelo` con su extra
+  // para que el redirect resuelva. Con ruta tope distinta, el refresh basta.
+  ref.listen(
+    modeloControllerProvider.select((s) => s.listo),
+    (previo, listo) {
+      if (!listo) return;
+      final estado = router.routerDelegate.state;
+      if (estado.matchedLocation == Rutas.modelo) {
+        router.go(Rutas.modelo, extra: estado.extra);
+      } else {
+        refresco.refrescar();
+      }
+    },
+  );
+  ref.onDispose(refresco.dispose);
+
+  return router;
 });

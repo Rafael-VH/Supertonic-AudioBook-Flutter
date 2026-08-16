@@ -107,6 +107,15 @@ Chain strategy: pending
 
 **Objetivo**: el gate de `/modelo` devuelve al origen conocido vía `state.extra` (whitelist), fallback `/home`, sin regresión (D5/DASH-4/W-1).
 
-- [ ] WO-5.1 RED: `test/presentation/routing/app_router_test.dart` (nuevo, GoRouter real con overrides) — gate `home→modelo` intacto sin extra; extra `dashboard`/`seleccion` → vuelve al origen; extra inválido → `/home`; `/biblioteca` renderiza la screen.
-- [ ] WO-5.2 GREEN: `lib/presentation/routing/app_router.dart` — `_origenesValidos = {Rutas.home, Rutas.dashboard, Rutas.seleccion}`; `state.extra is String && en whitelist → extra`, fallback `/home`.
-- [ ] Done: tests verdes + analyze limpio; escenario DASH-4 completo (tap CTA de WO-4b → vuelve al dashboard).
+- [x] WO-5.1 RED: `test/presentation/routing/app_router_test.dart` (nuevo, GoRouter real con overrides) — gate `home→modelo` intacto sin extra; extra `dashboard`/`seleccion` → vuelve al origen; extra inválido → `/home`; `/biblioteca` renderiza la screen; escenario DASH-4 completo (CTA → `/modelo` → descarga → vuelve al dashboard).
+- [x] WO-5.2 GREEN: `lib/presentation/routing/app_router.dart` — `_origenesValidos = {Rutas.home, Rutas.dashboard, Rutas.seleccion}`; `state.extra is String && en whitelist → extra`, fallback `/home`.
+- [x] Done: tests verdes + analyze limpio; escenario DASH-4 completo (tap CTA de WO-4b → vuelve al dashboard).
+
+> **Nota de diseño (delta)**: go_router 17 solo re-evalúa redirects al re-parsear la
+> URI, y una ruta imperativa (`push` del CTA del dashboard, D7) NO cambia la URI:
+> el `refreshListenable` re-parsea la base `/dashboard` y el redirect nunca ve
+> `destino=/modelo`. El listener de `appRouterProvider` re-navega a
+> `router.go(Rutas.modelo, extra: estado.extra)` cuando `listo` llega a true con
+> `/modelo` como ruta tope, para que el redirect W-1 (punto único de decisión)
+> resuelva el origen. Con ruta tope distinta se mantiene el refresh clásico.
+> Verificado empíricamente (probes) antes de implementar.
