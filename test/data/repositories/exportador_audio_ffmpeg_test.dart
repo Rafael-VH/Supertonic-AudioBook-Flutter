@@ -129,6 +129,22 @@ void main() {
       expect(File(destino).existsSync(), isTrue);
       expect(File(destino).lengthSync(), greaterThan(0));
     });
+
+    test('sobrescribe un destino pre-creado (caso ProcesarArchivo) (skip si no disponible)', () async {
+      // Regresión: ProcesarArchivo._nuevoTemporal pre-crea el destino vacío;
+      // FFmpeg abortaría con "Not overwriting" (rc=1) sin el flag -y.
+      if (!await _probarFfmpeg()) {
+        markTestSkipped('FFmpeg no disponible en este entorno');
+        return;
+      }
+      final wav = '${temp.path}/a.wav';
+      await exportador.wavAppend([Float32List(44100)], wav);
+      final destino = '${temp.path}/a.flac';
+      File(destino).createSync();
+      await exportador.convertirDesdeWav(wav, destino, 'flac');
+      expect(File(destino).existsSync(), isTrue);
+      expect(File(destino).lengthSync(), greaterThan(0));
+    });
   });
 
   group('duracionAudio', () {

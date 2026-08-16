@@ -58,8 +58,10 @@ class ExportadorAudioFfmpeg implements ExportadorAudio {
           'Formato de audio no soportado (se espera wav, flac, ogg o mp3)');
     }
     File(rutaDestino).parent.createSync(recursive: true);
+    // -y: el destino es un temporal pre-creado (ver ProcesarArchivo._nuevoTemporal);
+    // FFmpeg abortaría con "Not overwriting" si el archivo ya existe.
     final sesion = await FFmpegKit.executeWithArguments(
-        ['-i', rutaWav, '-c:a', codec, '-f', formato, rutaDestino]);
+        ['-y', '-i', rutaWav, '-c:a', codec, '-f', formato, rutaDestino]);
     final codigo = await sesion.getReturnCode();
     if (!ReturnCode.isSuccess(codigo)) {
       final logs = await sesion.getAllLogs();
