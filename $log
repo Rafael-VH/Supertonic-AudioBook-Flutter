@@ -1,0 +1,96 @@
+Running Gradle task 'assembleDebug'...                          
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':audio_session:extractDebugAnnotations'.
+> Could not resolve all files for configuration ':audio_session:detachedConfiguration1'.
+   > Could not download lint-gradle-31.13.2.jar (com.android.tools.lint:lint-gradle:31.13.2)
+      > Could not get resource 'https://dl.google.com/dl/android/maven2/com/android/tools/lint/lint-gradle/31.13.2/lint-gradle-31.13.2.jar'.
+         > Could not GET 'https://dl.google.com/dl/android/maven2/com/android/tools/lint/lint-gradle/31.13.2/lint-gradle-31.13.2.jar'.
+            > Host desconocido (dl.google.com)
+   > Could not download lint-31.13.2.jar (com.android.tools.lint:lint:31.13.2)
+      > Could not get resource 'https://dl.google.com/dl/android/maven2/com/android/tools/lint/lint/31.13.2/lint-31.13.2.jar'.
+         > Could not GET 'https://dl.google.com/dl/android/maven2/com/android/tools/lint/lint/31.13.2/lint-31.13.2.jar'.
+            > dl.google.com
+   > Could not download lint-checks-31.13.2.jar (com.android.tools.lint:lint-checks:31.13.2)
+      > Could not get resource 'https://dl.google.com/dl/android/maven2/com/android/tools/lint/lint-checks/31.13.2/lint-checks-31.13.2.jar'.
+         > Could not GET 'https://dl.google.com/dl/android/maven2/com/android/tools/lint/lint-checks/31.13.2/lint-checks-31.13.2.jar'.
+            > dl.google.com
+   > Could not download lint-api-31.13.2.jar (com.android.tools.lint:lint-api:31.13.2)
+      > Could not get resource 'https://dl.google.com/dl/android/maven2/com/android/tools/lint/lint-api/31.13.2/lint-api-31.13.2.jar'.
+         > Could not GET 'https://dl.google.com/dl/android/maven2/com/android/tools/lint/lint-api/31.13.2/lint-api-31.13.2.jar'.
+            > dl.google.com
+   > Could not download intellij-core-31.13.2.jar (com.android.tools.external.com-intellij:intellij-core:31.13.2)
+      > Could not get resource 'https://dl.google.com/dl/android/maven2/com/android/tools/external/com-intellij/intellij-core/31.13.2/intellij-core-31.13.2.jar'.
+         > Could not GET 'https://dl.google.com/dl/android/maven2/com/android/tools/external/com-intellij/intellij-core/31.13.2/intellij-core-31.13.2.jar'.
+            > dl.google.com
+   > Could not download kotlin-compiler-31.13.2.jar (com.android.tools.external.com-intellij:kotlin-compiler:31.13.2)
+      > Could not get resource 'https://dl.google.com/dl/android/maven2/com/android/tools/external/com-intellij/kotlin-compiler/31.13.2/kotlin-compiler-31.13.2.jar'.
+         > Could not GET 'https://dl.google.com/dl/android/maven2/com/android/tools/external/com-intellij/kotlin-compiler/31.13.2/kotlin-compiler-31.13.2.jar'.
+            > dl.google.com
+   > Could not download uast-31.13.2.jar (com.android.tools.external.org-jetbrains:uast:31.13.2)
+      > Could not get resource 'https://dl.google.com/dl/android/maven2/com/android/tools/external/org-jetbrains/uast/31.13.2/uast-31.13.2.jar'.
+         > Could not GET 'https://dl.google.com/dl/android/maven2/com/android/tools/external/org-jetbrains/uast/31.13.2/uast-31.13.2.jar'.
+            > dl.google.com
+   > Could not download play-sdk-proto-31.13.2.jar (com.android.tools:play-sdk-proto:31.13.2)
+      > Could not get resource 'https://dl.google.com/dl/android/maven2/com/android/tools/play-sdk-proto/31.13.2/play-sdk-proto-31.13.2.jar'.
+         > Could not GET 'https://dl.google.com/dl/android/maven2/com/android/tools/play-sdk-proto/31.13.2/play-sdk-proto-31.13.2.jar'.
+            > dl.google.com
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights.
+> Get more help at https://help.gradle.org.
+
+BUILD FAILED in 20m 44s
+Running Gradle task 'assembleDebug'...                           1275,5s
+[!] Gradle threw an error while downloading artifacts from the network.
+Retrying Gradle Build: #1, wait time: 100ms
+Running Gradle task 'assembleDebug'...                          
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':audio_session:extractDebugAnnotations'.
+> Could not resolve all files for configuration ':audio_session:detachedConfiguration1'.
+   > Could not download lint-31.13.2.jar (com.android.tools.lint:lint:31.13.2)
+      > Could not get resource 'https://dl.google.com/dl/android/maven2/com/android/tools/lint/lint/31.13.2/lint-31.13.2.jar'.
+         > Could not GET 'https://dl.google.com/dl/android/maven2/com/android/tools/lint/lint/31.13.2/lint-31.13.2.jar'.
+            > dl.google.com
+   > Could not download lint-checks-31.13.2.jar (com.android.tools.lint:lint-checks:31.13.2)
+      > Could not get resource 'https://dl.google.com/dl/android/maven2/com/android/tools/lint/lint-checks/31.13.2/lint-checks-31.13.2.jar'.
+         > Could not GET 'https://dl.google.com/dl/android/maven2/com/android/tools/lint/lint-checks/31.13.2/lint-checks-31.13.2.jar'.
+            > dl.google.com
+   > Could not download lint-api-31.13.2.jar (com.android.tools.lint:lint-api:31.13.2)
+      > Could not get resource 'https://dl.google.com/dl/android/maven2/com/android/tools/lint/lint-api/31.13.2/lint-api-31.13.2.jar'.
+         > Could not GET 'https://dl.google.com/dl/android/maven2/com/android/tools/lint/lint-api/31.13.2/lint-api-31.13.2.jar'.
+            > Host desconocido (dl.google.com)
+   > Could not download intellij-core-31.13.2.jar (com.android.tools.external.com-intellij:intellij-core:31.13.2)
+      > Could not get resource 'https://dl.google.com/dl/android/maven2/com/android/tools/external/com-intellij/intellij-core/31.13.2/intellij-core-31.13.2.jar'.
+         > Could not GET 'https://dl.google.com/dl/android/maven2/com/android/tools/external/com-intellij/intellij-core/31.13.2/intellij-core-31.13.2.jar'.
+            > dl.google.com
+   > Could not download kotlin-compiler-31.13.2.jar (com.android.tools.external.com-intellij:kotlin-compiler:31.13.2)
+      > Could not get resource 'https://dl.google.com/dl/android/maven2/com/android/tools/external/com-intellij/kotlin-compiler/31.13.2/kotlin-compiler-31.13.2.jar'.
+         > Could not GET 'https://dl.google.com/dl/android/maven2/com/android/tools/external/com-intellij/kotlin-compiler/31.13.2/kotlin-compiler-31.13.2.jar'.
+            > dl.google.com
+   > Could not download uast-31.13.2.jar (com.android.tools.external.org-jetbrains:uast:31.13.2)
+      > Could not get resource 'https://dl.google.com/dl/android/maven2/com/android/tools/external/org-jetbrains/uast/31.13.2/uast-31.13.2.jar'.
+         > Could not GET 'https://dl.google.com/dl/android/maven2/com/android/tools/external/org-jetbrains/uast/31.13.2/uast-31.13.2.jar'.
+            > dl.google.com
+   > Could not download play-sdk-proto-31.13.2.jar (com.android.tools:play-sdk-proto:31.13.2)
+      > Could not get resource 'https://dl.google.com/dl/android/maven2/com/android/tools/play-sdk-proto/31.13.2/play-sdk-proto-31.13.2.jar'.
+         > Could not GET 'https://dl.google.com/dl/android/maven2/com/android/tools/play-sdk-proto/31.13.2/play-sdk-proto-31.13.2.jar'.
+            > dl.google.com
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights.
+> Get more help at https://help.gradle.org.
+
+BUILD FAILED in 6m 42s
+Running Gradle task 'assembleDebug'...                            408,0s
+[!] Gradle threw an error while downloading artifacts from the network.
+Gradle task assembleDebug failed with exit code 1
