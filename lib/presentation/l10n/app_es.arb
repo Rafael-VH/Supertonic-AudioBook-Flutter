@@ -51,8 +51,8 @@
   "log_muestra_fin": "    Muestra lista. Reproduciendo...",
   "log_muestra_error": "    No se pudo generar o reproducir la muestra.",
   "registro": "Registro",
-  "btn_procesar": "▶  Procesar",
-  "btn_cancelar": "■  Cancelar",
+  "btn_procesar": "Procesar",
+  "btn_cancelar": "Cancelar",
   "estado_listo": "Listo.",
   "estado_archivo": "Archivo {i} de {n}: {nombre}",
   "@estado_archivo": {
