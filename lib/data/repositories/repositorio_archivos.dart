@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:supertonic_audiobook/core/utils/natural_sort.dart';
@@ -31,7 +32,16 @@ class RepositorioArchivosLocal implements RepositorioArchivos {
   }
 
   @override
-  String leerArchivo(String ruta) => File(ruta).readAsStringSync();
+  String leerArchivo(String ruta) {
+    final bytes = File(ruta).readAsBytesSync();
+    // UTF-8 estricto; si el archivo viene en CP1252/latin-1 (el plan permite
+    // "ancho de codificación"), se decodifica como latin-1 en vez de lanzar.
+    try {
+      return utf8.decode(bytes);
+    } on FormatException {
+      return latin1.decode(bytes);
+    }
+  }
 }
 
 /// Nombre del archivo sin la última extensión (port de `Path.stem`).

@@ -10,7 +10,10 @@
   var ultimo = 0;
   for (final m in re.allMatches(stem)) {
     if (m.start > ultimo) tokens.add(stem.substring(ultimo, m.start));
-    tokens.add(int.parse(m.group(1)!));
+    // Números de más de 19 dígitos desbordan el `int` de Dart; se comparan
+    // como texto para no lanzar FormatException en el parse.
+    final numToken = m.group(1)!;
+    tokens.add(numToken.length > 19 ? numToken : int.parse(numToken));
     ultimo = m.end;
   }
   if (ultimo < stem.length) tokens.add(stem.substring(ultimo));

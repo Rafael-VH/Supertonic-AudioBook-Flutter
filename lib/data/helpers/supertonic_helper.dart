@@ -185,9 +185,15 @@ String preprocessText(String text, String lang) {
   text = text.replaceAll(" '", "'");
 
   // Remove duplicate quotes
-  while (text.contains('""')) text = text.replaceAll('""', '"');
-  while (text.contains("''")) text = text.replaceAll("''", "'");
-  while (text.contains('``')) text = text.replaceAll('``', '`');
+  while (text.contains('""')) {
+    text = text.replaceAll('""', '"');
+  }
+  while (text.contains("''")) {
+    text = text.replaceAll("''", "'");
+  }
+  while (text.contains('``')) {
+    text = text.replaceAll('``', '`');
+  }
 
   // Remove extra spaces
   text = text.replaceAll(RegExp(r'\s+'), ' ').trim();
@@ -611,7 +617,10 @@ Future<String> copyModelToFile(String path) async {
   final modelPath = '${tempDir.path}/${path.split("/").last}';
 
   final file = File(modelPath);
-  await file.writeAsBytes(byteData.buffer.asUint8List());
+  // Solo el view correcto del buffer: el ByteData puede empezar con offset.
+  await file.writeAsBytes(
+    byteData.buffer.asUint8List(byteData.offsetInBytes, byteData.lengthInBytes),
+  );
   return modelPath;
 }
 
@@ -695,9 +704,10 @@ void writeWavFile(String filename, List<double> audioData, int sampleRate) {
   buffer.setUint32(offset, dataSize, Endian.little);
   offset += 4;
 
-  // Write audio samples
+  // Write audio samples (NaN → 0: `NaN.round()` lanzaría y corrompería)
   for (var i = 0; i < audioData.length; i++) {
-    final sample = (audioData[i].clamp(-1.0, 1.0) * 32767).round();
+    final valor = audioData[i].isNaN ? 0.0 : audioData[i];
+    final sample = (valor.clamp(-1.0, 1.0) * 32767).round();
     buffer.setInt16(offset + i * 2, sample, Endian.little);
   }
 

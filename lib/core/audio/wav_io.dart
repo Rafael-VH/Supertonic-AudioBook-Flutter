@@ -101,13 +101,17 @@ double duracionWav(String ruta) {
 }
 
 /// Convierte float32 (−1..1) a PCM int16 LE (clip * 32767, redondeado).
+///
+/// Un NaN (silencioso, del motor) se escribe como 0: `NaN.round()` lanzaría
+/// y corrompería el archivo. Infinitos se recortan al clip.
 Uint8List _pcm16De(List<Float32List> fragmentos) {
   final total = fragmentos.fold<int>(0, (acum, f) => acum + f.length);
   final datos = ByteData(total * 2);
   var offset = 0;
   for (final fragmento in fragmentos) {
     for (final muestra in fragmento) {
-      final pcm = (muestra.clamp(-1.0, 1.0) * 32767.0).round();
+      final valor = muestra.isNaN ? 0.0 : muestra;
+      final pcm = (valor.clamp(-1.0, 1.0) * 32767.0).round();
       datos.setInt16(offset, pcm, Endian.little);
       offset += 2;
     }

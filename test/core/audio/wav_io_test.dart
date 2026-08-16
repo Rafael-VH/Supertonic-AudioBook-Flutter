@@ -49,6 +49,16 @@ void main() {
       expect(bd.getInt16(8, Endian.little), -32767);
     });
 
+    test('un NaN se escribe como 0 sin corromper el WAV', () {
+      final ruta = '${temp.path}/nan.wav';
+      escribirWav([Float32List.fromList([0.0, double.nan, 0.5])], ruta);
+
+      final bd = ByteData.sublistView(File(ruta).readAsBytesSync(), 44);
+      expect(bd.getInt16(0, Endian.little), 0);
+      expect(bd.getInt16(2, Endian.little), 0); // NaN → 0
+      expect(bd.getInt16(4, Endian.little), 16384);
+    });
+
     test('concatena varios fragmentos en orden', () {
       final ruta = '${temp.path}/a.wav';
       escribirWav([
@@ -57,8 +67,7 @@ void main() {
       ], ruta);
 
       final bd = ByteData.sublistView(File(ruta).readAsBytesSync(), 44);
-      expect(bd.getInt16(0, Endian.little), 0);
-      expect(bd.getInt16(2, Endian.little), 0);
+      expect(bd.getInt16(0, Endian.little), 0);      expect(bd.getInt16(2, Endian.little), 0);
       expect(bd.getInt16(4, Endian.little), 32767);
     });
 
