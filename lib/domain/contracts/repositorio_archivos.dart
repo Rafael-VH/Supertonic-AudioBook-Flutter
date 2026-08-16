@@ -8,6 +8,10 @@ abstract class RepositorioArchivos {
   /// Busca archivos `.md` en [carpeta] y los ordena numéricamente.
   List<Archivo> listarArchivosMd(String carpeta);
 
+  /// Lista los audios generados (`wav|flac|ogg|mp3`) de [carpeta] en orden
+  /// natural. Carpeta inexistente → lista vacía (BIB-1).
+  List<String> listarAudios(String carpeta);
+
   /// Lee el contenido UTF-8 de un archivo.
   String leerArchivo(String ruta);
 }

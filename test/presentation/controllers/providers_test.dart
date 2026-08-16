@@ -41,6 +41,9 @@ class RepositorioArchivosFalso implements RepositorioArchivos {
   List<Archivo> listarArchivosMd(String carpeta) => [];
 
   @override
+  List<String> listarAudios(String carpeta) => [];
+
+  @override
   String leerArchivo(String ruta) => _contenidos[ruta]!;
 }
 

@@ -36,6 +36,9 @@ class _ArchivosVacios implements RepositorioArchivos {
   List<Archivo> listarArchivosMd(String carpeta) => const [];
 
   @override
+  List<String> listarAudios(String carpeta) => const [];
+
+  @override
   String leerArchivo(String ruta) => '';
 }
 

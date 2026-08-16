@@ -34,12 +34,17 @@ class PreferenciasMemoria implements RepositorioPreferencias {
   Map<String, Object> get datos => Map.unmodifiable(_datos);
 }
 
-/// Repositorio de archivos falso con una lista fija de `.md`.
+/// Repositorio de archivos falso con una lista fija de `.md` y de audios.
 class RepositorioArchivosFake implements RepositorioArchivos {
-  RepositorioArchivosFake(this.archivos, {this.carpetasCreadas});
+  RepositorioArchivosFake(
+    this.archivos, {
+    this.carpetasCreadas,
+    List<String>? audios,
+  }) : audios = audios ?? const [];
 
   final List<Archivo> archivos;
   final List<String>? carpetasCreadas;
+  final List<String> audios;
 
   int listados = 0;
 
@@ -53,6 +58,9 @@ class RepositorioArchivosFake implements RepositorioArchivos {
     listados++;
     return archivos;
   }
+
+  @override
+  List<String> listarAudios(String carpeta) => audios;
 
   @override
   String leerArchivo(String ruta) => '';
@@ -104,14 +112,51 @@ class ExportadorFake implements ExportadorAudio {
   Future<void> wavAppend(List<Float32List> fragmentos, String ruta) async {}
 }
 
-/// Reproductor falso.
+/// Reproductor falso con stream de estado y flags para verificar
+/// pausa/reanudación/detención.
 class ReproductorFake implements ReproductorAudio {
+  ReproductorFake() {
+    _estado.add(EstadoReproduccion.detenido);
+  }
+
   final List<String> rutas = [];
+  final StreamController<EstadoReproduccion> _estado =
+      StreamController<EstadoReproduccion>.broadcast();
+
+  bool pausado = false;
+  bool detenido = false;
+  bool reanudado = false;
+
+  /// Emite un estado sin pasar por los métodos (simula el fin del audio o
+  /// el inicio de la reproducción).
+  void emitir(EstadoReproduccion e) => _estado.add(e);
 
   @override
   Future<void> reproducir(String ruta) async {
     rutas.add(ruta);
+    _estado.add(EstadoReproduccion.reproduciendo);
   }
+
+  @override
+  Future<void> pausar() async {
+    pausado = true;
+    _estado.add(EstadoReproduccion.pausado);
+  }
+
+  @override
+  Future<void> reanudar() async {
+    reanudado = true;
+    _estado.add(EstadoReproduccion.reproduciendo);
+  }
+
+  @override
+  Future<void> detener() async {
+    detenido = true;
+    _estado.add(EstadoReproduccion.detenido);
+  }
+
+  @override
+  Stream<EstadoReproduccion> get estado => _estado.stream;
 }
 
 /// Gestor del modelo falso.

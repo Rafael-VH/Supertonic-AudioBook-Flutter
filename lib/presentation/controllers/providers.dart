@@ -6,6 +6,7 @@ import 'package:supertonic_audiobook/domain/contracts/motor_tts.dart';
 import 'package:supertonic_audiobook/domain/contracts/repositorio_archivos.dart';
 import 'package:supertonic_audiobook/domain/contracts/repositorio_preferencias.dart';
 import 'package:supertonic_audiobook/domain/contracts/reproductor_audio.dart';
+import 'package:supertonic_audiobook/domain/use_cases/listar_audios_generados.dart';
 import 'package:supertonic_audiobook/domain/use_cases/procesar_archivo.dart';
 import 'package:supertonic_audiobook/domain/use_cases/sintetizar_muestra.dart';
 
@@ -88,5 +89,13 @@ final sintetizarMuestraProvider = Provider<SintetizarMuestra>((ref) {
   return SintetizarMuestra(
     motor: ref.watch(motorTtsProvider),
     exportador: ref.watch(exportadorAudioProvider),
+  );
+});
+
+/// Caso de uso de la biblioteca: lista los audios generados agrupados por
+/// libro (BIB-2).
+final listarAudiosProvider = Provider<ListarAudiosGenerados>((ref) {
+  return ListarAudiosGenerados(
+    archivos: ref.watch(repositorioArchivosProvider),
   );
 });

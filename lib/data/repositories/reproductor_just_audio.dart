@@ -13,4 +13,26 @@ class ReproductorJustAudio implements ReproductorAudio {
     await _player.setFilePath(ruta);
     await _player.play();
   }
+
+  @override
+  Future<void> pausar() => _player.pause();
+
+  @override
+  Future<void> reanudar() => _player.play();
+
+  @override
+  Future<void> detener() => _player.stop();
+
+  /// Mapea el estado interno de `just_audio`: procesando (idle/completed) →
+  /// `detenido`; si no, según `playing` → `reproduciendo` o `pausado`.
+  @override
+  Stream<EstadoReproduccion> get estado =>
+      _player.playerStateStream.map((estado) {
+        final terminal = estado.processingState == ProcessingState.idle ||
+            estado.processingState == ProcessingState.completed;
+        if (terminal) return EstadoReproduccion.detenido;
+        return estado.playing
+            ? EstadoReproduccion.reproduciendo
+            : EstadoReproduccion.pausado;
+      });
 }

@@ -56,6 +56,9 @@ class _FakeRepositorio implements RepositorioArchivos {
   List<Archivo> listarArchivosMd(String carpeta) => const [];
 
   @override
+  List<String> listarAudios(String carpeta) => const [];
+
+  @override
   String leerArchivo(String ruta) {
     ultimaRutaLeida = ruta;
     if (_contenido == 'ERROR') throw const FileSystemException('no legible');

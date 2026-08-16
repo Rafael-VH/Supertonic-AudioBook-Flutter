@@ -32,6 +32,24 @@ class RepositorioArchivosLocal implements RepositorioArchivos {
   }
 
   @override
+  List<String> listarAudios(String carpeta) {
+    final dir = Directory(carpeta);
+    if (!dir.existsSync()) return [];
+
+    const extensiones = {'.wav', '.flac', '.ogg', '.mp3'};
+    final audios = dir.listSync().whereType<File>().where(
+          (f) => extensiones.contains(_extension(f.uri.pathSegments.last)),
+        ).toList();
+
+    audios.sort((a, b) {
+      final claveA = naturalSortKey(_stem(a.uri.pathSegments.last));
+      final claveB = naturalSortKey(_stem(b.uri.pathSegments.last));
+      return compararNaturalSortKey(claveA, claveB);
+    });
+    return audios.map((f) => f.path).toList();
+  }
+
+  @override
   String leerArchivo(String ruta) {
     final bytes = File(ruta).readAsBytesSync();
     // UTF-8 estricto; si el archivo viene en CP1252/latin-1 (el plan permite
@@ -48,4 +66,10 @@ class RepositorioArchivosLocal implements RepositorioArchivos {
 String _stem(String nombre) {
   final i = nombre.lastIndexOf('.');
   return i <= 0 ? nombre : nombre.substring(0, i);
+}
+
+/// Extensión del archivo en minúsculas, con punto ('' si no tiene).
+String _extension(String nombre) {
+  final i = nombre.lastIndexOf('.');
+  return i <= 0 ? '' : nombre.substring(i).toLowerCase();
 }

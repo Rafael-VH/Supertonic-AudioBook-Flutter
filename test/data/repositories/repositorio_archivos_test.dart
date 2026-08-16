@@ -25,6 +25,11 @@ void main() {
       .map((a) => a.ruta.split(Platform.pathSeparator).last)
       .toList();
 
+  List<String> nombresAudios() => RepositorioArchivosLocal()
+      .listarAudios(temp.path)
+      .map((r) => r.split(Platform.pathSeparator).last)
+      .toList();
+
   group('listarArchivosMd', () {
     test('ordena con natural sort (números, no lexicográfico)', () {
       crear('capitulo.md');
@@ -79,6 +84,55 @@ void main() {
 
     test('carpeta inexistente → lista vacía', () {
       expect(RepositorioArchivosLocal().listarArchivosMd('${temp.path}/nope'), isEmpty);
+    });
+  });
+
+  group('listarAudios', () {
+    test('filtra solo wav/flac/ogg/mp3 (case-insensitive en la extensión)', () {
+      crear('libro1.mp3');
+      crear('libro2.wav');
+      crear('libro3.ogg');
+      crear('libro4.flac');
+      crear('libro5.MP3');
+      crear('libro6.Ogg');
+      crear('nota.txt');
+      crear('nota.md');
+      crear('portada.png');
+
+      expect(nombresAudios(), [
+        'libro1.mp3',
+        'libro2.wav',
+        'libro3.ogg',
+        'libro4.flac',
+        'libro5.MP3',
+        'libro6.Ogg',
+      ]);
+    });
+
+    test('ordena con natural sort por stem', () {
+      crear('capitulo10.mp3');
+      crear('capitulo2.mp3');
+      crear('capitulo1.wav');
+      crear('capitulo.mp3');
+
+      expect(nombresAudios(), [
+        'capitulo.mp3',
+        'capitulo1.wav',
+        'capitulo2.mp3',
+        'capitulo10.mp3',
+      ]);
+    });
+
+    test('no incluye carpetas aunque terminen en .mp3', () {
+      crear('audio.mp3');
+      Directory('${temp.path}/carpeta.mp3').createSync();
+
+      expect(nombresAudios(), ['audio.mp3']);
+    });
+
+    test('carpeta inexistente → lista vacía', () {
+      expect(RepositorioArchivosLocal().listarAudios('${temp.path}/nope'),
+          isEmpty);
     });
   });
 
