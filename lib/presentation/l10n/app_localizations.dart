@@ -740,6 +740,12 @@ abstract class AppLocalizations {
   /// **'What do you want to do today?'**
   String get dashboard_bienvenida;
 
+  /// No description provided for @dashboard_bienvenida_sub.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick an option and get started.'**
+  String get dashboard_bienvenida_sub;
+
   /// No description provided for @dashboard_procesar.
   ///
   /// In en, this message translates to:
@@ -752,29 +758,29 @@ abstract class AppLocalizations {
   /// **'Pick a folder, choose a voice and export your Markdown books as audio.'**
   String get dashboard_procesar_desc;
 
-  /// No description provided for @dashboard_opcion2.
+  /// No description provided for @dashboard_procesar_sueltos.
   ///
   /// In en, this message translates to:
   /// **'Process loose files'**
-  String get dashboard_opcion2;
+  String get dashboard_procesar_sueltos;
 
-  /// No description provided for @dashboard_opcion2_desc.
+  /// No description provided for @dashboard_procesar_sueltos_desc.
   ///
   /// In en, this message translates to:
   /// **'Pick one or more .md files from anywhere and convert them to audio.'**
-  String get dashboard_opcion2_desc;
+  String get dashboard_procesar_sueltos_desc;
 
-  /// No description provided for @dashboard_opcion3.
+  /// No description provided for @dashboard_biblioteca.
   ///
   /// In en, this message translates to:
-  /// **'Coming soon'**
-  String get dashboard_opcion3;
+  /// **'Library'**
+  String get dashboard_biblioteca;
 
-  /// No description provided for @dashboard_opcion3_desc.
+  /// No description provided for @dashboard_biblioteca_desc.
   ///
   /// In en, this message translates to:
-  /// **'New features are on their way.'**
-  String get dashboard_opcion3_desc;
+  /// **'Listen again to the audiobooks you\'ve already generated.'**
+  String get dashboard_biblioteca_desc;
 
   /// No description provided for @dashboard_modelos.
   ///

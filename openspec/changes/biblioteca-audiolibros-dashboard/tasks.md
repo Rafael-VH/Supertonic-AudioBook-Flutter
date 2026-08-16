@@ -89,10 +89,10 @@ Chain strategy: pending
 
 **Objetivo**: dashboard con hero, cards del cardTheme + `PaletaExt` (Biblioteca activa), grid responsive y renombres l10n de cards (DASH-1/2/3/8/9).
 
-- [ ] WO-4a.1 RED: en `test/presentation/screens/dashboard_screen_test.dart` (estructura + harness router): hero visible (DASH-8); card Biblioteca navega a `/biblioteca` (DASH-1); grid 2 col@800dp / 1 col@400dp (DASH-9); cards heredan cardTheme sin override local (DASH-3).
-- [ ] WO-4a.2 GREEN: `lib/presentation/screens/dashboard/dashboard_screen.dart` — `_BotonFuncion`→`_CardFuncion` sin `color`/`shape` propios + acentos `PaletaExt`; card #3 `Icons.library_books_outlined` → `context.push(Rutas.biblioteca)`; hero título+subtítulo; `LayoutBuilder` + `GridView.count`.
-- [ ] WO-4a.3 GREEN: ARB es/en — renombrar `dashboard_opcion2/3(_desc)` → `dashboard_procesar_sueltos(_desc)`/`dashboard_biblioteca(_desc)`; +`dashboard_bienvenida_sub`; renombrar el widget en el mismo commit (gen-l10n).
-- [ ] Done: tests verdes + analyze limpio.
+- [x] WO-4a.1 RED: en `test/presentation/screens/dashboard_screen_test.dart` (estructura + harness router): hero visible (DASH-8); card Biblioteca navega a `/biblioteca` (DASH-1); grid 2 col@800dp / 1 col@400dp (DASH-9); cards heredan cardTheme sin override local (DASH-3).
+- [x] WO-4a.2 GREEN: `lib/presentation/screens/dashboard/dashboard_screen.dart` — `_BotonFuncion`→`_CardFuncion` sin `color`/`shape` propios + acentos `PaletaExt`; card #3 `Icons.library_books_outlined` → `context.push(Rutas.biblioteca)`; hero título+subtítulo; `LayoutBuilder` + `GridView.count`.
+- [x] WO-4a.3 GREEN: ARB es/en — renombrar `dashboard_opcion2/3(_desc)` → `dashboard_procesar_sueltos(_desc)`/`dashboard_biblioteca(_desc)`; +`dashboard_bienvenida_sub`; renombrar el widget en el mismo commit (gen-l10n).
+- [x] Done: tests verdes + analyze limpio.
 
 ## WO-4b — Dashboard: Card de estado del modelo (~290 líneas)
 

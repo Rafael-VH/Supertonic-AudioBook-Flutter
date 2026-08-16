@@ -400,6 +400,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get dashboard_bienvenida => '¿Qué quieres hacer hoy?';
 
   @override
+  String get dashboard_bienvenida_sub => 'Elegí una función y empezá.';
+
+  @override
   String get dashboard_procesar => 'Convertir archivos a audio';
 
   @override
@@ -407,17 +410,18 @@ class AppLocalizationsEs extends AppLocalizations {
       'Elige una carpeta, una voz y exporta tus libros en Markdown como audio.';
 
   @override
-  String get dashboard_opcion2 => 'Procesar archivos sueltos';
+  String get dashboard_procesar_sueltos => 'Procesar archivos sueltos';
 
   @override
-  String get dashboard_opcion2_desc =>
+  String get dashboard_procesar_sueltos_desc =>
       'Elegí uno o más archivos .md de cualquier lugar y convertilos en audio.';
 
   @override
-  String get dashboard_opcion3 => 'Próximamente';
+  String get dashboard_biblioteca => 'Biblioteca';
 
   @override
-  String get dashboard_opcion3_desc => 'Nuevas funciones en camino.';
+  String get dashboard_biblioteca_desc =>
+      'Volvé a escuchar los audiolibros que ya generaste.';
 
   @override
   String get dashboard_modelos => 'Modelos: ';
