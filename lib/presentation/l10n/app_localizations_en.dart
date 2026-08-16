@@ -417,6 +417,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get dashboard_opcion3_desc => 'New features are on their way.';
 
   @override
+  String get dashboard_modelos => 'Models: ';
+
+  @override
+  String get dashboard_modelo_descargado => 'downloaded';
+
+  @override
+  String get dashboard_modelo_sin_descargar => 'not downloaded';
+
+  @override
+  String get dashboard_modelo_verificando => 'checking…';
+
+  @override
   String get carpetas => 'Folders';
 
   @override

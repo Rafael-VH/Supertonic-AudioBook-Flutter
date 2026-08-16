@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:supertonic_audiobook/presentation/controllers/modelo_controller.dart';
 import 'package:supertonic_audiobook/presentation/l10n/app_localizations.dart';
 import 'package:supertonic_audiobook/presentation/routing/app_router.dart';
 
@@ -14,6 +15,7 @@ class DashboardScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final t = AppLocalizations.of(context)!;
     final texto = Theme.of(context).textTheme;
+    final modelo = ref.watch(modeloControllerProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -29,7 +31,7 @@ class DashboardScreen extends ConsumerWidget {
       body: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 560),
-          child: Padding(
+          child: SingleChildScrollView(
             padding: const EdgeInsets.all(24),
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -60,6 +62,12 @@ class DashboardScreen extends ConsumerWidget {
                   titulo: t.dashboard_opcion3,
                   descripcion: t.dashboard_opcion3_desc,
                   onTap: null,
+                ),
+                const SizedBox(height: 16),
+                _FilaEstadoModelo(
+                  estado: modelo,
+                  onVerificar: () =>
+                      ref.read(modeloControllerProvider.notifier).verificar(),
                 ),
               ],
             ),
@@ -144,6 +152,63 @@ class _BotonFuncion extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+/// Línea de estado del modelo: veredicto actual ("descargado" / "sin
+/// descargar") con un botón para re-verificar en disco. Discreta: texto chico
+/// sobre `onSurfaceVariant`.
+class _FilaEstadoModelo extends StatelessWidget {
+  const _FilaEstadoModelo({required this.estado, required this.onVerificar});
+
+  final ModeloEstado estado;
+  final VoidCallback onVerificar;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context)!;
+    final colores = Theme.of(context).colorScheme;
+    final estilo =
+        Theme.of(context).textTheme.bodySmall?.copyWith(color: colores.onSurfaceVariant);
+
+    // Al arrancar con preferencia guardada, `listo` llega antes de que la
+    // verificación de fondo termine: no mostrar el spinner sobre un
+    // "descargado" ya publicado.
+    final verificando = estado.verificando && !estado.listo;
+    final String estadoTexto;
+    if (verificando) {
+      estadoTexto = t.dashboard_modelo_verificando;
+    } else if (estado.listo) {
+      estadoTexto = t.dashboard_modelo_descargado;
+    } else {
+      estadoTexto = t.dashboard_modelo_sin_descargar;
+    }
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        if (verificando)
+          const SizedBox(
+            width: 16,
+            height: 16,
+            child: CircularProgressIndicator(strokeWidth: 2),
+          )
+        else
+          IconButton(
+            icon: const Icon(Icons.refresh, size: 16),
+            tooltip: t.refrescar,
+            onPressed: onVerificar,
+            visualDensity: VisualDensity.compact,
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(minWidth: 24, minHeight: 24),
+          ),
+        const SizedBox(width: 8),
+        Text(
+          '${t.dashboard_modelos}$estadoTexto',
+          style: estilo,
+        ),
+      ],
     );
   }
 }

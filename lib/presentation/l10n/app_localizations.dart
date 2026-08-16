@@ -776,6 +776,30 @@ abstract class AppLocalizations {
   /// **'New features are on their way.'**
   String get dashboard_opcion3_desc;
 
+  /// No description provided for @dashboard_modelos.
+  ///
+  /// In en, this message translates to:
+  /// **'Models: '**
+  String get dashboard_modelos;
+
+  /// No description provided for @dashboard_modelo_descargado.
+  ///
+  /// In en, this message translates to:
+  /// **'downloaded'**
+  String get dashboard_modelo_descargado;
+
+  /// No description provided for @dashboard_modelo_sin_descargar.
+  ///
+  /// In en, this message translates to:
+  /// **'not downloaded'**
+  String get dashboard_modelo_sin_descargar;
+
+  /// No description provided for @dashboard_modelo_verificando.
+  ///
+  /// In en, this message translates to:
+  /// **'checking…'**
+  String get dashboard_modelo_verificando;
+
   /// No description provided for @carpetas.
   ///
   /// In en, this message translates to:
