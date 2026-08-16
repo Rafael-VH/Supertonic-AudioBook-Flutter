@@ -30,6 +30,23 @@ class _RepositorioQueFalla extends _RepositorioAudios {
       throw StateError('falla al listar audios');
 }
 
+/// Repositorio que falla las primeras [fallarHasta] llamadas al listado y
+/// luego responde (para probar `recargar()` del estado de error).
+class _RepositorioFlaky extends _RepositorioAudios {
+  _RepositorioFlaky(this._fallarHasta, [List<String>? audios]) : super(audios);
+
+  int _fallarHasta;
+
+  @override
+  List<String> listarAudios(String carpeta) {
+    if (_fallarHasta > 0) {
+      _fallarHasta--;
+      throw StateError('falla al listar audios');
+    }
+    return super.listarAudios(carpeta);
+  }
+}
+
 /// Reproductor que falla al reproducir (BIB-5: archivo faltante o corrupto).
 class _ReproductorQueFalla extends ReproductorFake {
   @override
@@ -212,6 +229,43 @@ void main() {
       expect(estado.libros, isEmpty);
       expect(estado.error, isNull);
       expect(estado.vacio, isTrue);
+    });
+
+    test('recargar tras error del listado re-lista y limpia el error', () {
+      preferencias = PreferenciasMemoria({'carpeta_out': 'C:/audio'});
+      repositorio = _RepositorioFlaky(1, ['C:/audio/libro.mp3']);
+      reproductor = ReproductorFake();
+
+      final container = crearContenedor();
+      final controller = container.read(bibliotecaControllerProvider.notifier);
+      expect(
+        container.read(bibliotecaControllerProvider).error,
+        contains('falla al listar'),
+      );
+
+      controller.recargar();
+
+      final estado = container.read(bibliotecaControllerProvider);
+      expect(estado.error, isNull);
+      expect(estado.libros, hasLength(1));
+      expect(estado.libros.single.titulo, 'libro');
+      expect(estado.vacio, isFalse);
+    });
+
+    test('recargar conserva el error si el listado sigue fallando', () {
+      preferencias = PreferenciasMemoria({'carpeta_out': 'C:/audio'});
+      repositorio = _RepositorioFlaky(99, ['C:/audio/libro.mp3']);
+      reproductor = ReproductorFake();
+
+      final container = crearContenedor();
+      final controller = container.read(bibliotecaControllerProvider.notifier);
+
+      controller.recargar();
+
+      final estado = container.read(bibliotecaControllerProvider);
+      expect(estado.error, contains('falla al listar'));
+      expect(estado.libros, isEmpty);
+      expect(estado.vacio, isFalse);
     });
   });
 }

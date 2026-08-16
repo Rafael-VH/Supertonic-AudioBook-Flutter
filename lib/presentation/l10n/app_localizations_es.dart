@@ -462,4 +462,24 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get seleccion_ir_modelo => 'Ir a descargar el modelo';
+
+  @override
+  String get biblioteca_titulo => 'Biblioteca';
+
+  @override
+  String get biblioteca_vacio => 'Todavía no generaste ningún audiolibro.';
+
+  @override
+  String get biblioteca_vacio_accion => 'Ir a convertir';
+
+  @override
+  String get biblioteca_play => 'Reproducir';
+
+  @override
+  String get biblioteca_pausa => 'Pausar';
+
+  @override
+  String biblioteca_error(String error) {
+    return 'No se pudo reproducir: $error';
+  }
 }

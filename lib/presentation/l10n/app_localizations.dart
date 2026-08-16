@@ -859,6 +859,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Go download the model'**
   String get seleccion_ir_modelo;
+
+  /// No description provided for @biblioteca_titulo.
+  ///
+  /// In en, this message translates to:
+  /// **'Library'**
+  String get biblioteca_titulo;
+
+  /// No description provided for @biblioteca_vacio.
+  ///
+  /// In en, this message translates to:
+  /// **'You haven\'t generated any audiobooks yet.'**
+  String get biblioteca_vacio;
+
+  /// No description provided for @biblioteca_vacio_accion.
+  ///
+  /// In en, this message translates to:
+  /// **'Go convert'**
+  String get biblioteca_vacio_accion;
+
+  /// No description provided for @biblioteca_play.
+  ///
+  /// In en, this message translates to:
+  /// **'Play'**
+  String get biblioteca_play;
+
+  /// No description provided for @biblioteca_pausa.
+  ///
+  /// In en, this message translates to:
+  /// **'Pause'**
+  String get biblioteca_pausa;
+
+  /// Playback or listing error in the library.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not play: {error}'**
+  String biblioteca_error(String error);
 }
 
 class _AppLocalizationsDelegate

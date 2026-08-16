@@ -293,5 +293,17 @@
   "seleccion_quitar": "Quitar",
   "seleccion_error_picker": "No se pudo abrir el buscador de archivos.",
   "seleccion_modelo_aviso": "El modelo de voz todavía no está descargado. Para procesar estos archivos primero tenés que descargarlo.",
-  "seleccion_ir_modelo": "Ir a descargar el modelo"
+  "seleccion_ir_modelo": "Ir a descargar el modelo",
+  "biblioteca_titulo": "Biblioteca",
+  "biblioteca_vacio": "Todavía no generaste ningún audiolibro.",
+  "biblioteca_vacio_accion": "Ir a convertir",
+  "biblioteca_play": "Reproducir",
+  "biblioteca_pausa": "Pausar",
+  "biblioteca_error": "No se pudo reproducir: {error}",
+  "@biblioteca_error": {
+    "description": "Error de reproducción o de listado de la biblioteca.",
+    "placeholders": {
+      "error": {"type": "String"}
+    }
+  }
 }

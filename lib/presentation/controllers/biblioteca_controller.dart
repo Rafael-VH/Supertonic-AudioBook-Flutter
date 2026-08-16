@@ -56,12 +56,16 @@ class BibliotecaEstado {
 class BibliotecaController extends Notifier<BibliotecaEstado> {
   StreamSubscription<EstadoReproduccion>? _subEstado;
 
+  /// Carpeta de salida resuelta en [build]; `recargar()` la reutiliza para
+  /// re-ejecutar el listado sin recomponer preferencias.
+  String _carpeta = '';
+
   @override
   BibliotecaEstado build() {
     final prefs = ref.watch(repositorioPreferenciasProvider).cargar();
     final base = ref.watch(carpetaBaseProvider);
     final sep = Platform.pathSeparator;
-    final carpeta = prefs['carpeta_out'] as String? ?? '$base${sep}audio';
+    _carpeta = prefs['carpeta_out'] as String? ?? '$base${sep}audio';
 
     // El stream de estado es la fuente de verdad de pausa/fin/error de la
     // reproducción (D2). La suscripción se cancela en dispose (sin leaks).
@@ -76,12 +80,26 @@ class BibliotecaController extends Notifier<BibliotecaEstado> {
 
     try {
       return BibliotecaEstado(
-        libros: ref.read(listarAudiosProvider).ejecutar(carpeta: carpeta),
+        libros: ref.read(listarAudiosProvider).ejecutar(carpeta: _carpeta),
       );
     } catch (e) {
       // Defensivo: un fallo del listado no debe crashear la pantalla
       // (paridad con la filosofía de BIB-5, sin estado vacío falso).
       return BibliotecaEstado(libros: const [], error: '$e');
+    }
+  }
+
+  /// Botón reintentar del estado de error: re-ejecuta el listado y limpia el
+  /// error si la carpeta ya responde. Síncrono (D3: el listado del FS es
+  /// síncrono); un nuevo fallo vuelve a publicar el error.
+  void recargar() {
+    try {
+      state = state.copyWith(
+        libros: ref.read(listarAudiosProvider).ejecutar(carpeta: _carpeta),
+        clearError: true,
+      );
+    } catch (e) {
+      state = state.copyWith(error: '$e');
     }
   }
 

@@ -293,5 +293,17 @@
   "seleccion_quitar": "Remove",
   "seleccion_error_picker": "Could not open the file picker.",
   "seleccion_modelo_aviso": "The voice model is not downloaded yet. You need to download it before processing these files.",
-  "seleccion_ir_modelo": "Go download the model"
+  "seleccion_ir_modelo": "Go download the model",
+  "biblioteca_titulo": "Library",
+  "biblioteca_vacio": "You haven't generated any audiobooks yet.",
+  "biblioteca_vacio_accion": "Go convert",
+  "biblioteca_play": "Play",
+  "biblioteca_pausa": "Pause",
+  "biblioteca_error": "Could not play: {error}",
+  "@biblioteca_error": {
+    "description": "Playback or listing error in the library.",
+    "placeholders": {
+      "error": {"type": "String"}
+    }
+  }
 }

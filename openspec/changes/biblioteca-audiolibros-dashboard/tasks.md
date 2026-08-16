@@ -80,10 +80,10 @@ Chain strategy: pending
 
 **Objetivo**: pantalla lista/vacío/error con reproducción por tile; ruta `/biblioteca` accesible (BIB-4/DASH-1-ruta).
 
-- [ ] WO-3.1 RED: `test/presentation/screens/biblioteca_screen_test.dart` — lista con tiles; vacío + acción → `/home`; iconos play/pausa por tile; error en SnackBar; tooltips ≥48.
-- [ ] WO-3.2 GREEN: `lib/presentation/screens/biblioteca/biblioteca_screen.dart` (nuevo, patrón seleccion: `ref.listen` error, `ListView.builder` de `Card(ListTile)`, estado vacío con acción).
-- [ ] WO-3.3 GREEN: `lib/presentation/routing/app_router.dart` (+`Rutas.biblioteca` + `GoRoute`); claves `biblioteca_*` en `lib/presentation/l10n/app_es.arb` y `app_en.arb` (gen-l10n en el commit).
-- [ ] Done: tests verdes + analyze limpio.
+- [x] WO-3.1 RED: `test/presentation/screens/biblioteca_screen_test.dart` — lista con tiles; vacío + acción → `/home`; iconos play/pausa por tile; error en SnackBar; tooltips ≥48.
+- [x] WO-3.2 GREEN: `lib/presentation/screens/biblioteca/biblioteca_screen.dart` (nuevo, patrón seleccion: `ref.listen` error, `ListView.builder` de `Card(ListTile)`, estado vacío con acción).
+- [x] WO-3.3 GREEN: `lib/presentation/routing/app_router.dart` (+`Rutas.biblioteca` + `GoRoute`); claves `biblioteca_*` en `lib/presentation/l10n/app_es.arb` y `app_en.arb` (gen-l10n en el commit).
+- [x] Done: tests verdes + analyze limpio.
 
 ## WO-4a — Dashboard: hero + cards + grid (~350 líneas)
 
