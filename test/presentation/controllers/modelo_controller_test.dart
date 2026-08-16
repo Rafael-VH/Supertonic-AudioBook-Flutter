@@ -12,9 +12,13 @@ void main() {
   group('ModeloController', () {
     late ModeloGestorFake gestor;
 
-    ProviderContainer crearContenedor() {
+    ProviderContainer crearContenedor({PreferenciasMemoria? preferencias}) {
       final contenedor = ProviderContainer(
-        overrides: [modeloManagerProvider.overrideWithValue(gestor)],
+        overrides: [
+          modeloManagerProvider.overrideWithValue(gestor),
+          repositorioPreferenciasProvider
+              .overrideWithValue(preferencias ?? PreferenciasMemoria()),
+        ],
       );
       // Mantiene vivo el provider: sin listener, Riverpod descarta el
       // Notifier tras el read y `ref.mounted` corta la verificación.
@@ -209,6 +213,95 @@ void main() {
       expect(estado.descargando, false);
       expect(estado.listo, false);
       expect(estado.verificando, false);
+    });
+
+    test('persistir el veredicto no pisa otras preferencias', () async {
+      gestor = ModeloGestorFake(disponible: true);
+      final preferencias = PreferenciasMemoria({'onboarding_visto': true});
+      crearContenedor(preferencias: preferencias);
+      await estabilizar();
+
+      expect(preferencias.datos['onboarding_visto'], true);
+      expect(preferencias.datos['modelo_descargado'], true);
+    });
+
+    test('con preferencia guardada arranca optimista en listo', () async {
+      gestor = ModeloGestorFake(disponible: true);
+      final contenedor = crearContenedor(
+        preferencias: PreferenciasMemoria({'modelo_descargado': true}),
+      );
+
+      // Estado inicial inmediato: muestra "descargado" sin esperar el disco.
+      var estado = contenedor.read(modeloControllerProvider);
+      expect(estado.listo, true);
+      expect(estado.verificando, true);
+
+      // La verificación de fondo confirma el optimismo y lo deja estable.
+      await estabilizar();
+      estado = contenedor.read(modeloControllerProvider);
+      expect(estado.listo, true);
+      expect(estado.verificando, false);
+      expect(
+        contenedor.read(repositorioPreferenciasProvider).cargar()[
+            'modelo_descargado'],
+        true,
+      );
+    });
+
+    test(
+        'el optimismo de preferencia se corrige si el modelo ya no está '
+        'en disco', () async {
+      // Preferencia dice "descargado", pero el disco está vacío (el modelo se
+      // borró o se corrompió): la verificación de fondo debe corregir el
+      // estado y la preferencia, no dejar "descargado" para siempre.
+      gestor = ModeloGestorFake();
+      final preferencias = PreferenciasMemoria({'modelo_descargado': true});
+      final contenedor = crearContenedor(preferencias: preferencias);
+      await estabilizar();
+
+      final estado = contenedor.read(modeloControllerProvider);
+      expect(estado.listo, false);
+      expect(estado.verificando, false);
+      expect(preferencias.datos['modelo_descargado'], false);
+    });
+
+    test('verificar() pública re-chequea, publica y persiste el resultado',
+        () async {
+      gestor = ModeloGestorFake();
+      final preferencias = PreferenciasMemoria();
+      final contenedor = crearContenedor(preferencias: preferencias);
+      await estabilizar();
+      expect(preferencias.datos['modelo_descargado'], false);
+
+      // El modelo "aparece" en disco: el botón del dashboard debe detectarlo.
+      gestor.disponible = true;
+      final controller = contenedor.read(modeloControllerProvider.notifier);
+      await controller.verificar();
+
+      final estado = contenedor.read(modeloControllerProvider);
+      expect(estado.listo, true);
+      expect(estado.verificando, false);
+      expect(preferencias.datos['modelo_descargado'], true);
+    });
+
+    test('verificar() durante una descarga no interfiere', () async {
+      gestor = ModeloGestorFake()..espera = Completer<void>();
+      final contenedor = crearContenedor();
+      await estabilizar();
+      final controller = contenedor.read(modeloControllerProvider.notifier);
+
+      final futuro = controller.descargar();
+      await estabilizar();
+      expect(contenedor.read(modeloControllerProvider).descargando, true);
+
+      await controller.verificar();
+      final estado = contenedor.read(modeloControllerProvider);
+      expect(estado.descargando, true);
+      expect(estado.listo, false);
+
+      gestor.espera!.complete();
+      await futuro;
+      expect(contenedor.read(modeloControllerProvider).listo, true);
     });
   });
 }

@@ -71,10 +71,23 @@ class ModeloController extends Notifier<ModeloEstado> {
   bool _descargaEnCurso = false;
   bool _cancelada = false;
 
+  /// Una descarga completada en ESTA sesión publicó `listo`: el veredicto de
+  /// una verificación en vuelo (lanzada antes de la descarga) quedó obsoleto
+  /// y no debe pisarlo. En cambio, el `listo` optimista que llega de la
+  /// preferencia NO protege el veredicto: la verificación de fondo es la
+  /// fuente de verdad y debe poder corregirlo si el modelo ya no está.
+  bool _descargadoEnSesion = false;
+
   @override
   ModeloEstado build() {
-    _verificar();
-    return const ModeloEstado(verificando: true);
+    // Verificación de fondo: el dashboard no tiene que iniciarla a mano.
+    _verificarEnBackground();
+    // Optimismo persistido: si la última verificación dijo "descargado", la
+    // próxima apertura lo muestra al instante (la verificación de fondo lo
+    // confirma o el botón del dashboard permite corregirlo).
+    final preferencias = ref.read(repositorioPreferenciasProvider).cargar();
+    final descargado = preferencias['modelo_descargado'] == true;
+    return ModeloEstado(verificando: true, listo: descargado);
   }
 
   /// Comprueba el disco sin descargar y publica el estado resultante.
@@ -85,21 +98,46 @@ class ModeloController extends Notifier<ModeloEstado> {
   /// descarga ya terminó mientras la verificación hasheaba: el veredicto
   /// pre-descarga (tomado con el disco vacío) no debe borrar `listo` ni el
   /// `error` de una descarga que falló en el ínterin.
-  Future<void> _verificar() async {
+  ///
+  /// El veredicto que sí se publica se persiste en preferencias
+  /// (`modelo_descargado`) para que la próxima apertura muestre el último
+  /// estado conocido de inmediato.
+  Future<void> _verificarEnBackground() async {
     final gestor = ref.read(modeloManagerProvider);
     final ok = await gestor.verificarDisponible();
     if (!ref.mounted) return;
     if (_descargaEnCurso || state.descargando) return;
     // Carrera opuesta: la descarga pudo completarse (y publicar `listo`)
     // durante la espera de arriba; esta verificación quedó obsoleta.
-    if (state.listo) return;
+    // El `listo` optimista de la preferencia NO protege: se corrige abajo.
+    if (state.listo && _descargadoEnSesion) return;
     // La descarga pudo FALLAR (publicó `error`, `descargando: false`) mientras
     // la verificación hasheaba: su veredicto pre-descarga no debe borrar el
     // error terminal ni dejar el gate "idle" como si nada hubiera pasado.
     if (state.error != null) return;
+    _persistirVeredicto(ok);
     state = ok
         ? const ModeloEstado(listo: true)
         : const ModeloEstado(verificando: false);
+  }
+
+  /// Re-verificación bajo demanda (botón del dashboard): limpia el veredicto
+  /// cacheado y vuelve a comprobar el disco, publicando el resultado fresco.
+  ///
+  /// No interfiere con una descarga en curso (no hace nada si hay una).
+  Future<void> verificar() async {
+    if (_descargaEnCurso || state.descargando) return;
+    state = state.copyWith(verificando: true, listo: false, clearError: true);
+    await _verificarEnBackground();
+  }
+
+  /// Persiste el veredicto del disco en preferencias, fusionado con las
+  /// claves existentes (no pisa otras preferencias).
+  void _persistirVeredicto(bool ok) {
+    final repo = ref.read(repositorioPreferenciasProvider);
+    final preferencias = repo.cargar();
+    preferencias['modelo_descargado'] = ok;
+    repo.guardar(preferencias);
   }
 
   /// Inicia la descarga del modelo (no-op si ya está descargando o listo).
@@ -123,9 +161,12 @@ class ModeloController extends Notifier<ModeloEstado> {
         },
       );
       if (!ref.mounted) return;
-      state = _cancelada
-          ? const ModeloEstado()
-          : const ModeloEstado(listo: true);
+      if (_cancelada) {
+        state = const ModeloEstado();
+      } else {
+        _descargadoEnSesion = true;
+        state = const ModeloEstado(listo: true);
+      }
     } catch (e) {
       if (!ref.mounted) return;
       state = _cancelada
