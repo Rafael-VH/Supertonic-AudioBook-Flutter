@@ -149,4 +149,26 @@ pre-crea vacío. Los tests pasan porque nunca reproducen el `_nuevoTemporal` pre
 | 11 (Teóricos) | ✅ Parcial | Hechas: segmento largo por caracteres, natural_sort >19 dígitos, NaN WAV (wav_io + writeWavFile), `copyModelToFile` buffer view, CP1252 fallback, log virtualizado (`VistaLog`). No aplicada: `seleccion_controller` build→estado vacío (evitar I/O requiere refactor mayor, riesgo > beneficio para un teórico). |
 
 Verificación final: `flutter analyze` sin issues; `flutter test` 160 pasados, 4 skips
-(FFmpeg no disponible en entorno de test). Round 2 de juicio pendiente de programar.
+(FFmpeg no disponible en entorno de test).
+
+## Re-juicio (2026-08-16) — Rounds 2 a 4
+
+Tras implementar las fases se relanzó el juicio con dos jueces ciegos (skill `judgment-day`)
+sobre `16105c1..HEAD`. Resultado por ronda:
+
+| Ronda | Confirmados | Fixes aplicados | Verificación |
+|-------|-------------|-----------------|--------------|
+| Round 2 | 4 real + 1 teórico | Batch 1: `ModeloCorruptoException` tras 3 intentos; guard `ejecutando` en merge; `catch (exc)` en escuchar; guard `listo` en `_verificar`; `BigInt.parse` en natural_sort; `esMovil` inyectado (sin `Platform` en domain) | analyze limpio; 164 pasados, 4 skips |
+| Round 3 | 1 real + 2 teóricos (guard `quitarArchivoExterno`, error de descarga pisado, BigInt discriminator) + 1 suspect real (416 loop) | Batch 2: guard `ejecutando\|\|probandoVoz` en `cargarArchivosExternos`; `error != null` en `_verificar`; discriminator `is int \|\| is BigInt`; borrar `.part` con `inicio >= tamanoBytes` | analyze limpio; 169 pasados, 4 skips |
+| Round 4 | 6 confirmados (real/teórico + sugerencias) | **No aplicados** (decisión del usuario: cerrar acá) | — |
+
+Veredicto final: **JUDGMENT: APPROVED** (0 CRITICAL, 0 WARNING real con doble consenso).
+Quedan como INFO/suspect sin aplicar (documentados, no bloqueantes):
+
+- `_verificar` fire-and-forget sin try/catch → estado atascado si `verificarDisponible()` lanza
+- `escuchar` sin guard `ejecutando` a nivel controller (hoy protegido solo por UI)
+- X/Agregar habilitados durante run: taps descartados sin feedback
+- Guard asimétrico en `agregarArchivosExternos` (no cubre `probandoVoz`)
+- Log de error con punto+colon y excepción cruda sin i18n
+- Run todo-omitido reporta "éxito 0 archivos"
+- Cancelado cuenta como `exitos++`; `.part` completo-válido re-descarga; progreso cae a 0; `fdb_helper` en runtime deps; `_partirFraseLarga` sin `.` final; comentario pureza vs `dart:io` preexistente; docstring `cargarArchivosExternos` desactualizado; VistaLog sin selección multi-línea
