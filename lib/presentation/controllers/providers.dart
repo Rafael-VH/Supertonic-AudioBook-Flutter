@@ -15,6 +15,10 @@ typedef TtsConfig = ({
   int silencioMuestras,
   int memoriaSafeMarginBytes,
   int topeMovilBytes,
+
+  /// Presupuesto móvil o desktop: la decisión de plataforma vive en la
+  /// composición (la presentación puede usar `dart:io`, el dominio no).
+  bool esMovil,
 });
 
 /// Contratos de `domain/` inyectados desde `main.dart` (composición).
@@ -75,6 +79,7 @@ final procesarArchivoProvider = Provider<ProcesarArchivo>((ref) {
     silencioMuestras: config.silencioMuestras,
     memoriaSafeMarginBytes: config.memoriaSafeMarginBytes,
     topeMovilBytes: config.topeMovilBytes,
+    esMovil: config.esMovil,
   );
 });
 

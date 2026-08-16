@@ -114,6 +114,7 @@ void main() {
           silencioMuestras: silenceSamples,
           memoriaSafeMarginBytes: memoriaSafeMarginBytes,
           topeMovilBytes: memoriaSafeMarginBytesMovil,
+          esMovil: false,
         )),
       ]);
       addTearDown(contenedor.dispose);
@@ -122,6 +123,7 @@ void main() {
       expect(config.silencioMuestras, 26460);
       expect(config.memoriaSafeMarginBytes, 524288000);
       expect(config.topeMovilBytes, 67108864);
+      expect(config.esMovil, false);
     });
 
     test(
@@ -145,6 +147,7 @@ void main() {
           silencioMuestras: silenceSamples,
           memoriaSafeMarginBytes: memoriaSafeMarginBytes,
           topeMovilBytes: memoriaSafeMarginBytesMovil,
+          esMovil: false,
         )),
       ]);
       addTearDown(contenedor.dispose);

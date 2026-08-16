@@ -34,6 +34,7 @@ class ProcesarArchivo {
     required this._silencioMuestras,
     required this._memoriaSafeMarginBytes,
     required this._topeMovilBytes,
+    this._esMovil = false,
   });
 
   final MotorTts _motor;
@@ -45,6 +46,11 @@ class ProcesarArchivo {
   /// Presupuesto de RAM para retener fragmentos en móvil (inyectado desde la
   /// composición; el dominio no conoce valores de `data/`).
   final int _topeMovilBytes;
+
+  /// Verdadero en Android/iOS (decidido en la composición, no con `dart:io`):
+  /// el heap disponible es mucho menor que el de desktop y acumular cientos
+  /// de MiB de Float32 provoca OOM.
+  final bool _esMovil;
 
   /// Presupuesto efectivo de RAM para retener fragmentos antes de volcar a
   /// disco. En móvil se usa [topeMovil] (heap chico → OOM con 500 MiB);
@@ -60,11 +66,6 @@ class ProcesarArchivo {
         ? memoriaSafeMarginBytes
         : topeMovil;
   }
-
-  /// Verdadero en Android/iOS: el heap disponible es mucho menor que el de
-  /// desktop y acumular cientos de MiB de Float32 provoca OOM.
-  bool get _esMovil =>
-      Platform.isAndroid || Platform.isIOS;
 
   /// Convierte [archivo] en audios en los formatos pedidos.
   ///

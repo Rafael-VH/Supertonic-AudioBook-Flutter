@@ -206,6 +206,7 @@ class ProcesarArchivoStub extends ProcesarArchivo {
     required super.silencioMuestras,
     required super.memoriaSafeMarginBytes,
     required super.topeMovilBytes,
+    super.esMovil,
   });
 
   final List<

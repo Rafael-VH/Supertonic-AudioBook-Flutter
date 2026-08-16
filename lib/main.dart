@@ -55,6 +55,9 @@ Future<void> main() async {
           silencioMuestras: silenceSamples,
           memoriaSafeMarginBytes: memoriaSafeMarginBytes,
           topeMovilBytes: memoriaSafeMarginBytesMovil,
+          // Decisión de plataforma: acá vive (composition root con dart:io),
+          // nunca en domain/.
+          esMovil: Platform.isAndroid || Platform.isIOS,
         )),
         carpetaBaseProvider.overrideWithValue(docsBase),
         modeloManagerProvider.overrideWithValue(ModeloManager()),
