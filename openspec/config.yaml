@@ -1,0 +1,54 @@
+# openspec/config.yaml — SDD configuration for supertonic-audiobook-flutter
+schema: spec-driven
+
+context: |
+  Tech stack: Flutter 3.44.9 / Dart 3.12.2 — app supertonic_audiobook (TTS de audiolibros,
+    ONNX runtime on-device, sin nube). Riverpod 3.4.2 (Notifier + providers), go_router 17.5,
+    just_audio, ffmpeg_kit_flutter_new. l10n: gen-l10n (app_es.arb / app_en.arb).
+  Architecture: Clean Architecture — lib/presentation (UI + controllers/providers),
+    lib/domain (contratos + casos de uso), lib/data (repositorios), lib/core.
+  Testing: flutter_test + mocktail. Suite: 179 passed / 4 skipped
+    (FFmpeg no disponible en el entorno de tests).
+  Style: idioma de código español (nombres de casos de uso, repositorios y tests en español);
+    conventional commits; commits por unidad de trabajo (work-unit-commits).
+
+testing:
+  strict_tdd: true
+  test_command: flutter test
+  coverage_command: flutter test --coverage
+  layers:
+    unit: flutter_test (test/core, test/domain/use_cases)
+    widget: flutter_test (test/presentation)
+    integration: flutter_test con mocktail — test/domain/use_cases/*_integration_test.dart
+    e2e: no disponible (sin integration_test/; FFmpeg no corre en test env)
+  quality:
+    linter: flutter analyze (flutter_lints 5.0.0)
+    type_checker: flutter analyze (Dart statically typed)
+    formatter: dart format
+
+rules:
+  proposal:
+    - Include rollback plan for risky changes
+    - Keep intent, scope, and approach explicit
+  specs:
+    - Use Given/When/Then for scenarios
+    - Use RFC 2119 keywords (MUST, SHALL, SHOULD, MAY)
+    - Describe deltas only; never rewrite main specs in a change
+  design:
+    - Include sequence diagrams for complex flows
+    - Document architecture decisions with rationale
+    - Respect Clean Architecture Dependency Rule (domain no depende de data/presentation)
+  tasks:
+    - Group by phase, use hierarchical numbering
+    - Keep tasks completable in one session
+  apply:
+    - Follow existing code patterns (idioma español en identificadores de dominio)
+    - Run tests after each work unit
+    tdd: true
+    test_command: "flutter test"
+  verify:
+    test_command: "flutter test"
+    build_command: "flutter analyze"
+    coverage_threshold: 0
+  archive:
+    - Warn before merging destructive deltas
