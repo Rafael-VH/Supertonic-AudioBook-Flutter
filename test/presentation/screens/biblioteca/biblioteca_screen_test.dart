@@ -52,7 +52,7 @@ class _DestinoPrueba extends StatelessWidget {
 
 /// Harness de la pantalla bajo un router mínimo (el estado vacío navega con
 /// `context.push`). La ruta `/biblioteca` es la inicial y `/home` es un
-/// destino de prueba para verificar la navegación sin arrastrar HomeScreen.
+/// destino de prueba para verificar la navegación sin arrastrar ConvertScreen.
 Widget _harness({
   RepositorioArchivos? repositorio,
   ReproductorFake? reproductor,

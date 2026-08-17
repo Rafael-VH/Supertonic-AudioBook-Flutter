@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 
 import 'package:supertonic_audiobook/presentation/controllers/home_controller.dart';
 import 'package:supertonic_audiobook/presentation/l10n/app_localizations.dart';
-import 'package:supertonic_audiobook/presentation/screens/home/tablet/panel_entrada.dart';
-import 'package:supertonic_audiobook/presentation/screens/home/tablet/panel_sintesis.dart';
+import 'package:supertonic_audiobook/presentation/screens/convert/tablet/panel_entrada.dart';
+import 'package:supertonic_audiobook/presentation/screens/convert/tablet/panel_sintesis.dart';
 
 /// Tablet: dos paneles lado a lado, cada uno con sus cards.
 class CuerpoLadoAlado extends StatelessWidget {

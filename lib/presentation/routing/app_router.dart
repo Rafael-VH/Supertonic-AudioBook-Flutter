@@ -5,7 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:supertonic_audiobook/presentation/controllers/modelo_controller.dart';
 import 'package:supertonic_audiobook/presentation/screens/biblioteca/biblioteca_screen.dart';
 import 'package:supertonic_audiobook/presentation/screens/dashboard/dashboard_screen.dart';
-import 'package:supertonic_audiobook/presentation/screens/home/home_screen.dart';
+import 'package:supertonic_audiobook/presentation/screens/convert/convert_screen.dart';
 import 'package:supertonic_audiobook/presentation/screens/modelo/modelo_screen.dart';
 import 'package:supertonic_audiobook/presentation/screens/onboarding/onboarding_screen.dart';
 import 'package:supertonic_audiobook/presentation/screens/settings/settings_screen.dart';
@@ -67,7 +67,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: Rutas.dashboard,
         builder: (_, __) => const DashboardScreen(),
       ),
-      GoRoute(path: Rutas.home, builder: (_, __) => const HomeScreen()),
+      GoRoute(path: Rutas.home, builder: (_, __) => const ConvertScreen()),
       GoRoute(path: Rutas.modelo, builder: (_, __) => const ModeloScreen()),
       GoRoute(
         path: Rutas.biblioteca,

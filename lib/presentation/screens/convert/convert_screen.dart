@@ -5,8 +5,8 @@ import 'package:go_router/go_router.dart';
 import 'package:supertonic_audiobook/presentation/controllers/home_controller.dart';
 import 'package:supertonic_audiobook/presentation/l10n/app_localizations.dart';
 import 'package:supertonic_audiobook/presentation/routing/app_router.dart';
-import 'package:supertonic_audiobook/presentation/screens/home/movil/cuerpo_apilado.dart';
-import 'package:supertonic_audiobook/presentation/screens/home/tablet/cuerpo_lado_alado.dart';
+import 'package:supertonic_audiobook/presentation/screens/convert/movil/cuerpo_apilado.dart';
+import 'package:supertonic_audiobook/presentation/screens/convert/tablet/cuerpo_lado_alado.dart';
 import 'package:supertonic_audiobook/presentation/theme/app_theme.dart';
 import 'package:supertonic_audiobook/presentation/widgets/barra_accion.dart';
 
@@ -19,8 +19,8 @@ const int umbralAncho = 900;
 /// En tablet (>= [umbralAncho]) los paneles van lado a lado con scroll
 /// propio; en móvil se apilan con la lista de archivos como protagonista y
 /// una barra de acción inferior persistente (plan de mejora de interfaz).
-class HomeScreen extends ConsumerWidget {
-  const HomeScreen({super.key});
+class ConvertScreen extends ConsumerWidget {
+  const ConvertScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -37,16 +37,16 @@ class HomeScreen extends ConsumerWidget {
           ),
         ],
       ),
-      body: const HomeBody(),
+      body: const ConvertBody(),
     );
   }
 }
 
 /// Cuerpo reutilizable de la pantalla Home (sin Scaffold propio).
-/// Se usa tanto en [HomeScreen] como embebido en el [DashboardScreen] con
+/// Se usa tanto en [ConvertScreen] como embebido en el [DashboardScreen] con
 /// BottomNavigationBar.
-class HomeBody extends ConsumerWidget {
-  const HomeBody({super.key});
+class ConvertBody extends ConsumerWidget {
+  const ConvertBody({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

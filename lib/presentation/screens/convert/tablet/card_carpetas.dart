@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:supertonic_audiobook/presentation/controllers/home_controller.dart';
 import 'package:supertonic_audiobook/presentation/l10n/app_localizations.dart';
-import 'package:supertonic_audiobook/presentation/screens/home/movil/contenido_carpetas.dart';
+import 'package:supertonic_audiobook/presentation/screens/convert/movil/contenido_carpetas.dart';
 
 /// Card de carpetas de origen y salida (vista de tablet).
 class CardCarpetas extends StatelessWidget {

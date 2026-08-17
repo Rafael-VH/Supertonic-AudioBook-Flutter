@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:supertonic_audiobook/presentation/controllers/home_controller.dart';
 import 'package:supertonic_audiobook/presentation/l10n/app_localizations.dart';
-import 'package:supertonic_audiobook/presentation/screens/home/movil/contenido_archivos.dart';
+import 'package:supertonic_audiobook/presentation/screens/convert/movil/contenido_archivos.dart';
 
 /// Card de archivos encontrados con su lista de selección (vista de tablet).
 class CardArchivos extends StatelessWidget {

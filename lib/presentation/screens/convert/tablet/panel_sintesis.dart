@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 
 import 'package:supertonic_audiobook/presentation/controllers/home_controller.dart';
 import 'package:supertonic_audiobook/presentation/l10n/app_localizations.dart';
-import 'package:supertonic_audiobook/presentation/screens/home/tablet/card_opciones.dart';
-import 'package:supertonic_audiobook/presentation/screens/home/tablet/card_registro.dart';
+import 'package:supertonic_audiobook/presentation/screens/convert/tablet/card_opciones.dart';
+import 'package:supertonic_audiobook/presentation/screens/convert/tablet/card_registro.dart';
 
 /// Panel de síntesis: opciones y registro (vista de tablet).
 class PanelSintesis extends StatelessWidget {

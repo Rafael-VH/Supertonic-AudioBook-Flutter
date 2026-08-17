@@ -131,7 +131,7 @@ void main() {
 
     await _saltarSplash(tester);
 
-    // El workspace de conversión (HomeBody) ya está embebido en el tab 0
+    // El workspace de conversión (ConvertBody) ya está embebido en el tab 0
     // del dashboard — no hay navegación separada.
     expect(find.text('Carpeta de origen'), findsOneWidget);
   });

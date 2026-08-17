@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 
 import 'package:supertonic_audiobook/presentation/controllers/home_controller.dart';
 import 'package:supertonic_audiobook/presentation/l10n/app_localizations.dart';
-import 'package:supertonic_audiobook/presentation/screens/home/tablet/card_archivos.dart';
-import 'package:supertonic_audiobook/presentation/screens/home/tablet/card_carpetas.dart';
+import 'package:supertonic_audiobook/presentation/screens/convert/tablet/card_archivos.dart';
+import 'package:supertonic_audiobook/presentation/screens/convert/tablet/card_carpetas.dart';
 
 /// Panel de entrada: carpetas de origen/salida y lista de archivos.
 class PanelEntrada extends StatelessWidget {

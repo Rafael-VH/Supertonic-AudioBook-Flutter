@@ -9,7 +9,7 @@ import 'package:supertonic_audiobook/presentation/l10n/app_localizations.dart';
 import 'package:supertonic_audiobook/presentation/routing/app_router.dart';
 import 'package:supertonic_audiobook/presentation/screens/biblioteca/biblioteca_screen.dart';
 import 'package:supertonic_audiobook/presentation/screens/dashboard/dashboard_screen.dart';
-import 'package:supertonic_audiobook/presentation/screens/home/home_screen.dart';
+import 'package:supertonic_audiobook/presentation/screens/convert/convert_screen.dart';
 import 'package:supertonic_audiobook/presentation/screens/modelo/modelo_screen.dart';
 import 'package:supertonic_audiobook/presentation/theme/app_theme.dart';
 import 'package:supertonic_audiobook/presentation/theme/paleta.dart';
@@ -129,7 +129,7 @@ void main() {
       final router = container.read(appRouterProvider);
 
       expect(_rutaActual(router), Rutas.home);
-      expect(find.byType(HomeScreen), findsOneWidget);
+      expect(find.byType(ConvertScreen), findsOneWidget);
     });
 
     testWidgets('con extra /dashboard el redirect devuelve al dashboard '
@@ -158,7 +158,7 @@ void main() {
       final router = container.read(appRouterProvider);
 
       expect(_rutaActual(router), Rutas.home);
-      expect(find.byType(HomeScreen), findsOneWidget);
+      expect(find.byType(ConvertScreen), findsOneWidget);
     });
 
     testWidgets(

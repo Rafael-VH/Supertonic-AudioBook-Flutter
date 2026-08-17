@@ -68,7 +68,7 @@ Future<void> _hasta(WidgetTester tester, String texto) async {
   fail('No apareció el texto "$texto"');
 }
 
-/// Salta el splash (1200 ms). El dashboard ahora muestra HomeBody (tab 0)
+/// Salta el splash (1200 ms). El dashboard ahora muestra ConvertBody (tab 0)
 /// directamente, sin necesidad de tocar una card de navegación.
 Future<void> _arrancarYProcesar(WidgetTester tester) async {
   await tester.pump();
@@ -150,7 +150,7 @@ void main() {
       await tester.tap(find.text('Configuración'));
       await tester.pumpAndSettle();
       await _hasta(tester, 'Descargar modelo');
-      // El dashboard ahora embebe HomeBody siempre; la card del modelo
+      // El dashboard ahora embebe ConvertBody siempre; la card del modelo
       // en SettingsBody muestra el CTA de descarga sin bloquear la pantalla.
       expect(find.byType(DashboardScreen), findsOneWidget);
     });

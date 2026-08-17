@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:supertonic_audiobook/presentation/l10n/app_localizations.dart';
 import 'package:supertonic_audiobook/presentation/screens/biblioteca/biblioteca_screen.dart';
-import 'package:supertonic_audiobook/presentation/screens/home/home_screen.dart';
+import 'package:supertonic_audiobook/presentation/screens/convert/convert_screen.dart';
 import 'package:supertonic_audiobook/presentation/screens/settings/settings_screen.dart';
 
 /// Shell principal de la app con BottomNavigationBar. Alterna entre
-/// [HomeBody] (conversión), [BibliotecaBody] (audiolibros) y
+/// [ConvertBody] (conversión), [BibliotecaBody] (audiolibros) y
 /// [SettingsBody] (configuración + estado del modelo).
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -25,7 +25,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       body: IndexedStack(
         index: _selectedIndex,
         children: const [
-          HomeBody(),
+          ConvertBody(),
           BibliotecaBody(),
           SettingsBody(),
         ],

@@ -10,7 +10,7 @@ import 'package:supertonic_audiobook/domain/entities/archivo.dart';
 import 'package:supertonic_audiobook/presentation/controllers/providers.dart';
 import 'package:supertonic_audiobook/presentation/controllers/settings_controller.dart';
 import 'package:supertonic_audiobook/presentation/l10n/app_localizations.dart';
-import 'package:supertonic_audiobook/presentation/screens/home/home_screen.dart';
+import 'package:supertonic_audiobook/presentation/screens/convert/convert_screen.dart';
 import 'package:supertonic_audiobook/presentation/theme/app_theme.dart';
 
 import '../../support/fakes.dart';
@@ -41,7 +41,7 @@ Widget _harness({RepositorioArchivosFake? repositorio, MotorFake? motor}) {
         theme: construirTema(oscuro: false, estilo: ajustes.estilo),
         darkTheme: construirTema(oscuro: true, estilo: ajustes.estilo),
         themeMode: ajustes.temaOscuro ? ThemeMode.dark : ThemeMode.light,
-        home: const HomeScreen(),
+        home: const ConvertScreen(),
       );
     }),
   );
@@ -136,7 +136,7 @@ void main() {
     await _pump(tester);
 
     final container = ProviderScope.containerOf(
-      tester.element(find.byType(HomeScreen)),
+      tester.element(find.byType(ConvertScreen)),
     );
     container.read(settingsControllerProvider.notifier).cambiarIdioma('en');
     await tester.pumpAndSettle();

@@ -13,7 +13,7 @@ import 'package:supertonic_audiobook/presentation/screens/dashboard/dashboard_sc
 import '../../support/fakes.dart';
 
 /// Harness de la pantalla sola (sin router). Provee los providers que
-/// HomeBody, BibliotecaBody y SettingsBody necesitan al estar embebidos
+/// ConvertBody, BibliotecaBody y SettingsBody necesitan al estar embebidos
 /// en el dashboard.
 Widget _harness(
   ModeloGestorFake gestor, {
@@ -69,7 +69,7 @@ void _iniciarDescarga(WidgetTester tester) {
 }
 
 /// Finder del Card del modelo: el Card que contiene el texto de estado del
-/// modelo (aislado de otros Cards que pueda haber en HomeBody/BibliotecaBody).
+/// modelo (aislado de otros Cards que pueda haber en ConvertBody/BibliotecaBody).
 Finder get _modeloCard => find.ancestor(
   of: find.textContaining('Modelos:'),
   matching: find.byType(Card),
@@ -131,7 +131,7 @@ void main() {
   );
 
   testWidgets(
-    'tocar Inicio vuelve a índice 0 (HomeBody)',
+    'tocar Inicio vuelve a índice 0 (ConvertBody)',
     (tester) async {
       await _pump(tester, ModeloGestorFake());
       await tester.pumpAndSettle();
@@ -398,7 +398,7 @@ void main() {
   });
 
   testWidgets(
-    'los ticks del modelo no reconstruyen HomeBody ni BibliotecaBody (DASH-7)',
+    'los ticks del modelo no reconstruyen ConvertBody ni BibliotecaBody (DASH-7)',
     (tester) async {
       final gestor = ModeloGestorFake()..espera = Completer<void>();
       await _pump(tester, gestor);
