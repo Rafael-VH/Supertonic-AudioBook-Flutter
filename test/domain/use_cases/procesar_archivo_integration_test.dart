@@ -2,8 +2,9 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:supertonic_audiobook/core/audio/wav_io.dart';
+import 'package:supertonic_audiobook/core/audio/wav_io.dart' as wav;
 import 'package:supertonic_audiobook/data/repositories/exportador_audio_ffmpeg.dart';
+import 'package:supertonic_audiobook/domain/contracts/exportador_audio.dart';
 import 'package:supertonic_audiobook/domain/contracts/motor_tts.dart';
 import 'package:supertonic_audiobook/domain/contracts/repositorio_archivos.dart';
 import 'package:supertonic_audiobook/domain/entities/archivo.dart';
@@ -11,7 +12,7 @@ import 'package:supertonic_audiobook/domain/use_cases/procesar_archivo.dart';
 import 'package:supertonic_audiobook/domain/use_cases/sintetizar_muestra.dart';
 
 /// Devuelve [cantidad] muestras float32 (1 s de silencio = 44100 muestras).
-Float32List _audio(double segundos) => Float32List((segundos * wavSampleRate).round());
+Float32List _audio(double segundos) => Float32List((segundos * wav.wavSampleRate).round());
 
 /// Párrafo largo (> mergeThreshold = 200) para que NO se fusione con el
 /// siguiente en `segmentarTexto` y el test controle los segmentos.
@@ -66,16 +67,58 @@ class _FakeRepositorio implements RepositorioArchivos {
   }
 }
 
+/// Exportador que falla al convertir los formatos en [formatosQueFallan]
+/// pero funciona para el resto (WAV siempre funciona).
+class _ExportadorSelectivo implements ExportadorAudio {
+  _ExportadorSelectivo({required this.formatosQueFallan});
+
+  final Set<String> formatosQueFallan;
+
+  @override
+  Future<void> escribirAudio(
+      List<Float32List> fragmentos, String ruta, String formato) async {
+    if (formatosQueFallan.contains(formato)) {
+      throw StateError('FFmpeg falló al convertir a $formato');
+    }
+    wav.escribirWav(fragmentos, ruta);
+  }
+
+  @override
+  Future<void> wavAppend(List<Float32List> fragmentos, String ruta) async {
+    wav.wavAppend(fragmentos, ruta);
+  }
+
+  @override
+  Future<void> convertirDesdeWav(
+      String rutaWav, String rutaDestino, String formato) async {
+    if (formatosQueFallan.contains(formato)) {
+      throw StateError('FFmpeg falló al convertir a $formato');
+    }
+    // Para formatos selectivos que no fallan, escribimos un WAV simple
+    // (suficiente para el test de publicación).
+    final datos = File(rutaWav).readAsBytesSync();
+    File(rutaDestino).writeAsBytesSync(datos);
+  }
+
+  @override
+  Future<double> duracionAudio(String ruta) async {
+    if (!File(ruta).existsSync()) return 0.0;
+    if (ruta.toLowerCase().endsWith('.wav')) return wav.duracionWav(ruta);
+    return 0.0;
+  }
+}
+
 ProcesarArchivo _caso(
   MotorTts motor,
   RepositorioArchivos archivos, {
   int silencio = 0,
   int margenMemoria = 1 << 30,
+  ExportadorAudio? exportador,
 }) {
   return ProcesarArchivo(
     motor: motor,
     archivos: archivos,
-    exportador: ExportadorAudioFfmpeg(),
+    exportador: exportador ?? ExportadorAudioFfmpeg(),
     silencioMuestras: silencio,
     memoriaSafeMarginBytes: margenMemoria,
     topeMovilBytes: margenMemoria,
@@ -113,7 +156,7 @@ void main() {
       final ruta = '${temp.path}/salida.wav';
       expect(File(ruta).existsSync(), isTrue);
       // 2 segmentos de 1 s = 2.0 s (sin silencio intermedio).
-      expect(duracionWav(ruta), closeTo(2.0, 1e-6));
+      expect(wav.duracionWav(ruta), closeTo(2.0, 1e-6));
       expect(progresos, [1, 2]);
       expect(motor.llamadas, 2);
     });
@@ -168,14 +211,14 @@ void main() {
       expect(motor.llamadas, 1);
       final ruta = '${temp.path}/salida.wav';
       expect(File(ruta).existsSync(), isTrue);
-      expect(duracionWav(ruta), closeTo(1.0, 1e-6));
+      expect(wav.duracionWav(ruta), closeTo(1.0, 1e-6));
     });
 
     test('cancelar conserva el output previo y publica solo destinos nuevos',
         () async {
       // Output previo COMPLETO (9 s) de una corrida anterior.
       final previo = '${temp.path}/salida.wav';
-      escribirWav([_audio(9.0)], previo);
+      wav.escribirWav([_audio(9.0)], previo);
 
       final motor = _FakeMotor();
       final caso = _caso(
@@ -196,7 +239,7 @@ void main() {
       // Solo se sintetizó 1 segmento (1 s) y el destino YA existía: la
       // cancelación no debe pisar el audio previo con el truncado.
       expect(motor.llamadas, 1);
-      expect(duracionWav(previo), closeTo(9.0, 1e-6));
+      expect(wav.duracionWav(previo), closeTo(9.0, 1e-6));
     });
 
     test('vuelca a disco por límite de memoria y arma el WAV final', () async {
@@ -214,7 +257,7 @@ void main() {
       );
       final ruta = '${temp.path}/salida.wav';
       expect(File(ruta).existsSync(), isTrue);
-      expect(duracionWav(ruta), closeTo(3.0, 1e-6));
+      expect(wav.duracionWav(ruta), closeTo(3.0, 1e-6));
     });
 
     test('omite archivos vacíos tras limpiar', () async {
@@ -262,7 +305,7 @@ void main() {
     test('no reemplaza el WAV previo si el destino está en uso (Windows)',
         () async {
       final previo = '${temp.path}/salida.wav';
-      escribirWav([_audio(9.0)], previo);
+      wav.escribirWav([_audio(9.0)], previo);
       final raf = File(previo).openSync(mode: FileMode.append);
       try {
         final caso = _caso(_FakeMotor(), _FakeRepositorio('Texto.'));
@@ -277,11 +320,35 @@ void main() {
           throwsA(isA<FileSystemException>()),
         );
         // El WAV previo quedó intacto (9.0 s).
-        expect(duracionWav(previo), closeTo(9.0, 1e-6));
+        expect(wav.duracionWav(previo), closeTo(9.0, 1e-6));
       } finally {
         raf.closeSync();
       }
     }, skip: !Platform.isWindows ? 'El lock de archivo es de Windows' : null);
+
+    test('si un formato falla, publica los que sí convirtieron', () async {
+      // FLAC falla, MP3 y WAV funcionan.
+      final exportador = _ExportadorSelectivo(formatosQueFallan: {'flac'});
+      final caso = _caso(
+        _FakeMotor(),
+        _FakeRepositorio('Texto.'),
+        exportador: exportador,
+      );
+
+      final resultado = await caso.procesar(
+        Archivo('${temp.path}/in.md'),
+        '${temp.path}/salida',
+        steps: 5,
+        speed: 1.1,
+        formatos: ['mp3', 'flac', 'wav'],
+      );
+
+      expect(resultado, ResultadoProceso.ok);
+      // MP3 y WAV se publicaron; FLAC no (fallo de conversión).
+      expect(File('${temp.path}/salida.mp3').existsSync(), isTrue);
+      expect(File('${temp.path}/salida.wav').existsSync(), isTrue);
+      expect(File('${temp.path}/salida.flac').existsSync(), isFalse);
+    });
   });
 
   group('SintetizarMuestra (integración)', () {
@@ -295,7 +362,7 @@ void main() {
 
       expect(resultado, ruta);
       expect(File(ruta).existsSync(), isTrue);
-      expect(duracionWav(ruta), closeTo(1.0, 1e-6));
+      expect(wav.duracionWav(ruta), closeTo(1.0, 1e-6));
     });
 
     test('con el motor caído relanza el error sin crear archivo', () async {
@@ -322,7 +389,7 @@ void main() {
 
       expect(resultado, ruta);
       expect(File(ruta).existsSync(), isTrue);
-      expect(duracionWav(ruta), 0.0);
+      expect(wav.duracionWav(ruta), 0.0);
     });
   });
 }

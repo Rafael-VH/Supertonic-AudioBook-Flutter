@@ -181,24 +181,34 @@ class ProcesarArchivo {
 
       // --- Exportar ---
       _log.i('Exportando audio...');
-      // Fase 1: generar todo a archivos temporales.
+      // Fase 1: generar todo a archivos temporales. Un fallo de conversión
+      // en un formato no aborta los demás: se loguea y se continua. Solo los
+      // formatos que convirtieron exitosamente se publican.
       final salidas = <(String, String)>[];
       if (parcialEscrito) {
         await _exportador.wavAppend(fragmentos, rutaWavTrabajo);
         for (final formato in formatosUnicos) {
-          if (formato == 'wav') {
-            salidas.add((rutaWavTrabajo, '$rutaBase.wav'));
-          } else {
-            final temporal = _nuevoTemporal(dirSalida, formato, temporales);
-            await _exportador.convertirDesdeWav(rutaWavTrabajo, temporal, formato);
-            salidas.add((temporal, '$rutaBase.$formato'));
+          try {
+            if (formato == 'wav') {
+              salidas.add((rutaWavTrabajo, '$rutaBase.wav'));
+            } else {
+              final temporal = _nuevoTemporal(dirSalida, formato, temporales);
+              await _exportador.convertirDesdeWav(rutaWavTrabajo, temporal, formato);
+              salidas.add((temporal, '$rutaBase.$formato'));
+            }
+          } catch (exc) {
+            _log.e("Fallo al exportar formato '$formato': $exc");
           }
         }
       } else {
         for (final formato in formatosUnicos) {
-          final temporal = _nuevoTemporal(dirSalida, formato, temporales);
-          await _exportador.escribirAudio(fragmentos, temporal, formato);
-          salidas.add((temporal, '$rutaBase.$formato'));
+          try {
+            final temporal = _nuevoTemporal(dirSalida, formato, temporales);
+            await _exportador.escribirAudio(fragmentos, temporal, formato);
+            salidas.add((temporal, '$rutaBase.$formato'));
+          } catch (exc) {
+            _log.e("Fallo al exportar formato '$formato': $exc");
+          }
         }
       }
 
