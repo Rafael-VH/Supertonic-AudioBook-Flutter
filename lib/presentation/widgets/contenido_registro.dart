@@ -2,10 +2,10 @@
 import 'package:flutter/material.dart';
 import 'package:supertonic_audiobook/presentation/controllers/home_controller.dart';
 import 'package:supertonic_audiobook/presentation/l10n/app_localizations.dart';
-import 'package:supertonic_audiobook/presentation/widgets/barra_progreso.dart';
 import 'package:supertonic_audiobook/presentation/widgets/vista_log.dart';
 
-/// Contenido del registro: log, estado y progreso.
+/// Contenido del registro: log y estado.
+/// La barra de progreso vive en [BarraAccion] (barra inferior persistente).
 class ContenidoRegistro extends StatelessWidget {
   const ContenidoRegistro({
     super.key,
@@ -37,11 +37,6 @@ class ContenidoRegistro extends StatelessWidget {
         Text(
           estado.estado.isEmpty ? t.estado_listo : estado.estado,
           style: Theme.of(context).textTheme.bodyMedium,
-        ),
-        const SizedBox(height: 8),
-        BarraProgreso(
-          actual: estado.progresoActual,
-          total: estado.progresoTotal,
         ),
       ],
     );
