@@ -514,4 +514,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String biblioteca_error(String error) {
     return 'Could not play: $error';
   }
+
+  @override
+  String get btn_carpeta => 'Folder';
+
+  @override
+  String get btn_archivos => 'Files';
 }

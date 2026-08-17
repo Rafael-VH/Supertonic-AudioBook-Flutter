@@ -955,6 +955,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Could not play: {error}'**
   String biblioteca_error(String error);
+
+  /// No description provided for @btn_carpeta.
+  ///
+  /// In en, this message translates to:
+  /// **'Folder'**
+  String get btn_carpeta;
+
+  /// No description provided for @btn_archivos.
+  ///
+  /// In en, this message translates to:
+  /// **'Files'**
+  String get btn_archivos;
 }
 
 class _AppLocalizationsDelegate

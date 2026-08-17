@@ -325,5 +325,7 @@
     "placeholders": {
       "error": {"type": "String"}
     }
-  }
+  },
+  "btn_carpeta": "Folder",
+  "btn_archivos": "Files"
 }

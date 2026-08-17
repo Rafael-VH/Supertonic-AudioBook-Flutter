@@ -518,4 +518,10 @@ class AppLocalizationsEs extends AppLocalizations {
   String biblioteca_error(String error) {
     return 'No se pudo reproducir: $error';
   }
+
+  @override
+  String get btn_carpeta => 'Carpeta';
+
+  @override
+  String get btn_archivos => 'Archivos';
 }

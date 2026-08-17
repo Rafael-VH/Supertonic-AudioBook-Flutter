@@ -50,6 +50,7 @@ class PanelEntrada extends StatelessWidget {
           Expanded(
             child: CardArchivos(
               estado: estado,
+              controller: controller,
               habilitado: habilitado,
               listaExpandida: listaExpandida,
               onRefrescar: controller.cargarArchivos,
@@ -61,6 +62,7 @@ class PanelEntrada extends StatelessWidget {
         else
           CardArchivos(
             estado: estado,
+            controller: controller,
             habilitado: habilitado,
             listaExpandida: listaExpandida,
             onRefrescar: controller.cargarArchivos,

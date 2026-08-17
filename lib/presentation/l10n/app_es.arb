@@ -325,5 +325,7 @@
     "placeholders": {
       "error": {"type": "String"}
     }
-  }
+  },
+  "btn_carpeta": "Carpeta",
+  "btn_archivos": "Archivos"
 }

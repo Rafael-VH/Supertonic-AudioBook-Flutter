@@ -87,12 +87,6 @@ class DashboardScreen extends StatelessWidget {
                       onTap: () => context.push(Rutas.home),
                     ),
                     _CardFuncion(
-                      icono: Icons.library_music_outlined,
-                      titulo: t.dashboard_procesar_sueltos,
-                      descripcion: t.dashboard_procesar_sueltos_desc,
-                      onTap: () => context.push(Rutas.seleccion),
-                    ),
-                    _CardFuncion(
                       icono: Icons.library_books_outlined,
                       titulo: t.dashboard_biblioteca,
                       descripcion: t.dashboard_biblioteca_desc,

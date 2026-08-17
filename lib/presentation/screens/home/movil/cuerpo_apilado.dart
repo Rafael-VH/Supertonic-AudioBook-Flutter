@@ -41,6 +41,7 @@ class _CuerpoApiladoState extends State<CuerpoApilado> {
       1 => ContenidoArchivos(
           key: const ValueKey(1),
           estado: estado,
+          controller: controller,
           habilitado: habilitado,
           listaExpandida: false, // false dentro de SingleChildScrollView
           onRefrescar: controller.cargarArchivos,

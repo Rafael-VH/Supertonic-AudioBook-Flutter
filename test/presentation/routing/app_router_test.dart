@@ -11,7 +11,6 @@ import 'package:supertonic_audiobook/presentation/screens/biblioteca/biblioteca_
 import 'package:supertonic_audiobook/presentation/screens/dashboard/dashboard_screen.dart';
 import 'package:supertonic_audiobook/presentation/screens/home/home_screen.dart';
 import 'package:supertonic_audiobook/presentation/screens/modelo/modelo_screen.dart';
-import 'package:supertonic_audiobook/presentation/screens/seleccion/seleccion_screen.dart';
 import 'package:supertonic_audiobook/presentation/theme/app_theme.dart';
 import 'package:supertonic_audiobook/presentation/theme/paleta.dart';
 
@@ -145,20 +144,6 @@ void main() {
 
       expect(_rutaActual(router), Rutas.dashboard);
       expect(find.byType(DashboardScreen), findsOneWidget);
-    });
-
-    testWidgets('con extra /seleccion el redirect devuelve a seleccion '
-        '(sin regresión)', (tester) async {
-      final container = await _montar(
-        tester,
-        modeloListo: true,
-        inicio: Rutas.modelo,
-        extra: Rutas.seleccion,
-      );
-      final router = container.read(appRouterProvider);
-
-      expect(_rutaActual(router), Rutas.seleccion);
-      expect(find.byType(SeleccionScreen), findsOneWidget);
     });
 
     testWidgets('con extra desconocido el redirect cae al fallback /home', (

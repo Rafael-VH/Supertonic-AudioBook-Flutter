@@ -1,4 +1,3 @@
-import 'package:file_picker/src/platform/file_picker_platform_interface.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -136,22 +135,15 @@ void main() {
         findsOneWidget);
   });
 
-  testWidgets('el segundo botón del dashboard llega a la selección de archivos',
+  testWidgets('el segundo botón del dashboard es Biblioteca',
       (WidgetTester tester) async {
-    FilePickerPlatform.instance = FilePickerFake(null);
-    addTearDown(() {
-      FilePickerPlatform.instance = FilePickerFake(null);
-    });
-
     await tester.pumpWidget(_construirApp(preferencias: {
       'onboarding_visto': true,
     }));
 
     await _saltarSplash(tester);
-    await tester.tap(find.text('Procesar archivos sueltos'));
-    await tester.pumpAndSettle();
 
-    expect(find.text('Procesar archivos sueltos'), findsOneWidget);
-    expect(find.text('Todavía no elegiste archivos.'), findsOneWidget);
+    expect(find.text('Biblioteca'), findsOneWidget);
+    expect(find.byIcon(Icons.library_books_outlined), findsOneWidget);
   });
 }

@@ -10,7 +10,6 @@ import 'package:supertonic_audiobook/domain/entities/archivo.dart';
 import 'package:supertonic_audiobook/domain/use_cases/procesar_archivo.dart';
 import 'package:supertonic_audiobook/presentation/controllers/home_controller.dart';
 import 'package:supertonic_audiobook/presentation/controllers/providers.dart';
-import 'package:supertonic_audiobook/presentation/controllers/seleccion_controller.dart';
 import 'package:supertonic_audiobook/presentation/l10n/app_localizations.dart';
 
 import '../../support/fakes.dart';
@@ -501,75 +500,6 @@ void main() {
       expect(estado.estado, t.estado_con_errores(0, 2, 2));
       expect(estado.snackbar?.esError, isTrue);
       expect(estado.lineasLog, contains(t.log_archivo_error(1, 2, 'a.md')));
-    });
-  });
-
-  group('SeleccionController', () {
-    late PreferenciasMemoria preferencias;
-    late RepositorioArchivosFake repositorio;
-    late MotorFake motor;
-    late ExportadorFake exportador;
-    late ReproductorFake reproductor;
-    late ProcesarArchivoStub procesador;
-
-    ProviderContainer crearContenedor() => ProviderContainer(
-          overrides: [
-            repositorioPreferenciasProvider.overrideWithValue(preferencias),
-            repositorioArchivosProvider.overrideWithValue(repositorio),
-            motorTtsProvider.overrideWithValue(motor),
-            exportadorAudioProvider.overrideWithValue(exportador),
-            reproductorAudioProvider.overrideWithValue(reproductor),
-            procesarArchivoProvider.overrideWithValue(procesador),
-            carpetaBaseProvider.overrideWithValue('C:/base'),
-          ],
-        );
-
-    void baseFakes({List<Archivo>? archivos}) {
-      preferencias = PreferenciasMemoria();
-      repositorio = RepositorioArchivosFake(archivos ?? const []);
-      motor = MotorFake();
-      exportador = ExportadorFake();
-      reproductor = ReproductorFake();
-      procesador = ProcesarArchivoStub(
-        motor: motor,
-        archivos: repositorio,
-        exportador: exportador,
-        silencioMuestras: 0,
-        memoriaSafeMarginBytes: 0,
-        topeMovilBytes: 0,
-      );
-    }
-
-    test('build arranca con lista vacía aunque la carpeta por defecto tenga archivos',
-        () {
-      baseFakes(archivos: const [Archivo('C:/base/archivos/a.md')]);
-
-      final container = crearContenedor();
-      final estado = container.read(seleccionControllerProvider);
-
-      expect(estado.archivos, isEmpty);
-    });
-
-    test('cargarArchivosExternos alimenta la lista y procesa', () async {
-      baseFakes();
-
-      final container = crearContenedor();
-      final controller = container.read(seleccionControllerProvider.notifier);
-      controller.cargarArchivosExternos(const [
-        Archivo('C:/sueltos/a.md'),
-        Archivo('C:/sueltos/b.md'),
-      ]);
-
-      await controller.procesar(es());
-
-      final estado = container.read(seleccionControllerProvider);
-      expect(estado.ejecutando, isFalse);
-      expect(estado.estado, es().estado_listo_n(2, es().tiempo_seg(0)));
-      expect(procesador.llamadas, hasLength(2));
-      expect(
-        procesador.llamadas.first.rutaBase,
-        'C:/base${Platform.pathSeparator}audio${Platform.pathSeparator}a',
-      );
     });
   });
 }

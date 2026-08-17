@@ -275,10 +275,10 @@ void main() {
     final dyConvertir = tester
         .getTopLeft(find.text('Convertir archivos a audio'))
         .dy;
-    final dySueltos = tester
-        .getTopLeft(find.text('Procesar archivos sueltos'))
+    final dyBiblioteca = tester
+        .getTopLeft(find.text('Biblioteca'))
         .dy;
-    expect(dySueltos, greaterThan(dyConvertir));
+    expect(dyBiblioteca, greaterThan(dyConvertir));
   });
 
   testWidgets(
@@ -290,10 +290,10 @@ void main() {
       final dyConvertir = tester
           .getTopLeft(find.text('Convertir archivos a audio'))
           .dy;
-      final dySueltos = tester
-          .getTopLeft(find.text('Procesar archivos sueltos'))
+      final dyBiblioteca = tester
+          .getTopLeft(find.text('Biblioteca'))
           .dy;
-      expect(dyConvertir, dySueltos);
+      expect(dyConvertir, dyBiblioteca);
     },
   );
 
@@ -304,8 +304,8 @@ void main() {
       await tester.pumpAndSettle();
 
       final cards = tester.widgetList<Card>(find.byType(Card)).toList();
-      // 3 cards de función + la Card de estado del modelo (WO-4b).
-      expect(cards.length, 4);
+      // 2 cards de función + la Card de estado del modelo (WO-4b).
+      expect(cards.length, 3);
       for (final card in cards) {
         expect(
           card.color,
@@ -333,7 +333,7 @@ void main() {
       await tester.pumpAndSettle();
 
       final circulos = _circulosDeIcono(tester);
-      expect(circulos.length, 3);
+      expect(circulos.length, 2);
       final paleta = Paleta.para(oscuro: false, estilo: AppEstilo.material);
       for (final circulo in circulos) {
         expect(circulo.color, paleta.primarioClaro);
@@ -354,7 +354,7 @@ void main() {
 
       final paleta = Paleta.para(oscuro: false, estilo: AppEstilo.neumo);
       final circulos = _circulosDeIcono(tester);
-      expect(circulos.length, 3);
+      expect(circulos.length, 2);
       for (final circulo in circulos) {
         expect(circulo.color, paleta.primarioLuz);
       }

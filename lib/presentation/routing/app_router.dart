@@ -8,7 +8,6 @@ import 'package:supertonic_audiobook/presentation/screens/dashboard/dashboard_sc
 import 'package:supertonic_audiobook/presentation/screens/home/home_screen.dart';
 import 'package:supertonic_audiobook/presentation/screens/modelo/modelo_screen.dart';
 import 'package:supertonic_audiobook/presentation/screens/onboarding/onboarding_screen.dart';
-import 'package:supertonic_audiobook/presentation/screens/seleccion/seleccion_screen.dart';
 import 'package:supertonic_audiobook/presentation/screens/settings/settings_screen.dart';
 import 'package:supertonic_audiobook/presentation/screens/splash/splash_screen.dart';
 
@@ -20,15 +19,13 @@ abstract final class Rutas {
   static const home = '/home';
   static const modelo = '/modelo';
   static const settings = '/settings';
-  static const seleccion = '/seleccion';
   static const biblioteca = '/biblioteca';
 }
 
 /// Orígenes admitidos para el redirect del gate del modelo (D5): el modelo se
-/// solicita desde `/home` (gate normal), `/dashboard` (CTA de la card) o
-/// `/seleccion` (procesar archivos sueltos). Cualquier otro origen cae al
-/// fallback `/home`.
-const _origenesValidos = {Rutas.home, Rutas.dashboard, Rutas.seleccion};
+/// solicita desde `/home` (gate normal) o `/dashboard` (CTA de la card).
+/// Cualquier otro origen cae al fallback `/home`.
+const _origenesValidos = {Rutas.home, Rutas.dashboard};
 
 /// Notifica a go_router que re-evalúe los redirects cuando cambia el modelo.
 class _RefrescoModelo extends ChangeNotifier {
@@ -38,10 +35,8 @@ class _RefrescoModelo extends ChangeNotifier {
 /// Router declarativo. Concentra la navegación y los gates:
 /// - `/` nunca se visita: [SplashScreen] decide entre onboarding y dashboard.
 /// - El gate del modelo: `/home` sin modelo redirige a `/modelo`, y al quedar
-///   listo vuelve al origen conocido (`/home`, `/dashboard` o `/seleccion`,
-///   ver `_origenesValidos`) o a `/home` como fallback (antes era el widget
-///   privado `_ModeloGate`). La pantalla de selección no tiene gate: solo
-///   avisa al procesar (decisión del usuario).
+///   listo vuelve al origen conocido (`/home` o `/dashboard`, ver
+///   `_origenesValidos`) o a `/home` como fallback.
 final appRouterProvider = Provider<GoRouter>((ref) {
   final refresco = _RefrescoModelo();
   final router = GoRouter(
@@ -52,9 +47,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       final listo = ref.read(modeloControllerProvider).listo;
       if (destino == Rutas.home && !listo) return Rutas.modelo;
       if (destino == Rutas.modelo && listo) {
-        // Volver a donde se pidió el modelo (DASH-4): `/seleccion` (procesar
-        // archivos sueltos), `/dashboard` (CTA de la card) o `/home` (gate
-        // normal). Origen desconocido → fallback `/home`.
+        // Volver a donde se pidió el modelo: `/dashboard` (CTA de la card)
+        // o `/home` (gate normal). Origen desconocido → fallback `/home`.
         final origen = state.extra;
         if (origen is String && _origenesValidos.contains(origen)) {
           return origen;
@@ -75,10 +69,6 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(path: Rutas.home, builder: (_, __) => const HomeScreen()),
       GoRoute(path: Rutas.modelo, builder: (_, __) => const ModeloScreen()),
-      GoRoute(
-        path: Rutas.seleccion,
-        builder: (_, __) => const SeleccionScreen(),
-      ),
       GoRoute(
         path: Rutas.biblioteca,
         builder: (_, __) => const BibliotecaScreen(),

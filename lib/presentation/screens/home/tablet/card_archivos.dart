@@ -9,6 +9,7 @@ class CardArchivos extends StatelessWidget {
   const CardArchivos({
     super.key,
     required this.estado,
+    required this.controller,
     required this.habilitado,
     required this.listaExpandida,
     required this.onRefrescar,
@@ -18,6 +19,7 @@ class CardArchivos extends StatelessWidget {
   });
 
   final HomeEstado estado;
+  final HomeController controller;
   final bool habilitado;
   final bool listaExpandida;
   final VoidCallback onRefrescar;
@@ -43,6 +45,7 @@ class CardArchivos extends StatelessWidget {
             const SizedBox(height: 8),
             ContenidoArchivos(
               estado: estado,
+              controller: controller,
               habilitado: habilitado,
               listaExpandida: listaExpandida,
               onRefrescar: onRefrescar,
