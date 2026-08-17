@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:supertonic_audiobook/presentation/controllers/providers.dart';
@@ -9,17 +11,25 @@ class SettingsEstado {
     required this.temaOscuro,
     required this.estilo,
     required this.idioma,
+    required this.carpetaOut,
   });
 
   final bool temaOscuro;
   final AppEstilo estilo;
   final String idioma;
+  final String carpetaOut;
 
-  SettingsEstado copyWith({bool? temaOscuro, AppEstilo? estilo, String? idioma}) {
+  SettingsEstado copyWith({
+    bool? temaOscuro,
+    AppEstilo? estilo,
+    String? idioma,
+    String? carpetaOut,
+  }) {
     return SettingsEstado(
       temaOscuro: temaOscuro ?? this.temaOscuro,
       estilo: estilo ?? this.estilo,
       idioma: idioma ?? this.idioma,
+      carpetaOut: carpetaOut ?? this.carpetaOut,
     );
   }
 }
@@ -30,10 +40,13 @@ class SettingsController extends Notifier<SettingsEstado> {
   @override
   SettingsEstado build() {
     final preferencias = ref.watch(repositorioPreferenciasProvider).cargar();
+    final base = ref.watch(carpetaBaseProvider);
     return SettingsEstado(
       temaOscuro: preferencias['tema_oscuro'] as bool? ?? false,
       estilo: AppEstilo.desdeId(preferencias['estilo'] as String?),
       idioma: preferencias['idioma'] as String? ?? 'es',
+      carpetaOut: preferencias['carpeta_out'] as String? ??
+          '$base${Platform.pathSeparator}audio',
     );
   }
 
@@ -45,6 +58,7 @@ class SettingsController extends Notifier<SettingsEstado> {
       'tema_oscuro': state.temaOscuro,
       'estilo': state.estilo.id,
       'idioma': state.idioma,
+      'carpeta_out': state.carpetaOut,
     };
     ref.read(repositorioPreferenciasProvider).guardar(prefs);
   }
@@ -61,6 +75,11 @@ class SettingsController extends Notifier<SettingsEstado> {
 
   void cambiarIdioma(String idioma) {
     state = state.copyWith(idioma: idioma);
+    _persistir();
+  }
+
+  void cambiarCarpetaOut(String carpeta) {
+    state = state.copyWith(carpetaOut: carpeta);
     _persistir();
   }
 }

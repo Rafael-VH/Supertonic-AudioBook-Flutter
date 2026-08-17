@@ -86,6 +86,8 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.text('Siguiente'));
     await tester.pumpAndSettle();
+    await tester.tap(find.text('Siguiente'));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Comenzar'));
     await tester.pumpAndSettle();
 

@@ -272,6 +272,15 @@
   "onboarding_paso3_descripcion": "Choose the voice you like and listen to a sample before you start.",
   "onboarding_paso4_titulo": "Process the audio",
   "onboarding_paso4_descripcion": "Run the conversion. Each chapter is read aloud and exported as audio on your device.",
+  "onboarding_paso5_titulo": "Choose where to save",
+  "onboarding_paso5_descripcion": "Select the folder where your audiobooks will be saved. You can change it later from Settings.",
+  "onboarding_paso5_examinar": "Browse folder…",
+  "onboarding_paso5_ruta": "Folder: {ruta}",
+  "@onboarding_paso5_ruta": {
+    "placeholders": {
+      "ruta": {"type": "String"}
+    }
+  },
   "dashboard_titulo": "Supertonic",
   "dashboard_bienvenida": "What do you want to do today?",
   "dashboard_bienvenida_sub": "Pick an option and get started.",
@@ -288,6 +297,14 @@
   "dashboard_modelo_sin_descargar": "not downloaded",
   "dashboard_modelo_verificando": "checking…",
   "carpetas": "Folders",
+  "settings_carpeta_salida": "Output folder",
+  "settings_carpeta_salida_ruta": "Path: {ruta}",
+  "@settings_carpeta_salida_ruta": {
+    "placeholders": {
+      "ruta": {"type": "String"}
+    }
+  },
+  "settings_carpeta_salida_cambiar": "Change folder…",
   "seleccion_titulo": "Process loose files",
   "seleccion_sin_archivos": "You haven't picked any files yet.",
   "seleccion_buscando": "Opening the file picker…",

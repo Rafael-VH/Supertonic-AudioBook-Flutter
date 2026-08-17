@@ -26,6 +26,7 @@ Widget _harness(Widget child) {
   return ProviderScope(
     overrides: [
       repositorioPreferenciasProvider.overrideWithValue(_PreferenciasMemoria()),
+      carpetaBaseProvider.overrideWithValue('/tmp/base'),
     ],
     child: Consumer(builder: (context, ref, _) {
       final ajustes = ref.watch(settingsControllerProvider);

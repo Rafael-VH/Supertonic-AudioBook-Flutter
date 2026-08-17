@@ -176,6 +176,7 @@ void main() {
       final repo = PreferenciasMemoria();
       final contenedor = ProviderContainer(overrides: [
         repositorioPreferenciasProvider.overrideWithValue(repo),
+        carpetaBaseProvider.overrideWithValue('/tmp/base'),
       ]);
       addTearDown(contenedor.dispose);
 
@@ -190,6 +191,7 @@ void main() {
       final repo = PreferenciasMemoria();
       final contenedor = ProviderContainer(overrides: [
         repositorioPreferenciasProvider.overrideWithValue(repo),
+        carpetaBaseProvider.overrideWithValue('/tmp/base'),
       ]);
       addTearDown(contenedor.dispose);
 
@@ -207,6 +209,7 @@ void main() {
       final repo = PreferenciasMemoria();
       final contenedor = ProviderContainer(overrides: [
         repositorioPreferenciasProvider.overrideWithValue(repo),
+        carpetaBaseProvider.overrideWithValue('/tmp/base'),
       ]);
       addTearDown(contenedor.dispose);
       contenedor.read(settingsControllerProvider.notifier).cambiarTemaOscuro(true);
@@ -214,6 +217,7 @@ void main() {
 
       final contenedor2 = ProviderContainer(overrides: [
         repositorioPreferenciasProvider.overrideWithValue(repo),
+        carpetaBaseProvider.overrideWithValue('/tmp/base'),
       ]);
       addTearDown(contenedor2.dispose);
 

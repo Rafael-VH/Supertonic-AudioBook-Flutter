@@ -20,6 +20,7 @@ Widget _harness(ModeloGestorFake gestor) {
     overrides: [
       repositorioPreferenciasProvider.overrideWithValue(PreferenciasMemoria()),
       modeloManagerProvider.overrideWithValue(gestor),
+      carpetaBaseProvider.overrideWithValue('/tmp/base'),
     ],
     child: Consumer(builder: (context, ref, _) {
       final ajustes = ref.watch(settingsControllerProvider);

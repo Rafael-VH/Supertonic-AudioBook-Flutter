@@ -728,6 +728,30 @@ abstract class AppLocalizations {
   /// **'Run the conversion. Each chapter is read aloud and exported as audio on your device.'**
   String get onboarding_paso4_descripcion;
 
+  /// No description provided for @onboarding_paso5_titulo.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose where to save'**
+  String get onboarding_paso5_titulo;
+
+  /// No description provided for @onboarding_paso5_descripcion.
+  ///
+  /// In en, this message translates to:
+  /// **'Select the folder where your audiobooks will be saved. You can change it later from Settings.'**
+  String get onboarding_paso5_descripcion;
+
+  /// No description provided for @onboarding_paso5_examinar.
+  ///
+  /// In en, this message translates to:
+  /// **'Browse folder…'**
+  String get onboarding_paso5_examinar;
+
+  /// No description provided for @onboarding_paso5_ruta.
+  ///
+  /// In en, this message translates to:
+  /// **'Folder: {ruta}'**
+  String onboarding_paso5_ruta(String ruta);
+
   /// No description provided for @dashboard_titulo.
   ///
   /// In en, this message translates to:
@@ -823,6 +847,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Folders'**
   String get carpetas;
+
+  /// No description provided for @settings_carpeta_salida.
+  ///
+  /// In en, this message translates to:
+  /// **'Output folder'**
+  String get settings_carpeta_salida;
+
+  /// No description provided for @settings_carpeta_salida_ruta.
+  ///
+  /// In en, this message translates to:
+  /// **'Path: {ruta}'**
+  String settings_carpeta_salida_ruta(String ruta);
+
+  /// No description provided for @settings_carpeta_salida_cambiar.
+  ///
+  /// In en, this message translates to:
+  /// **'Change folder…'**
+  String get settings_carpeta_salida_cambiar;
 
   /// No description provided for @seleccion_titulo.
   ///

@@ -1,3 +1,4 @@
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supertonic_audiobook/presentation/controllers/settings_controller.dart';
@@ -77,6 +78,32 @@ class SettingsScreen extends ConsumerWidget {
               selected: {ajustes.idioma},
               onSelectionChanged: (seleccion) =>
                   controlador.cambiarIdioma(seleccion.single),
+            ),
+          ),
+          _SeccionCard(
+            titulo: t?.settings_carpeta_salida ?? 'Carpeta de salida',
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  t?.settings_carpeta_salida_ruta(ajustes.carpetaOut) ??
+                      'Ruta: ${ajustes.carpetaOut}',
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
+                const SizedBox(height: 8),
+                FilledButton.tonalIcon(
+                  onPressed: () async {
+                    final carpeta =
+                        await FilePicker.getDirectoryPath();
+                    if (carpeta != null) {
+                      controlador.cambiarCarpetaOut(carpeta);
+                    }
+                  },
+                  icon: const Icon(Icons.folder_open),
+                  label: Text(
+                      t?.settings_carpeta_salida_cambiar ?? 'Cambiar carpeta…'),
+                ),
+              ],
             ),
           ),
           _SeccionCard(

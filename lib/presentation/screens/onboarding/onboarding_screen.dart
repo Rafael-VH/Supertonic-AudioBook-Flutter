@@ -1,3 +1,4 @@
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -17,8 +18,9 @@ class OnboardingScreen extends ConsumerStatefulWidget {
 class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   final _pageController = PageController();
   int _paso = 0;
+  String? _carpetaSeleccionada;
 
-  static const _totalPasos = 4;
+  static const _totalPasos = 5;
 
   void _irA(int pagina) {
     _pageController.animateToPage(
@@ -26,6 +28,17 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       duration: const Duration(milliseconds: 300),
       curve: Curves.easeInOut,
     );
+  }
+
+  Future<void> _elegirCarpeta() async {
+    final carpeta = await FilePicker.getDirectoryPath();
+    if (carpeta != null) {
+      setState(() => _carpetaSeleccionada = carpeta);
+      final prefs = ref.read(repositorioPreferenciasProvider);
+      final datos = prefs.cargar();
+      datos['carpeta_out'] = carpeta;
+      prefs.guardar(datos);
+    }
   }
 
   void _finalizar() {
@@ -96,7 +109,15 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 controller: _pageController,
                 itemCount: _totalPasos,
                 onPageChanged: (pagina) => setState(() => _paso = pagina),
-                itemBuilder: (context, indice) => pasos[indice],
+                itemBuilder: (context, indice) {
+                  if (indice == 4) {
+                    return _PasoOnboardingCarpeta(
+                      ruta: _carpetaSeleccionada,
+                      onElegir: _elegirCarpeta,
+                    );
+                  }
+                  return pasos[indice];
+                },
               ),
             ),
             Row(
@@ -181,6 +202,70 @@ class _PasoOnboarding extends StatelessWidget {
             style: texto.bodyLarge,
             textAlign: TextAlign.center,
           ),
+        ],
+      ),
+    );
+  }
+}
+
+class _PasoOnboardingCarpeta extends StatelessWidget {
+  const _PasoOnboardingCarpeta({
+    required this.ruta,
+    required this.onElegir,
+  });
+
+  final String? ruta;
+  final VoidCallback onElegir;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context)!;
+    final colores = Theme.of(context).colorScheme;
+    final texto = Theme.of(context).textTheme;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 32),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: colores.primaryContainer,
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              Icons.folder_open_outlined,
+              size: 48,
+              color: colores.onPrimaryContainer,
+            ),
+          ),
+          const SizedBox(height: 32),
+          Text(
+            t.onboarding_paso5_titulo,
+            style: texto.headlineSmall,
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 16),
+          Text(
+            t.onboarding_paso5_descripcion,
+            style: texto.bodyLarge,
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 24),
+          FilledButton.tonalIcon(
+            onPressed: onElegir,
+            icon: const Icon(Icons.folder_open),
+            label: Text(t.onboarding_paso5_examinar),
+          ),
+          if (ruta != null) ...[
+            const SizedBox(height: 12),
+            Text(
+              t.onboarding_paso5_ruta(ruta!),
+              style: texto.bodyMedium,
+              textAlign: TextAlign.center,
+            ),
+          ],
         ],
       ),
     );

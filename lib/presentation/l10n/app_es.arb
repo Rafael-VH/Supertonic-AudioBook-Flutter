@@ -272,6 +272,15 @@
   "onboarding_paso3_descripcion": "Selecciona la voz que prefieras y escucha una muestra antes de empezar.",
   "onboarding_paso4_titulo": "Procesa el audio",
   "onboarding_paso4_descripcion": "Ejecuta la conversión. Cada capítulo se lee en voz alta y se exporta como audio en tu dispositivo.",
+  "onboarding_paso5_titulo": "Elegí dónde guardar",
+  "onboarding_paso5_descripcion": "Seleccioná la carpeta donde se guardarán tus audiolibros. Podés cambiarla después desde Ajustes.",
+  "onboarding_paso5_examinar": "Examinar carpeta…",
+  "onboarding_paso5_ruta": "Carpeta: {ruta}",
+  "@onboarding_paso5_ruta": {
+    "placeholders": {
+      "ruta": {"type": "String"}
+    }
+  },
   "dashboard_titulo": "Supertonic",
   "dashboard_bienvenida": "¿Qué quieres hacer hoy?",
   "dashboard_bienvenida_sub": "Elegí una función y empezá.",
@@ -288,6 +297,14 @@
   "dashboard_modelo_sin_descargar": "sin descargar",
   "dashboard_modelo_verificando": "verificando…",
   "carpetas": "Carpetas",
+  "settings_carpeta_salida": "Carpeta de salida",
+  "settings_carpeta_salida_ruta": "Ruta: {ruta}",
+  "@settings_carpeta_salida_ruta": {
+    "placeholders": {
+      "ruta": {"type": "String"}
+    }
+  },
+  "settings_carpeta_salida_cambiar": "Cambiar carpeta…",
   "seleccion_titulo": "Procesar archivos sueltos",
   "seleccion_sin_archivos": "Todavía no elegiste archivos.",
   "seleccion_buscando": "Abriendo el buscador de archivos…",

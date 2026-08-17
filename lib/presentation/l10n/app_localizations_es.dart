@@ -394,6 +394,21 @@ class AppLocalizationsEs extends AppLocalizations {
       'Ejecuta la conversión. Cada capítulo se lee en voz alta y se exporta como audio en tu dispositivo.';
 
   @override
+  String get onboarding_paso5_titulo => 'Elegí dónde guardar';
+
+  @override
+  String get onboarding_paso5_descripcion =>
+      'Seleccioná la carpeta donde se guardarán tus audiolibros. Podés cambiarla después desde Ajustes.';
+
+  @override
+  String get onboarding_paso5_examinar => 'Examinar carpeta…';
+
+  @override
+  String onboarding_paso5_ruta(String ruta) {
+    return 'Carpeta: $ruta';
+  }
+
+  @override
   String get dashboard_titulo => 'Supertonic';
 
   @override
@@ -443,6 +458,17 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get carpetas => 'Carpetas';
+
+  @override
+  String get settings_carpeta_salida => 'Carpeta de salida';
+
+  @override
+  String settings_carpeta_salida_ruta(String ruta) {
+    return 'Ruta: $ruta';
+  }
+
+  @override
+  String get settings_carpeta_salida_cambiar => 'Cambiar carpeta…';
 
   @override
   String get seleccion_titulo => 'Procesar archivos sueltos';
