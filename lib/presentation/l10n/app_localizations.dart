@@ -967,6 +967,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Files'**
   String get btn_archivos;
+
+  /// No description provided for @nav_home.
+  ///
+  /// In en, this message translates to:
+  /// **'Home'**
+  String get nav_home;
+
+  /// No description provided for @nav_biblioteca.
+  ///
+  /// In en, this message translates to:
+  /// **'Library'**
+  String get nav_biblioteca;
 }
 
 class _AppLocalizationsDelegate

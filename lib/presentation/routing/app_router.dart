@@ -42,7 +42,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
   final router = GoRouter(
     initialLocation: Rutas.splash,
     refreshListenable: refresco,
-    redirect: (context, state) {
+      redirect: (context, state) {
       final destino = state.matchedLocation;
       final listo = ref.read(modeloControllerProvider).listo;
       if (destino == Rutas.home && !listo) return Rutas.modelo;

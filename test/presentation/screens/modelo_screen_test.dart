@@ -9,6 +9,7 @@ import 'package:supertonic_audiobook/app.dart';
 import 'package:supertonic_audiobook/presentation/controllers/providers.dart';
 import 'package:supertonic_audiobook/presentation/controllers/settings_controller.dart';
 import 'package:supertonic_audiobook/presentation/l10n/app_localizations.dart';
+import 'package:supertonic_audiobook/presentation/screens/dashboard/dashboard_screen.dart';
 import 'package:supertonic_audiobook/presentation/screens/modelo/modelo_screen.dart';
 import 'package:supertonic_audiobook/presentation/theme/app_theme.dart';
 
@@ -67,12 +68,11 @@ Future<void> _hasta(WidgetTester tester, String texto) async {
   fail('No apareció el texto "$texto"');
 }
 
-/// Salta el splash (1200 ms) y entra a Procesar desde el dashboard.
+/// Salta el splash (1200 ms). El dashboard ahora muestra HomeBody (tab 0)
+/// directamente, sin necesidad de tocar una card de navegación.
 Future<void> _arrancarYProcesar(WidgetTester tester) async {
   await tester.pump();
   await tester.pump(const Duration(milliseconds: 1300));
-  await tester.pumpAndSettle();
-  await tester.tap(find.text('Convertir archivos a audio'));
   await tester.pumpAndSettle();
 }
 
@@ -141,13 +141,15 @@ void main() {
       expect(find.text('Descargar modelo'), findsNothing);
     });
 
-    testWidgets('sin modelo bloquea con la pantalla de descarga',
+    testWidgets('sin modelo muestra el CTA de descarga en el dashboard',
         (tester) async {
       await tester.pumpWidget(_harnessApp(ModeloGestorFake()));
 
       await _arrancarYProcesar(tester);
       await _hasta(tester, 'Descargar modelo');
-      expect(find.text('Carpeta de origen'), findsNothing);
+      // El dashboard ahora embebe HomeBody siempre; la card del modelo
+      // muestra el CTA de descarga sin bloquear la pantalla.
+      expect(find.byType(DashboardScreen), findsOneWidget);
     });
   });
 }

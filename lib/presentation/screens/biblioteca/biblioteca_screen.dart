@@ -18,11 +18,28 @@ class BibliotecaScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final t = AppLocalizations.of(context)!;
+
+    return Scaffold(
+      appBar: AppBar(title: Text(t.biblioteca_titulo)),
+      body: const BibliotecaBody(),
+    );
+  }
+}
+
+/// Cuerpo reutilizable de la pantalla Biblioteca (sin Scaffold propio).
+/// Se usa tanto en [BibliotecaScreen] como embebido en el [DashboardScreen]
+/// con BottomNavigationBar.
+class BibliotecaBody extends ConsumerWidget {
+  const BibliotecaBody({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final t = AppLocalizations.of(context)!;
     final estado = ref.watch(bibliotecaControllerProvider);
     final controller = ref.read(bibliotecaControllerProvider.notifier);
 
     // BIB-5: un error nuevo (p. ej. reproducción fallida) se avisa en una
-    // SnackBar con el color de error de la paleta (patrón seleccion_screen).
+    // SnackBar con el color de error de la paleta.
     ref.listen(bibliotecaControllerProvider.select((s) => s.error), (
       previo,
       error,
@@ -39,11 +56,8 @@ class BibliotecaScreen extends ConsumerWidget {
       );
     });
 
-    return Scaffold(
-      appBar: AppBar(title: Text(t.biblioteca_titulo)),
-      body: SafeArea(
-        child: _Cuerpo(estado: estado, controller: controller, t: t),
-      ),
+    return SafeArea(
+      child: _Cuerpo(estado: estado, controller: controller, t: t),
     );
   }
 }

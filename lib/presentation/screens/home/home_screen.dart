@@ -25,6 +25,32 @@ class HomeScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final t = AppLocalizations.of(context)!;
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(t.ventana_titulo),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.settings_outlined),
+            tooltip: t.ajustes,
+            onPressed: () => context.push(Rutas.settings),
+          ),
+        ],
+      ),
+      body: const HomeBody(),
+    );
+  }
+}
+
+/// Cuerpo reutilizable de la pantalla Home (sin Scaffold propio).
+/// Se usa tanto en [HomeScreen] como embebido en el [DashboardScreen] con
+/// BottomNavigationBar.
+class HomeBody extends ConsumerWidget {
+  const HomeBody({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final t = AppLocalizations.of(context)!;
     final estado = ref.watch(homeControllerProvider);
     final controller = ref.read(homeControllerProvider.notifier);
     final ladoAlado = MediaQuery.sizeOf(context).width >= umbralAncho;
@@ -47,23 +73,17 @@ class HomeScreen extends ConsumerWidget {
       );
     });
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(t.ventana_titulo),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.settings_outlined),
-            tooltip: t.ajustes,
-            onPressed: () => context.push(Rutas.settings),
-          ),
-        ],
-      ),
-      body: ladoAlado
-          ? CuerpoLadoAlado(estado: estado, controller: controller, t: t)
-          : CuerpoApilado(estado: estado, controller: controller, t: t),
-      bottomNavigationBar: ladoAlado
-          ? null
-          : BarraAccion(estado: estado, controller: controller, t: t),
+    if (ladoAlado) {
+      return CuerpoLadoAlado(estado: estado, controller: controller, t: t);
+    }
+
+    return Column(
+      children: [
+        Expanded(
+          child: CuerpoApilado(estado: estado, controller: controller, t: t),
+        ),
+        BarraAccion(estado: estado, controller: controller, t: t),
+      ],
     );
   }
 }

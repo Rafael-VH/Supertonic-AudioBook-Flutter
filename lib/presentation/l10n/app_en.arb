@@ -327,5 +327,7 @@
     }
   },
   "btn_carpeta": "Folder",
-  "btn_archivos": "Files"
+  "btn_archivos": "Files",
+  "nav_home": "Home",
+  "nav_biblioteca": "Library"
 }

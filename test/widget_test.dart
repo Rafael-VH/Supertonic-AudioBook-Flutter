@@ -48,6 +48,7 @@ Widget _construirApp({Map<String, Object>? preferencias}) {
       repositorioPreferenciasProvider
           .overrideWithValue(_PreferenciasMemoria(preferencias)),
       repositorioArchivosProvider.overrideWithValue(_ArchivosVacios()),
+      reproductorAudioProvider.overrideWithValue(ReproductorFake()),
       carpetaBaseProvider.overrideWithValue('C:/base'),
       modeloManagerProvider
           .overrideWithValue(ModeloGestorFake(disponible: true)),
@@ -91,7 +92,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Supertonic'), findsWidgets);
-    expect(find.text('Convertir archivos a audio'), findsOneWidget);
+    expect(find.text('Inicio'), findsOneWidget);
   });
 
   testWidgets('con el onboarding visto arranca directo al dashboard',
@@ -102,8 +103,8 @@ void main() {
 
     await _saltarSplash(tester);
 
-    expect(find.text('Convertir archivos a audio'), findsOneWidget);
-    expect(find.text('¿Qué quieres hacer hoy?'), findsOneWidget);
+    expect(find.text('Inicio'), findsOneWidget);
+    expect(find.text('Biblioteca'), findsOneWidget);
   });
 
   testWidgets('el botón de ajustes abre la pantalla de configuración',
@@ -121,18 +122,17 @@ void main() {
     expect(find.text('Acerca de'), findsOneWidget);
   });
 
-  testWidgets('Procesar desde el dashboard llega a la pantalla de conversión',
+  testWidgets('el dashboard muestra el workspace de conversión',
       (WidgetTester tester) async {
     await tester.pumpWidget(_construirApp(preferencias: {
       'onboarding_visto': true,
     }));
 
     await _saltarSplash(tester);
-    await tester.tap(find.text('Convertir archivos a audio'));
-    await tester.pumpAndSettle();
 
-    expect(find.text('Supertonic-AudioBook — Conversor de archivos a audio'),
-        findsOneWidget);
+    // El workspace de conversión (HomeBody) ya está embebido en el tab 0
+    // del dashboard — no hay navegación separada.
+    expect(find.text('Carpeta de origen'), findsOneWidget);
   });
 
   testWidgets('el segundo botón del dashboard es Biblioteca',

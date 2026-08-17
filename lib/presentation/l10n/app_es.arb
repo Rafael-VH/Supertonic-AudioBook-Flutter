@@ -327,5 +327,7 @@
     }
   },
   "btn_carpeta": "Carpeta",
-  "btn_archivos": "Archivos"
+  "btn_archivos": "Archivos",
+  "nav_home": "Inicio",
+  "nav_biblioteca": "Biblioteca"
 }

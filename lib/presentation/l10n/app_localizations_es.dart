@@ -524,4 +524,10 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get btn_archivos => 'Archivos';
+
+  @override
+  String get nav_home => 'Inicio';
+
+  @override
+  String get nav_biblioteca => 'Biblioteca';
 }
