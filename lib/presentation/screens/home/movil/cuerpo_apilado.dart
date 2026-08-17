@@ -8,8 +8,9 @@ import 'package:supertonic_audiobook/presentation/screens/home/movil/contenido_c
 import 'package:supertonic_audiobook/presentation/widgets/contenido_opciones.dart';
 import 'package:supertonic_audiobook/presentation/widgets/contenido_registro.dart';
 
-/// Móvil: acordeones exclusivos (uno abierto a la vez ocupando el alto) con
-/// carpetas expandido por defecto y la acción principal en la barra inferior
+/// Móvil: acordeones que se empujan entre sí — al expandir uno, el contenido
+/// se muestra debajo del encabezado y empuja las demás secciones hacia abajo.
+/// Carpetas expandido por defecto y la acción principal en la barra inferior
 /// persistente.
 class CuerpoApilado extends StatefulWidget {
   const CuerpoApilado({
@@ -28,14 +29,15 @@ class CuerpoApilado extends StatefulWidget {
 }
 
 class _CuerpoApiladoState extends State<CuerpoApilado> {
-  /// Índice del acordeón abierto. Solo uno puede estar expandido.
+  /// Índice del acordeón abierto. -1 = ninguno abierto.
   int _activo = 0;
 
-  Widget _contenidoActivo() {
+  Widget _contenidoSeccion(int index) {
     final estado = widget.estado;
     final controller = widget.controller;
     final habilitado = !estado.ejecutando;
-    return switch (_activo) {
+
+    return switch (index) {
       1 => ContenidoArchivos(
           key: const ValueKey(1),
           estado: estado,
@@ -64,63 +66,67 @@ class _CuerpoApiladoState extends State<CuerpoApilado> {
     };
   }
 
+  /// Construye una sección de acordeón (encabezado + contenido condicional).
+  Widget _seccionAcordeon(int index, String titulo) {
+    final estaAbierto = _activo == index;
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        EncabezadoAcordeon(
+          titulo: titulo,
+          activo: estaAbierto,
+          onTap: () => setState(() => _activo = estaAbierto ? -1 : index),
+        ),
+        AnimatedSwitcher(
+          duration: const Duration(milliseconds: 250),
+          switchInCurve: Curves.easeOut,
+          switchOutCurve: Curves.easeIn,
+          transitionBuilder: (child, animation) {
+            return FadeTransition(
+              opacity: animation,
+              child: SlideTransition(
+                position: Tween<Offset>(
+                  begin: const Offset(0, 0.05),
+                  end: Offset.zero,
+                ).animate(animation),
+                child: child,
+              ),
+            );
+          },
+          child: estaAbierto
+              ? Padding(
+                  key: ValueKey(index),
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                  child: Card(
+                    margin: EdgeInsets.zero,
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: _contenidoSeccion(index),
+                    ),
+                  ),
+                )
+              : const SizedBox.shrink(key: ValueKey(-1)),
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final t = widget.t;
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        EncabezadoAcordeon(
-          titulo: t.carpetas,
-          activo: _activo == 0,
-          onTap: () => setState(() => _activo = 0),
-        ),
-        EncabezadoAcordeon(
-          titulo: t.archivos_encontrados,
-          activo: _activo == 1,
-          onTap: () => setState(() => _activo = 1),
-        ),
-        EncabezadoAcordeon(
-          titulo: t.opciones_sintesis,
-          activo: _activo == 2,
-          onTap: () => setState(() => _activo = 2),
-        ),
-        EncabezadoAcordeon(
-          titulo: t.registro,
-          activo: _activo == 3,
-          onTap: () => setState(() => _activo = 3),
-        ),
-        Expanded(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-            child: Card(
-              margin: EdgeInsets.zero,
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: AnimatedSwitcher(
-                  duration: const Duration(milliseconds: 250),
-                  switchInCurve: Curves.easeOut,
-                  switchOutCurve: Curves.easeIn,
-                  transitionBuilder: (child, animation) {
-                    return FadeTransition(
-                      opacity: animation,
-                      child: SlideTransition(
-                        position: Tween<Offset>(
-                          begin: const Offset(0, 0.05),
-                          end: Offset.zero,
-                        ).animate(animation),
-                        child: child,
-                      ),
-                    );
-                  },
-                  child: _contenidoActivo(),
-                ),
-              ),
-            ),
-          ),
-        ),
-      ],
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          _seccionAcordeon(0, t.carpetas),
+          _seccionAcordeon(1, t.archivos_encontrados),
+          _seccionAcordeon(2, t.opciones_sintesis),
+          _seccionAcordeon(3, t.registro),
+          const SizedBox(height: 16),
+        ],
+      ),
     );
   }
 }

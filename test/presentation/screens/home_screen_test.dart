@@ -192,13 +192,13 @@ void main() {
     expect(find.text('capitulo1.md'), findsOneWidget);
     expect(find.text('Carpeta de origen'), findsNothing);
 
-    // Abrir carpetas de nuevo cierra archivos.
-    await tester.tap(find.text('Carpetas'));
+    // Tocar el acordeón ya abierto lo cierra (toggle).
+    await tester.tap(find.text('Archivos Encontrados'));
     await tester.pumpAndSettle();
-    expect(find.text('Carpeta de origen'), findsOneWidget);
     expect(find.text('capitulo1.md'), findsNothing);
+    expect(find.text('Carpeta de origen'), findsNothing);
 
-    // Tocar el acordeón ya abierto no hace nada.
+    // Abrir carpetas de nuevo.
     await tester.tap(find.text('Carpetas'));
     await tester.pumpAndSettle();
     expect(find.text('Carpeta de origen'), findsOneWidget);
