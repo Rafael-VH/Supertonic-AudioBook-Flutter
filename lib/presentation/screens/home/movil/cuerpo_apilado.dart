@@ -37,6 +37,7 @@ class _CuerpoApiladoState extends State<CuerpoApilado> {
     final habilitado = !estado.ejecutando;
     return switch (_activo) {
       1 => ContenidoArchivos(
+          key: const ValueKey(1),
           estado: estado,
           habilitado: habilitado,
           listaExpandida: true,
@@ -46,12 +47,15 @@ class _CuerpoApiladoState extends State<CuerpoApilado> {
           onAlternar: controller.alternarSeleccion,
         ),
       2 => SingleChildScrollView(
+          key: const ValueKey(2),
           child: ContenidoOpciones(estado: estado, controller: controller),
         ),
       3 => SingleChildScrollView(
+          key: const ValueKey(3),
           child: ContenidoRegistro(estado: estado, controller: controller),
         ),
       _ => ContenidoCarpetas(
+          key: const ValueKey(0),
           estado: estado,
           habilitado: habilitado,
           onExaminarIn: controller.examinarCarpetaIn,
@@ -94,7 +98,24 @@ class _CuerpoApiladoState extends State<CuerpoApilado> {
               margin: EdgeInsets.zero,
               child: Padding(
                 padding: const EdgeInsets.all(16),
-                child: _contenidoActivo(),
+                child: AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 250),
+                  switchInCurve: Curves.easeOut,
+                  switchOutCurve: Curves.easeIn,
+                  transitionBuilder: (child, animation) {
+                    return FadeTransition(
+                      opacity: animation,
+                      child: SlideTransition(
+                        position: Tween<Offset>(
+                          begin: const Offset(0, 0.05),
+                          end: Offset.zero,
+                        ).animate(animation),
+                        child: child,
+                      ),
+                    );
+                  },
+                  child: _contenidoActivo(),
+                ),
               ),
             ),
           ),
