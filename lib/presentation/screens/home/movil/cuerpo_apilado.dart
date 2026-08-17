@@ -42,7 +42,7 @@ class _CuerpoApiladoState extends State<CuerpoApilado> {
           key: const ValueKey(1),
           estado: estado,
           habilitado: habilitado,
-          listaExpandida: true,
+          listaExpandida: false, // false dentro de SingleChildScrollView
           onRefrescar: controller.cargarArchivos,
           onTodo: controller.seleccionarTodo,
           onNada: controller.limpiarSeleccion,
