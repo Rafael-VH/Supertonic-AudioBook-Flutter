@@ -8,10 +8,11 @@
 [![Dart](https://img.shields.io/badge/Dart-3.12%2B-0175C2?logo=dart)](https://dart.dev)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![Tests](https://img.shields.io/badge/tests-228%20passed-brightgreen)](#testing)
+[![Docs](https://img.shields.io/badge/docs-ES%20%7C%20EN-blue)](#documentación)
 
 Sin nube. Sin API. Sin GPU. Todo ocurre en tu dispositivo.
 
-[Características](#características) · [Instalación](#instalación) · [Uso](#uso) · [Arquitectura](#arquitectura) · [Testing](#testing)
+[Características](#características) · [Instalación](#instalación) · [Uso](#uso) · [Arquitectura](#arquitectura) · [Documentación](#documentación) · [Testing](#testing)
 
 </div>
 
@@ -208,6 +209,28 @@ flutter test --coverage
 - **Tests**: Incluir tests para cada cambio de comportamiento
 - **i18n**: Solo editar `app_es.arb` y `app_en.arb`, luego `flutter gen-l10n`
 - **Arquitectura**: Respetar la regla de dependencia (domain no importa data)
+
+## Documentación
+
+Documentación completa del proyecto disponible en español e inglés.
+
+### Guías Rápidas
+
+| Tema | Español | English |
+|------|---------|---------|
+| Arquitectura | [architecture.md](docs/es/architecture.md) | [architecture.md](docs/en/architecture.md) |
+| Pantallas | [screens.md](docs/es/screens.md) | [screens.md](docs/en/screens.md) |
+| Pipeline de Audio | [pipeline.md](docs/es/pipeline.md) | [pipeline.md](docs/en/pipeline.md) |
+| Configuración | [configuration.md](docs/es/configuration.md) | [configuration.md](docs/en/configuration.md) |
+| Testing | [testing.md](docs/es/testing.md) | [testing.md](docs/en/testing.md) |
+| Navegación | [routing.md](docs/es/routing.md) | [routing.md](docs/en/routing.md) |
+| Internacionalización | [i18n.md](docs/es/i18n.md) | [i18n.md](docs/en/i18n.md) |
+| ONNX Runtime | [onnx-runtime.md](docs/es/onnx-runtime.md) | [onnx-runtime.md](docs/en/onnx-runtime.md) |
+| Modelo Supertonic 3 | [supertonic-3-model.md](docs/es/supertonic-3-model.md) | [supertonic-3-model.md](docs/en/supertonic-3-model.md) |
+
+### Planes Anteriores
+
+Documentación de fases anteriores del proyecto en [docs/plan/](docs/plan/).
 
 ## Licencia
 
