@@ -162,7 +162,7 @@ void main() {
     });
 
     testWidgets(
-      'DASH-4: el CTA del dashboard vuelve al dashboard tras la descarga',
+      'DASH-4: el CTA del settings vuelve al dashboard tras la descarga',
       (tester) async {
         tester.view.physicalSize = const Size(1280, 800);
         tester.view.devicePixelRatio = 1.0;
@@ -174,7 +174,9 @@ void main() {
         );
         final router = container.read(appRouterProvider);
 
-        // Modelo no listo: la Card muestra el CTA que navega con origen.
+        // Modelo no listo: navegar al tab Settings para ver la Card con CTA.
+        await tester.tap(find.text('Configuración'));
+        await tester.pumpAndSettle();
         expect(find.text('Descargar modelo'), findsOneWidget);
 
         // Tap del CTA → /modelo (gate abierto, el modelo todavía no está).
@@ -190,7 +192,6 @@ void main() {
 
         expect(_rutaActual(router), Rutas.dashboard);
         expect(find.byType(DashboardScreen), findsOneWidget);
-        expect(find.text('Modelos: descargado'), findsOneWidget);
       },
     );
   });

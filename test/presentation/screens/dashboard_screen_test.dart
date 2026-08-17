@@ -4,30 +4,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:go_router/go_router.dart';
 
 import 'package:supertonic_audiobook/presentation/controllers/modelo_controller.dart';
 import 'package:supertonic_audiobook/presentation/controllers/providers.dart';
 import 'package:supertonic_audiobook/presentation/l10n/app_localizations.dart';
-import 'package:supertonic_audiobook/presentation/routing/app_router.dart';
 import 'package:supertonic_audiobook/presentation/screens/dashboard/dashboard_screen.dart';
 
 import '../../support/fakes.dart';
 
-/// Destino de prueba para verificar la navegación sin arrastrar otra screen.
-class _DestinoPrueba extends StatelessWidget {
-  const _DestinoPrueba(this.etiqueta);
-
-  final String etiqueta;
-
-  @override
-  Widget build(BuildContext context) =>
-      Scaffold(body: Center(child: Text(etiqueta)));
-}
-
-/// Harness de la pantalla sola (sin router: la navegación se prueba en
-/// [_harnessRouter]). Provee los providers que HomeBody y BibliotecaBody
-/// necesitan al estar embebidos en el dashboard.
+/// Harness de la pantalla sola (sin router). Provee los providers que
+/// HomeBody, BibliotecaBody y SettingsBody necesitan al estar embebidos
+/// en el dashboard.
 Widget _harness(
   ModeloGestorFake gestor, {
   PreferenciasMemoria? preferencias,
@@ -58,51 +45,6 @@ Widget _harness(
   );
 }
 
-/// Harness con router mínimo: la card de descarga navega con `context.push`
-/// al `/modelo`.
-Widget _harnessRouter(
-  ModeloGestorFake gestor, {
-  bool conRutaModelo = false,
-}) {
-  final router = GoRouter(
-    initialLocation: Rutas.dashboard,
-    routes: [
-      GoRoute(
-        path: Rutas.dashboard,
-        builder: (_, __) => const DashboardScreen(),
-      ),
-      if (conRutaModelo)
-        GoRoute(
-          path: Rutas.modelo,
-          builder: (_, state) =>
-              _DestinoPrueba('Destino /modelo extra=${state.extra}'),
-        ),
-    ],
-  );
-  return ProviderScope(
-    overrides: [
-      repositorioPreferenciasProvider.overrideWithValue(PreferenciasMemoria()),
-      modeloManagerProvider.overrideWithValue(gestor),
-      repositorioArchivosProvider.overrideWithValue(
-        RepositorioArchivosFake([]),
-      ),
-      carpetaBaseProvider.overrideWithValue('/tmp/test'),
-      reproductorAudioProvider.overrideWithValue(ReproductorFake()),
-    ],
-    child: MaterialApp.router(
-      routerConfig: router,
-      locale: const Locale('es'),
-      supportedLocales: const [Locale('es'), Locale('en')],
-      localizationsDelegates: const [
-        AppLocalizations.delegate,
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-      ],
-    ),
-  );
-}
-
 /// Bombea el harness en una superficie donde el dashboard entra completo.
 Future<void> _pump(
   WidgetTester tester,
@@ -115,7 +57,7 @@ Future<void> _pump(
   await tester.pumpWidget(_harness(gestor, preferencias: preferencias));
 }
 
-/// Inicia la descarga del modelo desde el test. El CTA del dashboard solo
+/// Inicia la descarga del modelo desde el test. El CTA del settings solo
 /// navega a `/modelo` (la descarga la dispara `ModeloScreen`), así que para
 /// probar los estados de la Card se invoca al controller directamente a
 /// través del ProviderScope del harness.
@@ -134,26 +76,10 @@ Finder get _modeloCard => find.ancestor(
 ).first;
 
 void main() {
-  // ─── AppBar ────────────────────────────────────────────────────────────────
-
-  testWidgets('muestra el título del dashboard en el AppBar', (tester) async {
-    await _pump(tester, ModeloGestorFake());
-    await tester.pumpAndSettle();
-
-    expect(find.text('Supertonic'), findsOneWidget);
-  });
-
-  testWidgets('muestra el botón de ajustes en el AppBar', (tester) async {
-    await _pump(tester, ModeloGestorFake());
-    await tester.pumpAndSettle();
-
-    expect(find.byIcon(Icons.settings_outlined), findsOneWidget);
-  });
-
   // ─── NavigationBar ─────────────────────────────────────────────────────────
 
   testWidgets(
-    'la NavigationBar tiene dos destinations: Inicio y Biblioteca',
+    'la NavigationBar tiene tres destinations: Inicio, Biblioteca y Configuración',
     (tester) async {
       await _pump(tester, ModeloGestorFake());
       await tester.pumpAndSettle();
@@ -161,6 +87,7 @@ void main() {
       expect(find.byType(NavigationBar), findsOneWidget);
       expect(find.text('Inicio'), findsOneWidget);
       expect(find.text('Biblioteca'), findsOneWidget);
+      expect(find.text('Configuración'), findsOneWidget);
     },
   );
 
@@ -190,13 +117,27 @@ void main() {
   );
 
   testWidgets(
+    'tocar Configuración cambia a índice 2 (SettingsBody)',
+    (tester) async {
+      await _pump(tester, ModeloGestorFake());
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Configuración'));
+      await tester.pumpAndSettle();
+
+      final bar = tester.widget<NavigationBar>(find.byType(NavigationBar));
+      expect(bar.selectedIndex, 2);
+    },
+  );
+
+  testWidgets(
     'tocar Inicio vuelve a índice 0 (HomeBody)',
     (tester) async {
       await _pump(tester, ModeloGestorFake());
       await tester.pumpAndSettle();
 
-      // Navegar a Biblioteca primero.
-      await tester.tap(find.text('Biblioteca'));
+      // Navegar a Configuración primero.
+      await tester.tap(find.text('Configuración'));
       await tester.pumpAndSettle();
 
       // Volver a Inicio.
@@ -208,12 +149,16 @@ void main() {
     },
   );
 
-  // ─── WO-4b: Card de estado del modelo (DASH-5/6/7) ─────────────────────────
+  // ─── Card de estado del modelo (movida a SettingsBody) ──────────────────────
 
   testWidgets('muestra el estado descargado cuando el modelo está listo', (
     tester,
   ) async {
     await _pump(tester, ModeloGestorFake(disponible: true));
+    await tester.pumpAndSettle();
+
+    // Navegar a Settings para ver la card.
+    await tester.tap(find.text('Configuración'));
     await tester.pumpAndSettle();
 
     expect(find.text('Modelos: descargado'), findsOneWidget);
@@ -230,6 +175,9 @@ void main() {
     tester,
   ) async {
     await _pump(tester, ModeloGestorFake());
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Configuración'));
     await tester.pumpAndSettle();
 
     expect(find.text('Modelos: sin descargar'), findsOneWidget);
@@ -252,6 +200,9 @@ void main() {
         preferencias: PreferenciasMemoria({'modelo_descargado': true}),
       );
       await tester.pump();
+
+      await tester.tap(find.text('Configuración'));
+      await tester.pumpAndSettle();
 
       expect(find.text('Modelos: descargado'), findsOneWidget);
       expect(
@@ -282,13 +233,16 @@ void main() {
       final gestor = ModeloGestorFake();
       await _pump(tester, gestor);
       await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Configuración'));
+      await tester.pumpAndSettle();
+
       expect(find.text('Modelos: sin descargar'), findsOneWidget);
 
       gestor.disponible = true;
       gestor.verificacionLenta = Completer<void>();
 
-      // Tocar el refresh SOLO dentro de la Card del modelo (hay otro en
-      // el contenido de archivos de HomeBody).
+      // Tocar el refresh SOLO dentro de la Card del modelo.
       await tester.tap(
         find.descendant(
           of: _modeloCard,
@@ -327,6 +281,10 @@ void main() {
     final preferencias = PreferenciasMemoria();
     await _pump(tester, gestor, preferencias: preferencias);
     await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Configuración'));
+    await tester.pumpAndSettle();
+
     expect(preferencias.datos['modelo_descargado'], false);
 
     gestor.disponible = true;
@@ -347,6 +305,9 @@ void main() {
     (tester) async {
       final gestor = ModeloGestorFake()..espera = Completer<void>();
       await _pump(tester, gestor);
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Configuración'));
       await tester.pumpAndSettle();
 
       // Estado idle: el CTA de descarga está disponible en la card.
@@ -389,6 +350,9 @@ void main() {
       await _pump(tester, gestor);
       await tester.pumpAndSettle();
 
+      await tester.tap(find.text('Configuración'));
+      await tester.pumpAndSettle();
+
       _iniciarDescarga(tester);
       await tester.pumpAndSettle();
 
@@ -414,41 +378,13 @@ void main() {
     },
   );
 
-  testWidgets(
-    'el CTA navega a /modelo con el origen /dashboard y mide 48 de alto '
-    '(DASH-6)',
-    (tester) async {
-      tester.view.physicalSize = const Size(1280, 800);
-      tester.view.devicePixelRatio = 1.0;
-      addTearDown(tester.view.reset);
-      await tester.pumpWidget(
-        _harnessRouter(ModeloGestorFake(), conRutaModelo: true),
-      );
-      await tester.pumpAndSettle();
-
-      final cta = find.text('Descargar modelo');
-      expect(cta, findsOneWidget);
-
-      // El FilledButton del CTA (dentro de la Card del modelo).
-      final tamCta = tester.getSize(
-        find.descendant(
-          of: _modeloCard,
-          matching: find.byType(FilledButton),
-        ),
-      );
-      expect(tamCta.height, greaterThanOrEqualTo(48));
-
-      await tester.tap(cta);
-      await tester.pumpAndSettle();
-
-      expect(find.text('Destino /modelo extra=/dashboard'), findsOneWidget);
-    },
-  );
-
   testWidgets('el refresh de la Card mide al menos 48×48 (DASH-6/DASH-10)', (
     tester,
   ) async {
     await _pump(tester, ModeloGestorFake());
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Configuración'));
     await tester.pumpAndSettle();
 
     final tam = tester.getSize(
@@ -476,6 +412,10 @@ void main() {
 
       _iniciarDescarga(tester);
       await tester.pump();
+
+      // Navegar a Settings para ver el progreso.
+      await tester.tap(find.text('Configuración'));
+      await tester.pumpAndSettle();
 
       // El tick SÍ llegó (el progreso se renderiza).
       expect(find.text('1 MB de 10 MB'), findsOneWidget);

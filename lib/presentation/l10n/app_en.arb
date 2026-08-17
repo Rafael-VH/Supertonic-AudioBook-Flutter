@@ -329,5 +329,6 @@
   "btn_carpeta": "Folder",
   "btn_archivos": "Files",
   "nav_home": "Home",
-  "nav_biblioteca": "Library"
+  "nav_biblioteca": "Library",
+  "nav_settings": "Settings"
 }

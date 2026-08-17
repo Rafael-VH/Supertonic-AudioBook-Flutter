@@ -329,5 +329,6 @@
   "btn_carpeta": "Carpeta",
   "btn_archivos": "Archivos",
   "nav_home": "Inicio",
-  "nav_biblioteca": "Biblioteca"
+  "nav_biblioteca": "Biblioteca",
+  "nav_settings": "Configuración"
 }

@@ -91,7 +91,6 @@ void main() {
     await tester.tap(find.text('Comenzar'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Supertonic'), findsWidgets);
     expect(find.text('Inicio'), findsOneWidget);
   });
 
@@ -107,17 +106,19 @@ void main() {
     expect(find.text('Biblioteca'), findsOneWidget);
   });
 
-  testWidgets('el botón de ajustes abre la pantalla de configuración',
+  testWidgets('el tab de ajustes muestra la pantalla de configuración',
       (WidgetTester tester) async {
+    tester.view.physicalSize = const Size(800, 1600);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.reset);
     await tester.pumpWidget(_construirApp(preferencias: {
       'onboarding_visto': true,
     }));
 
     await _saltarSplash(tester);
-    await tester.tap(find.byIcon(Icons.settings_outlined));
+    await tester.tap(find.text('Configuración'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Ajustes'), findsOneWidget);
     expect(find.text('Tema'), findsOneWidget);
     expect(find.text('Acerca de'), findsOneWidget);
   });

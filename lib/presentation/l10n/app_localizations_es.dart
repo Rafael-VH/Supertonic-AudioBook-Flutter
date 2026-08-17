@@ -530,4 +530,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get nav_biblioteca => 'Biblioteca';
+
+  @override
+  String get nav_settings => 'Configuración';
 }

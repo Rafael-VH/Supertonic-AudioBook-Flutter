@@ -526,4 +526,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get nav_biblioteca => 'Library';
+
+  @override
+  String get nav_settings => 'Settings';
 }

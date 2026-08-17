@@ -146,9 +146,12 @@ void main() {
       await tester.pumpWidget(_harnessApp(ModeloGestorFake()));
 
       await _arrancarYProcesar(tester);
+      // El CTA del modelo está en SettingsBody (tab 2 del NavigationBar).
+      await tester.tap(find.text('Configuración'));
+      await tester.pumpAndSettle();
       await _hasta(tester, 'Descargar modelo');
       // El dashboard ahora embebe HomeBody siempre; la card del modelo
-      // muestra el CTA de descarga sin bloquear la pantalla.
+      // en SettingsBody muestra el CTA de descarga sin bloquear la pantalla.
       expect(find.byType(DashboardScreen), findsOneWidget);
     });
   });
