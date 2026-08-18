@@ -3,6 +3,8 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:supertonic_audiobook/shared/data/repositories/repositorio_preferencias.dart';
+import 'package:supertonic_audiobook/shared/domain/entities/app_preferences.dart';
+import 'package:supertonic_audiobook/shared/domain/entities/voice_config.dart';
 
 void main() {
   late Directory temp;
@@ -65,5 +67,67 @@ void main() {
   test('guardar no lanza si la ruta es inválida', () {
     final repo = PreferenciasJsonLocal(ruta: '${temp.path}/no_existe_dir/prefs.json');
     expect(() => repo.guardar({'voz': 'M1'}), returnsNormally);
+  });
+
+  // --- Typed methods ---
+
+  group('guardarPreferenciasTyped / cargarPreferenciasTyped', () {
+    test('guardar typed persists AppPreferences to disk', () {
+      final repo = PreferenciasJsonLocal(ruta: '${temp.path}/prefs.json');
+      const prefs = AppPreferences(
+        voiceConfig: VoiceConfig(voz: 'F2', steps: 8, speed: 1.3, langVoz: 'en'),
+        carpetaSalida: '/output',
+        onboardingVisto: true,
+      );
+
+      repo.guardarPreferenciasTyped(prefs);
+
+      final raw = jsonDecode(File('${temp.path}/prefs.json').readAsStringSync());
+      expect(raw['voz'], 'F2');
+      expect(raw['steps'], 8);
+      expect(raw['speed'], closeTo(1.3, 1e-9));
+      expect(raw['langVoz'], 'en');
+      expect(raw['carpeta_salida'], '/output');
+      expect(raw['onboarding_visto'], isTrue);
+    });
+
+    test('cargar typed returns AppPreferences from disk', () {
+      final repo = PreferenciasJsonLocal(ruta: '${temp.path}/prefs.json');
+      const prefs = AppPreferences(
+        voiceConfig: VoiceConfig(voz: 'M1'),
+        onboardingVisto: false,
+      );
+
+      repo.guardarPreferenciasTyped(prefs);
+      final loaded = repo.cargarPreferenciasTyped();
+
+      expect(loaded.voiceConfig.voz, 'M1');
+      expect(loaded.voiceConfig.steps, 32);
+      expect(loaded.onboardingVisto, isFalse);
+    });
+
+    test('roundtrip typed preserves all values', () {
+      final repo = PreferenciasJsonLocal(ruta: '${temp.path}/prefs.json');
+      const original = AppPreferences(
+        voiceConfig: VoiceConfig(voz: 'F3', steps: 9, speed: 1.5, langVoz: 'fr'),
+        carpetaSalida: '/audio',
+        onboardingVisto: true,
+        modeloState: 'descargado',
+        modeloPath: '/m',
+      );
+
+      repo.guardarPreferenciasTyped(original);
+      final roundtripped = repo.cargarPreferenciasTyped();
+
+      expect(roundtripped, equals(original));
+    });
+
+    test('cargar typed from empty file returns default AppPreferences', () {
+      final repo = PreferenciasJsonLocal(ruta: '${temp.path}/prefs.json');
+      final loaded = repo.cargarPreferenciasTyped();
+
+      expect(loaded.voiceConfig.voz, 'default');
+      expect(loaded.onboardingVisto, isFalse);
+    });
   });
 }

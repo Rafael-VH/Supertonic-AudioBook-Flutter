@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:supertonic_audiobook/shared/domain/contracts/repositorio_preferencias.dart';
+import 'package:supertonic_audiobook/shared/domain/entities/app_preferences.dart';
 
 /// Preferencias persistidas en un JSON local legible (indentado).
 class PreferenciasJsonLocal implements RepositorioPreferencias {
@@ -33,5 +34,20 @@ class PreferenciasJsonLocal implements RepositorioPreferencias {
     } catch (_) {
       // Sin permiso / ruta inválida → no puede persistir, no abortar.
     }
+  }
+
+  /// Persist an [AppPreferences] to disk.
+  void guardarPreferenciasTyped(AppPreferences prefs) {
+    final map = <String, Object>{
+      for (final e in prefs.toMap().entries)
+        if (e.value != null) e.key: e.value!,
+    };
+    guardar(map);
+  }
+
+  /// Load an [AppPreferences] from disk (returns defaults if missing/empty).
+  AppPreferences cargarPreferenciasTyped() {
+    final map = cargar();
+    return AppPreferences.fromMap(map);
   }
 }
