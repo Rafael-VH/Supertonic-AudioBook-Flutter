@@ -41,7 +41,7 @@ class ContenidoOpciones extends StatelessWidget {
         Text(t.voz, style: Theme.of(context).textTheme.titleMedium),
         const SizedBox(height: 4),
         DropdownButtonFormField<String>(
-          initialValue: estado.voz,
+          initialValue: estado.voiceConfig.voz,
           decoration: InputDecoration(
             helperText: t.modelo_supertonic,
             helperStyle: Theme.of(context).textTheme.bodySmall,
@@ -65,11 +65,11 @@ class ContenidoOpciones extends StatelessWidget {
             const SizedBox(width: 12),
             Expanded(
               child: Slider(
-                value: estado.steps.toDouble(),
+                value: estado.voiceConfig.steps.toDouble(),
                 min: 5,
                 max: 12,
                 divisions: 7,
-                label: '${estado.steps}',
+                label: '${estado.voiceConfig.steps}',
                 onChanged: habilitado
                     ? (v) => controller.cambiarSteps(v.round())
                     : null,
@@ -78,7 +78,7 @@ class ContenidoOpciones extends StatelessWidget {
             SizedBox(
               width: 32,
               child: Text(
-                '${estado.steps}',
+                '${estado.voiceConfig.steps}',
                 textAlign: TextAlign.end,
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
@@ -93,17 +93,17 @@ class ContenidoOpciones extends StatelessWidget {
             const SizedBox(width: 12),
             Expanded(
               child: Slider(
-                value: estado.speed,
+                value: estado.voiceConfig.speed,
                 min: 0.7,
                 max: 2.0,
-                label: '${estado.speed.toStringAsFixed(2)}x',
+                label: '${estado.voiceConfig.speed.toStringAsFixed(2)}x',
                 onChanged: habilitado ? controller.cambiarSpeed : null,
               ),
             ),
             SizedBox(
               width: 48,
               child: Text(
-                '${estado.speed.toStringAsFixed(2)}x',
+                '${estado.voiceConfig.speed.toStringAsFixed(2)}x',
                 textAlign: TextAlign.end,
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
@@ -115,7 +115,7 @@ class ContenidoOpciones extends StatelessWidget {
         Text(t.idioma_voz, style: Theme.of(context).textTheme.titleMedium),
         const SizedBox(height: 4),
         DropdownButtonFormField<String>(
-          initialValue: estado.langVoz,
+          initialValue: estado.voiceConfig.langVoz,
           decoration: InputDecoration(
             isDense: true,
             border: const OutlineInputBorder(),

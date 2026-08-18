@@ -87,10 +87,10 @@ void main() {
 
       expect(estado.carpetaIn, 'C:/libros');
       expect(estado.carpetaOut, 'C:/audio');
-      expect(estado.voz, 'F2');
-      expect(estado.steps, 7);
-      expect(estado.speed, 0.9);
-      expect(estado.langVoz, 'en');
+      expect(estado.voiceConfig.voz, 'F2');
+      expect(estado.voiceConfig.steps, 7);
+      expect(estado.voiceConfig.speed, 0.9);
+      expect(estado.voiceConfig.langVoz, 'en');
       expect(estado.formatos, {'ogg'});
       expect(estado.archivos, hasLength(2));
       expect(repositorio.listados, 1);
@@ -104,10 +104,10 @@ void main() {
 
       expect(estado.carpetaIn, 'C:/base${Platform.pathSeparator}archivos');
       expect(estado.carpetaOut, 'C:/base${Platform.pathSeparator}audio');
-      expect(estado.voz, 'M1');
-      expect(estado.steps, 5);
-      expect(estado.speed, 1.1);
-      expect(estado.langVoz, 'es');
+      expect(estado.voiceConfig.voz, 'M1');
+      expect(estado.voiceConfig.steps, 5);
+      expect(estado.voiceConfig.speed, 1.1);
+      expect(estado.voiceConfig.langVoz, 'es');
       expect(estado.formatos, {'wav', 'mp3'});
       expect(estado.ejecutando, isFalse);
     });
@@ -151,10 +151,10 @@ void main() {
       controller.alternarFormato('wav');
 
       final estado = container.read(homeControllerProvider);
-      expect(estado.voz, 'F1');
-      expect(estado.steps, 10);
-      expect(estado.speed, 1.7);
-      expect(estado.langVoz, 'fr');
+      expect(estado.voiceConfig.voz, 'F1');
+      expect(estado.voiceConfig.steps, 10);
+      expect(estado.voiceConfig.speed, 1.7);
+      expect(estado.voiceConfig.langVoz, 'fr');
       expect(estado.formatos, {'mp3', 'ogg'});
     });
 

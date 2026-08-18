@@ -8,6 +8,7 @@ import 'package:permission_handler/permission_handler.dart';
 
 import 'package:supertonic_audiobook/shared/domain/constants/producto.dart';
 import 'package:supertonic_audiobook/shared/domain/entities/archivo.dart';
+import 'package:supertonic_audiobook/shared/domain/entities/voice_config.dart';
 import 'package:supertonic_audiobook/features/convert/domain/use_cases/procesar_archivo.dart';
 import 'package:supertonic_audiobook/features/convert/presentation/constants/muestra_voz.dart';
 import 'package:supertonic_audiobook/presentation/controllers/providers.dart';
@@ -29,10 +30,7 @@ class HomeEstado {
     required this.carpetaOut,
     required this.archivos,
     required this.seleccion,
-    required this.voz,
-    required this.steps,
-    required this.speed,
-    required this.langVoz,
+    required this.voiceConfig,
     required this.formatos,
     required this.ejecutando,
     required this.probandoVoz,
@@ -51,10 +49,7 @@ class HomeEstado {
   /// Rutas marcadas en la lista. Vacío = "todos" (behavior de la ayuda).
   final Set<String> seleccion;
 
-  final String voz;
-  final int steps;
-  final double speed;
-  final String langVoz;
+  final VoiceConfig voiceConfig;
   final Set<String> formatos;
 
   final bool ejecutando;
@@ -77,10 +72,7 @@ class HomeEstado {
     String? carpetaOut,
     List<Archivo>? archivos,
     Set<String>? seleccion,
-    String? voz,
-    int? steps,
-    double? speed,
-    String? langVoz,
+    VoiceConfig? voiceConfig,
     Set<String>? formatos,
     bool? ejecutando,
     bool? probandoVoz,
@@ -97,10 +89,7 @@ class HomeEstado {
       carpetaOut: carpetaOut ?? this.carpetaOut,
       archivos: archivos ?? this.archivos,
       seleccion: seleccion ?? this.seleccion,
-      voz: voz ?? this.voz,
-      steps: steps ?? this.steps,
-      speed: speed ?? this.speed,
-      langVoz: langVoz ?? this.langVoz,
+      voiceConfig: voiceConfig ?? this.voiceConfig,
       formatos: formatos ?? this.formatos,
       ejecutando: ejecutando ?? this.ejecutando,
       probandoVoz: probandoVoz ?? this.probandoVoz,
@@ -150,10 +139,12 @@ class HomeController extends Notifier<HomeEstado> {
       carpetaOut: carpetaOut,
       archivos: archivos,
       seleccion: const {},
-      voz: voz,
-      steps: steps,
-      speed: speed,
-      langVoz: langVoz,
+      voiceConfig: VoiceConfig(
+        voz: voz,
+        steps: steps,
+        speed: speed,
+        langVoz: langVoz,
+      ),
       formatos: formatos,
       ejecutando: false,
       probandoVoz: false,
@@ -273,19 +264,27 @@ class HomeController extends Notifier<HomeEstado> {
   // ----------------------------------------------------------- opciones
 
   void cambiarVoz(String voz) {
-    state = state.copyWith(voz: voz);
+    state = state.copyWith(
+      voiceConfig: state.voiceConfig.copyWith(voz: voz),
+    );
   }
 
   void cambiarSteps(int steps) {
-    state = state.copyWith(steps: steps.clamp(5, 12));
+    state = state.copyWith(
+      voiceConfig: state.voiceConfig.copyWith(steps: steps.clamp(5, 12)),
+    );
   }
 
   void cambiarSpeed(double speed) {
-    state = state.copyWith(speed: speed.clamp(0.7, 2.0));
+    state = state.copyWith(
+      voiceConfig: state.voiceConfig.copyWith(speed: speed.clamp(0.7, 2.0)),
+    );
   }
 
   void cambiarLangVoz(String langVoz) {
-    state = state.copyWith(langVoz: langVoz);
+    state = state.copyWith(
+      voiceConfig: state.voiceConfig.copyWith(langVoz: langVoz),
+    );
   }
 
   void alternarFormato(String formato) {
@@ -300,8 +299,8 @@ class HomeController extends Notifier<HomeEstado> {
   Future<void> escuchar(AppLocalizations t) async {
     if (state.probandoVoz) return;
     state = state.copyWith(probandoVoz: true);
-    final voz = state.voz;
-    final lang = state.langVoz;
+    final voz = state.voiceConfig.voz;
+    final lang = state.voiceConfig.langVoz;
     try {
       _appendLog(t.log_muestra(voz, lang));
       await ref.read(motorTtsProvider).cambiarVoz(voz);
@@ -365,10 +364,10 @@ class HomeController extends Notifier<HomeEstado> {
       return;
     }
 
-    final voz = state.voz;
-    final steps = state.steps;
-    final speed = state.speed;
-    final lang = state.langVoz;
+    final voz = state.voiceConfig.voz;
+    final steps = state.voiceConfig.steps;
+    final speed = state.voiceConfig.speed;
+    final lang = state.voiceConfig.langVoz;
     final salida = state.carpetaOut;
 
     state = state.copyWith(
@@ -483,10 +482,10 @@ class HomeController extends Notifier<HomeEstado> {
   void _guardarPreferencias() {
     final prefs = {
       ...ref.read(repositorioPreferenciasProvider).cargar(),
-      'voz': state.voz,
-      'steps': state.steps,
-      'speed': state.speed,
-      'lang_voz': state.langVoz,
+      'voz': state.voiceConfig.voz,
+      'steps': state.voiceConfig.steps,
+      'speed': state.voiceConfig.speed,
+      'lang_voz': state.voiceConfig.langVoz,
       'formatos': [...state.formatos]..sort(),
       'carpeta_in': state.carpetaIn,
       'carpeta_out': state.carpetaOut,
