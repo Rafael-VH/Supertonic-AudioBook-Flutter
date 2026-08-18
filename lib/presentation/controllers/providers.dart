@@ -1,14 +1,14 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'package:supertonic_audiobook/domain/contracts/exportador_audio.dart';
-import 'package:supertonic_audiobook/domain/contracts/modelo_gestor.dart';
-import 'package:supertonic_audiobook/domain/contracts/motor_tts.dart';
-import 'package:supertonic_audiobook/domain/contracts/repositorio_archivos.dart';
-import 'package:supertonic_audiobook/domain/contracts/repositorio_preferencias.dart';
-import 'package:supertonic_audiobook/domain/contracts/reproductor_audio.dart';
-import 'package:supertonic_audiobook/domain/use_cases/listar_audios_generados.dart';
-import 'package:supertonic_audiobook/domain/use_cases/procesar_archivo.dart';
-import 'package:supertonic_audiobook/domain/use_cases/sintetizar_muestra.dart';
+import 'package:supertonic_audiobook/features/convert/domain/contracts/exportador_audio.dart';
+import 'package:supertonic_audiobook/features/modelo/domain/contracts/modelo_gestor.dart';
+import 'package:supertonic_audiobook/features/convert/domain/contracts/motor_tts.dart';
+import 'package:supertonic_audiobook/shared/domain/contracts/repositorio_archivos.dart';
+import 'package:supertonic_audiobook/shared/domain/contracts/repositorio_preferencias.dart';
+import 'package:supertonic_audiobook/shared/domain/contracts/reproductor_audio.dart';
+import 'package:supertonic_audiobook/features/biblioteca/domain/use_cases/listar_audios_generados.dart';
+import 'package:supertonic_audiobook/features/convert/domain/use_cases/procesar_archivo.dart';
+import 'package:supertonic_audiobook/features/convert/domain/use_cases/sintetizar_muestra.dart';
 import 'package:supertonic_audiobook/features/editor_metadata/domain/contracts/editor_metadata.dart';
 import 'package:supertonic_audiobook/features/editor_metadata/domain/use_cases/editar_metadata_mp3.dart';
 

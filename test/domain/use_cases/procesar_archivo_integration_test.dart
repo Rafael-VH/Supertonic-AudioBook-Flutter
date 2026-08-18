@@ -3,13 +3,13 @@ import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:supertonic_audiobook/core/audio/wav_io.dart' as wav;
-import 'package:supertonic_audiobook/data/repositories/exportador_audio_ffmpeg.dart';
-import 'package:supertonic_audiobook/domain/contracts/exportador_audio.dart';
-import 'package:supertonic_audiobook/domain/contracts/motor_tts.dart';
-import 'package:supertonic_audiobook/domain/contracts/repositorio_archivos.dart';
-import 'package:supertonic_audiobook/domain/entities/archivo.dart';
-import 'package:supertonic_audiobook/domain/use_cases/procesar_archivo.dart';
-import 'package:supertonic_audiobook/domain/use_cases/sintetizar_muestra.dart';
+import 'package:supertonic_audiobook/features/convert/data/repositories/exportador_audio_ffmpeg.dart';
+import 'package:supertonic_audiobook/features/convert/domain/contracts/exportador_audio.dart';
+import 'package:supertonic_audiobook/features/convert/domain/contracts/motor_tts.dart';
+import 'package:supertonic_audiobook/shared/domain/contracts/repositorio_archivos.dart';
+import 'package:supertonic_audiobook/features/convert/domain/entities/archivo.dart';
+import 'package:supertonic_audiobook/features/convert/domain/use_cases/procesar_archivo.dart';
+import 'package:supertonic_audiobook/features/convert/domain/use_cases/sintetizar_muestra.dart';
 
 /// Devuelve [cantidad] muestras float32 (1 s de silencio = 44100 muestras).
 Float32List _audio(double segundos) => Float32List((segundos * wav.wavSampleRate).round());

@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:supertonic_audiobook/data/repositories/repositorio_archivos.dart';
+import 'package:supertonic_audiobook/shared/data/repositories/repositorio_archivos.dart';
 
 void main() {
   late Directory temp;

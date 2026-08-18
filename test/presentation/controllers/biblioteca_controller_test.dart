@@ -3,8 +3,8 @@ import 'dart:io';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:supertonic_audiobook/domain/contracts/reproductor_audio.dart';
-import 'package:supertonic_audiobook/presentation/controllers/biblioteca_controller.dart';
+import 'package:supertonic_audiobook/shared/domain/contracts/reproductor_audio.dart';
+import 'package:supertonic_audiobook/features/biblioteca/presentation/controllers/biblioteca_controller.dart';
 import 'package:supertonic_audiobook/presentation/controllers/providers.dart';
 
 import '../../support/fakes.dart';

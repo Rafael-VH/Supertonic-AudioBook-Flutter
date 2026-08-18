@@ -2,15 +2,15 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import 'package:supertonic_audiobook/presentation/controllers/modelo_controller.dart';
-import 'package:supertonic_audiobook/presentation/screens/biblioteca/biblioteca_screen.dart';
-import 'package:supertonic_audiobook/presentation/screens/dashboard/dashboard_screen.dart';
-import 'package:supertonic_audiobook/presentation/screens/convert/convert_screen.dart';
-import 'package:supertonic_audiobook/presentation/screens/modelo/modelo_screen.dart';
-import 'package:supertonic_audiobook/presentation/screens/onboarding/onboarding_screen.dart';
-import 'package:supertonic_audiobook/presentation/screens/settings/settings_screen.dart';
+import 'package:supertonic_audiobook/features/modelo/presentation/controllers/modelo_controller.dart';
+import 'package:supertonic_audiobook/features/biblioteca/presentation/screens/biblioteca_screen.dart';
+import 'package:supertonic_audiobook/features/dashboard/presentation/screens/dashboard_screen.dart';
+import 'package:supertonic_audiobook/features/convert/presentation/screens/convert_screen.dart';
+import 'package:supertonic_audiobook/features/modelo/presentation/screens/modelo_screen.dart';
+import 'package:supertonic_audiobook/features/onboarding/presentation/screens/onboarding_screen.dart';
+import 'package:supertonic_audiobook/features/settings/presentation/screens/settings_screen.dart';
 import 'package:supertonic_audiobook/features/editor_metadata/presentation/screens/metadata_editor_screen.dart';
-import 'package:supertonic_audiobook/presentation/screens/splash/splash_screen.dart';
+import 'package:supertonic_audiobook/features/splash/presentation/screens/splash_screen.dart';
 
 /// Nombres de ruta centralizados para que ninguna screen importe otra.
 abstract final class Rutas {

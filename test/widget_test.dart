@@ -3,9 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:supertonic_audiobook/app.dart';
-import 'package:supertonic_audiobook/domain/contracts/repositorio_archivos.dart';
-import 'package:supertonic_audiobook/domain/contracts/repositorio_preferencias.dart';
-import 'package:supertonic_audiobook/domain/entities/archivo.dart';
+import 'package:supertonic_audiobook/shared/domain/contracts/repositorio_archivos.dart';
+import 'package:supertonic_audiobook/shared/domain/contracts/repositorio_preferencias.dart';
+import 'package:supertonic_audiobook/features/convert/domain/entities/archivo.dart';
 import 'package:supertonic_audiobook/presentation/controllers/providers.dart';
 
 import 'support/fakes.dart';

@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:supertonic_audiobook/domain/use_cases/listar_audios_generados.dart';
+import 'package:supertonic_audiobook/features/biblioteca/domain/use_cases/listar_audios_generados.dart';
 
 import '../../support/fakes.dart';
 

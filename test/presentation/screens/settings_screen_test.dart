@@ -3,11 +3,11 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:supertonic_audiobook/domain/contracts/repositorio_preferencias.dart';
+import 'package:supertonic_audiobook/shared/domain/contracts/repositorio_preferencias.dart';
 import 'package:supertonic_audiobook/presentation/controllers/providers.dart';
-import 'package:supertonic_audiobook/presentation/controllers/settings_controller.dart';
+import 'package:supertonic_audiobook/features/settings/presentation/controllers/settings_controller.dart';
 import 'package:supertonic_audiobook/presentation/l10n/app_localizations.dart';
-import 'package:supertonic_audiobook/presentation/screens/settings/settings_screen.dart';
+import 'package:supertonic_audiobook/features/settings/presentation/screens/settings_screen.dart';
 import 'package:supertonic_audiobook/presentation/theme/app_theme.dart';
 
 import '../../support/fakes.dart';

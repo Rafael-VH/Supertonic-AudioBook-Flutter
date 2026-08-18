@@ -6,7 +6,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:supertonic_audiobook/data/modelo/modelo_manager.dart';
+import 'package:supertonic_audiobook/features/modelo/data/repositories/modelo_manager.dart';
 
 /// Adaptador HTTP falso: sin `Range` devuelve [respuestaCompleta]; con
 /// `Range` (resumen de una descarga previa) devuelve cuerpo vacío, como un

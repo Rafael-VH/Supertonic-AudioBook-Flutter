@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:supertonic_audiobook/presentation/controllers/modelo_controller.dart';
+import 'package:supertonic_audiobook/features/modelo/presentation/controllers/modelo_controller.dart';
 import 'package:supertonic_audiobook/presentation/controllers/providers.dart';
 
 import '../../support/fakes.dart';

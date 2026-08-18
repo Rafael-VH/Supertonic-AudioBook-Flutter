@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:supertonic_audiobook/domain/use_cases/formato.dart';
+import 'package:supertonic_audiobook/features/convert/domain/use_cases/formato.dart';
 
 void main() {
   group('normalizarFormatos', () {

@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:supertonic_audiobook/domain/use_cases/procesar_archivo.dart';
+import 'package:supertonic_audiobook/features/convert/domain/use_cases/procesar_archivo.dart';
 
 void main() {
   group('ProcesarArchivo.presupuestoMemoria', () {

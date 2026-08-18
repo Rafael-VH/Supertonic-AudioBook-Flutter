@@ -4,11 +4,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 
-import 'package:supertonic_audiobook/domain/contracts/repositorio_archivos.dart';
+import 'package:supertonic_audiobook/shared/domain/contracts/repositorio_archivos.dart';
 import 'package:supertonic_audiobook/presentation/controllers/providers.dart';
 import 'package:supertonic_audiobook/presentation/l10n/app_localizations.dart';
 import 'package:supertonic_audiobook/presentation/routing/app_router.dart';
-import 'package:supertonic_audiobook/presentation/screens/biblioteca/biblioteca_screen.dart';
+import 'package:supertonic_audiobook/features/biblioteca/presentation/screens/biblioteca_screen.dart';
 import 'package:supertonic_audiobook/presentation/theme/app_theme.dart';
 import 'package:supertonic_audiobook/presentation/theme/paleta.dart';
 

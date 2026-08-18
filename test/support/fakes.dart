@@ -5,14 +5,14 @@ import 'dart:typed_data';
 import 'package:file_picker/file_picker.dart';
 import 'package:file_picker/src/platform/file_picker_platform_interface.dart';
 
-import 'package:supertonic_audiobook/domain/contracts/exportador_audio.dart';
-import 'package:supertonic_audiobook/domain/contracts/modelo_gestor.dart';
-import 'package:supertonic_audiobook/domain/contracts/motor_tts.dart';
-import 'package:supertonic_audiobook/domain/contracts/repositorio_archivos.dart';
-import 'package:supertonic_audiobook/domain/contracts/repositorio_preferencias.dart';
-import 'package:supertonic_audiobook/domain/contracts/reproductor_audio.dart';
-import 'package:supertonic_audiobook/domain/entities/archivo.dart';
-import 'package:supertonic_audiobook/domain/use_cases/procesar_archivo.dart';
+import 'package:supertonic_audiobook/features/convert/domain/contracts/exportador_audio.dart';
+import 'package:supertonic_audiobook/features/modelo/domain/contracts/modelo_gestor.dart';
+import 'package:supertonic_audiobook/features/convert/domain/contracts/motor_tts.dart';
+import 'package:supertonic_audiobook/shared/domain/contracts/repositorio_archivos.dart';
+import 'package:supertonic_audiobook/shared/domain/contracts/repositorio_preferencias.dart';
+import 'package:supertonic_audiobook/shared/domain/contracts/reproductor_audio.dart';
+import 'package:supertonic_audiobook/features/convert/domain/entities/archivo.dart';
+import 'package:supertonic_audiobook/features/convert/domain/use_cases/procesar_archivo.dart';
 
 /// Preferencias en memoria para los tests (sin disco).
 class PreferenciasMemoria implements RepositorioPreferencias {

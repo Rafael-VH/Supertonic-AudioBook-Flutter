@@ -7,10 +7,10 @@ import 'package:go_router/go_router.dart';
 import 'package:supertonic_audiobook/presentation/controllers/providers.dart';
 import 'package:supertonic_audiobook/presentation/l10n/app_localizations.dart';
 import 'package:supertonic_audiobook/presentation/routing/app_router.dart';
-import 'package:supertonic_audiobook/presentation/screens/biblioteca/biblioteca_screen.dart';
-import 'package:supertonic_audiobook/presentation/screens/dashboard/dashboard_screen.dart';
-import 'package:supertonic_audiobook/presentation/screens/convert/convert_screen.dart';
-import 'package:supertonic_audiobook/presentation/screens/modelo/modelo_screen.dart';
+import 'package:supertonic_audiobook/features/biblioteca/presentation/screens/biblioteca_screen.dart';
+import 'package:supertonic_audiobook/features/dashboard/presentation/screens/dashboard_screen.dart';
+import 'package:supertonic_audiobook/features/convert/presentation/screens/convert_screen.dart';
+import 'package:supertonic_audiobook/features/modelo/presentation/screens/modelo_screen.dart';
 import 'package:supertonic_audiobook/presentation/theme/app_theme.dart';
 import 'package:supertonic_audiobook/presentation/theme/paleta.dart';
 

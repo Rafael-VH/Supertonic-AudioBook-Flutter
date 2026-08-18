@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'package:supertonic_audiobook/presentation/controllers/settings_controller.dart';
+import 'package:supertonic_audiobook/features/settings/presentation/controllers/settings_controller.dart';
 import 'package:supertonic_audiobook/presentation/l10n/app_localizations.dart';
 import 'package:supertonic_audiobook/presentation/routing/app_router.dart';
 import 'package:supertonic_audiobook/presentation/theme/app_theme.dart';

@@ -6,7 +6,7 @@ import 'package:ffmpeg_kit_flutter_new/ffmpeg_kit.dart';
 import 'package:ffmpeg_kit_flutter_new/return_code.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:supertonic_audiobook/core/audio/wav_io.dart';
-import 'package:supertonic_audiobook/data/repositories/exportador_audio_ffmpeg.dart';
+import 'package:supertonic_audiobook/features/convert/data/repositories/exportador_audio_ffmpeg.dart';
 
 /// True si FFmpeg está disponible en el entorno de ejecución (en `flutter test`
 /// el plugin no está registrado y lanza MissingPluginException → los tests de
