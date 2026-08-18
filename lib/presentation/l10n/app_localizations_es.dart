@@ -540,4 +540,79 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get home_proximamente_desc =>
       'Esta función estará disponible en una próxima versión.';
+
+  @override
+  String get home_editor_voz => 'Editor de voz';
+
+  @override
+  String get home_editor_voz_desc =>
+      'Edita y personaliza las voces de tus audiolibros.';
+
+  @override
+  String get home_editor_metadata => 'Editor de metadatos';
+
+  @override
+  String get home_editor_metadata_desc =>
+      'Edita los metadatos de tus archivos MP3.';
+
+  @override
+  String get editor_metadata_seleccionar => 'Seleccionar archivo MP3';
+
+  @override
+  String get editor_metadata_sin_archivo =>
+      'Seleccioná un archivo MP3 para editar sus metadatos.';
+
+  @override
+  String get editor_metadata_titulo_campo => 'Título';
+
+  @override
+  String get editor_metadata_artista_campo => 'Artista';
+
+  @override
+  String get editor_metadata_album_campo => 'Álbum';
+
+  @override
+  String get editor_metadata_pista_campo => 'Pista';
+
+  @override
+  String get editor_metadata_disco_campo => 'Disco';
+
+  @override
+  String get editor_metadata_anio_campo => 'Año';
+
+  @override
+  String get editor_metadata_genero_campo => 'Género';
+
+  @override
+  String get editor_metadata_comentario_campo => 'Comentario';
+
+  @override
+  String get editor_metadata_cover_art => 'Portada';
+
+  @override
+  String get editor_metadata_cambiar_portada => 'Cambiar portada';
+
+  @override
+  String get editor_metadata_quitar_portada => 'Quitar portada';
+
+  @override
+  String get editor_metadata_guardar => 'Guardar';
+
+  @override
+  String get editor_metadata_cancelar => 'Cancelar';
+
+  @override
+  String get editor_metadata_exito => 'Metadatos guardados correctamente.';
+
+  @override
+  String get editor_metadata_error_lectura =>
+      'No se pudo leer los metadatos del archivo.';
+
+  @override
+  String get editor_metadata_error_escritura =>
+      'No se pudieron guardar los metadatos.';
+
+  @override
+  String get editor_metadata_error_portada =>
+      'La portada debe ser JPEG y no superar 500KB.';
 }

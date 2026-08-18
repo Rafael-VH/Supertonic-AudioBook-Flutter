@@ -997,6 +997,144 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'This feature will be available in a future version.'**
   String get home_proximamente_desc;
+
+  /// No description provided for @home_editor_voz.
+  ///
+  /// In en, this message translates to:
+  /// **'Voice editor'**
+  String get home_editor_voz;
+
+  /// No description provided for @home_editor_voz_desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit and customize the voices of your audiobooks.'**
+  String get home_editor_voz_desc;
+
+  /// No description provided for @home_editor_metadata.
+  ///
+  /// In en, this message translates to:
+  /// **'Metadata editor'**
+  String get home_editor_metadata;
+
+  /// No description provided for @home_editor_metadata_desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit the metadata of your MP3 files.'**
+  String get home_editor_metadata_desc;
+
+  /// No description provided for @editor_metadata_seleccionar.
+  ///
+  /// In en, this message translates to:
+  /// **'Select MP3 file'**
+  String get editor_metadata_seleccionar;
+
+  /// No description provided for @editor_metadata_sin_archivo.
+  ///
+  /// In en, this message translates to:
+  /// **'Select an MP3 file to edit its metadata.'**
+  String get editor_metadata_sin_archivo;
+
+  /// No description provided for @editor_metadata_titulo_campo.
+  ///
+  /// In en, this message translates to:
+  /// **'Title'**
+  String get editor_metadata_titulo_campo;
+
+  /// No description provided for @editor_metadata_artista_campo.
+  ///
+  /// In en, this message translates to:
+  /// **'Artist'**
+  String get editor_metadata_artista_campo;
+
+  /// No description provided for @editor_metadata_album_campo.
+  ///
+  /// In en, this message translates to:
+  /// **'Album'**
+  String get editor_metadata_album_campo;
+
+  /// No description provided for @editor_metadata_pista_campo.
+  ///
+  /// In en, this message translates to:
+  /// **'Track'**
+  String get editor_metadata_pista_campo;
+
+  /// No description provided for @editor_metadata_disco_campo.
+  ///
+  /// In en, this message translates to:
+  /// **'Disc'**
+  String get editor_metadata_disco_campo;
+
+  /// No description provided for @editor_metadata_anio_campo.
+  ///
+  /// In en, this message translates to:
+  /// **'Year'**
+  String get editor_metadata_anio_campo;
+
+  /// No description provided for @editor_metadata_genero_campo.
+  ///
+  /// In en, this message translates to:
+  /// **'Genre'**
+  String get editor_metadata_genero_campo;
+
+  /// No description provided for @editor_metadata_comentario_campo.
+  ///
+  /// In en, this message translates to:
+  /// **'Comment'**
+  String get editor_metadata_comentario_campo;
+
+  /// No description provided for @editor_metadata_cover_art.
+  ///
+  /// In en, this message translates to:
+  /// **'Cover art'**
+  String get editor_metadata_cover_art;
+
+  /// No description provided for @editor_metadata_cambiar_portada.
+  ///
+  /// In en, this message translates to:
+  /// **'Change cover'**
+  String get editor_metadata_cambiar_portada;
+
+  /// No description provided for @editor_metadata_quitar_portada.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove cover'**
+  String get editor_metadata_quitar_portada;
+
+  /// No description provided for @editor_metadata_guardar.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get editor_metadata_guardar;
+
+  /// No description provided for @editor_metadata_cancelar.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get editor_metadata_cancelar;
+
+  /// No description provided for @editor_metadata_exito.
+  ///
+  /// In en, this message translates to:
+  /// **'Metadata saved successfully.'**
+  String get editor_metadata_exito;
+
+  /// No description provided for @editor_metadata_error_lectura.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not read file metadata.'**
+  String get editor_metadata_error_lectura;
+
+  /// No description provided for @editor_metadata_error_escritura.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not save metadata.'**
+  String get editor_metadata_error_escritura;
+
+  /// No description provided for @editor_metadata_error_portada.
+  ///
+  /// In en, this message translates to:
+  /// **'Cover art must be JPEG and under 500KB.'**
+  String get editor_metadata_error_portada;
 }
 
 class _AppLocalizationsDelegate

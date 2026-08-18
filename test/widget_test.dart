@@ -134,7 +134,8 @@ void main() {
     // El hub (HomeScreen) muestra las funciones disponibles en el tab 0.
     expect(find.text('¿Qué quieres hacer hoy?'), findsOneWidget);
     expect(find.text('Convertir archivos a audio'), findsOneWidget);
-    expect(find.text('Próximamente'), findsOneWidget);
+    expect(find.text('Editor de metadatos'), findsOneWidget);
+    expect(find.text('Editor de voz'), findsOneWidget);
   });
 
   testWidgets('el segundo botón del dashboard es Biblioteca',

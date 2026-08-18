@@ -9,6 +9,7 @@ import 'package:supertonic_audiobook/presentation/screens/convert/convert_screen
 import 'package:supertonic_audiobook/presentation/screens/modelo/modelo_screen.dart';
 import 'package:supertonic_audiobook/presentation/screens/onboarding/onboarding_screen.dart';
 import 'package:supertonic_audiobook/presentation/screens/settings/settings_screen.dart';
+import 'package:supertonic_audiobook/features/editor_metadata/presentation/screens/metadata_editor_screen.dart';
 import 'package:supertonic_audiobook/presentation/screens/splash/splash_screen.dart';
 
 /// Nombres de ruta centralizados para que ninguna screen importe otra.
@@ -20,6 +21,7 @@ abstract final class Rutas {
   static const modelo = '/modelo';
   static const settings = '/settings';
   static const biblioteca = '/biblioteca';
+  static const editorMetadata = '/editor-metadata';
 }
 
 /// Orígenes admitidos para el redirect del gate del modelo (D5): el modelo se
@@ -74,6 +76,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (_, __) => const BibliotecaScreen(),
       ),
       GoRoute(path: Rutas.settings, builder: (_, __) => const SettingsScreen()),
+      GoRoute(
+        path: Rutas.editorMetadata,
+        builder: (_, __) => const MetadataEditorScreen(),
+      ),
     ],
   );
 

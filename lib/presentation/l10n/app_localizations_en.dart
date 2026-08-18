@@ -536,4 +536,77 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get home_proximamente_desc =>
       'This feature will be available in a future version.';
+
+  @override
+  String get home_editor_voz => 'Voice editor';
+
+  @override
+  String get home_editor_voz_desc =>
+      'Edit and customize the voices of your audiobooks.';
+
+  @override
+  String get home_editor_metadata => 'Metadata editor';
+
+  @override
+  String get home_editor_metadata_desc =>
+      'Edit the metadata of your MP3 files.';
+
+  @override
+  String get editor_metadata_seleccionar => 'Select MP3 file';
+
+  @override
+  String get editor_metadata_sin_archivo =>
+      'Select an MP3 file to edit its metadata.';
+
+  @override
+  String get editor_metadata_titulo_campo => 'Title';
+
+  @override
+  String get editor_metadata_artista_campo => 'Artist';
+
+  @override
+  String get editor_metadata_album_campo => 'Album';
+
+  @override
+  String get editor_metadata_pista_campo => 'Track';
+
+  @override
+  String get editor_metadata_disco_campo => 'Disc';
+
+  @override
+  String get editor_metadata_anio_campo => 'Year';
+
+  @override
+  String get editor_metadata_genero_campo => 'Genre';
+
+  @override
+  String get editor_metadata_comentario_campo => 'Comment';
+
+  @override
+  String get editor_metadata_cover_art => 'Cover art';
+
+  @override
+  String get editor_metadata_cambiar_portada => 'Change cover';
+
+  @override
+  String get editor_metadata_quitar_portada => 'Remove cover';
+
+  @override
+  String get editor_metadata_guardar => 'Save';
+
+  @override
+  String get editor_metadata_cancelar => 'Cancel';
+
+  @override
+  String get editor_metadata_exito => 'Metadata saved successfully.';
+
+  @override
+  String get editor_metadata_error_lectura => 'Could not read file metadata.';
+
+  @override
+  String get editor_metadata_error_escritura => 'Could not save metadata.';
+
+  @override
+  String get editor_metadata_error_portada =>
+      'Cover art must be JPEG and under 500KB.';
 }
