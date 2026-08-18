@@ -4,7 +4,7 @@ Constantes técnicas, preferencias y configuración en tiempo de ejecución.
 
 ## Constantes Técnicas
 
-### Configuración del Pipeline (`data/config.dart`)
+### Configuración del Pipeline (`shared/data/config.dart`)
 
 | Constante | Valor | Descripción |
 |-----------|-------|-------------|
@@ -14,7 +14,7 @@ Constantes técnicas, preferencias y configuración en tiempo de ejecución.
 | `memoriaSafeMarginBytesMovil` | `67108864` | Umbral de RAM para móvil (64 MB) |
 | `subtiposAudio` | Map | Subtipos de audio por formato |
 
-### Valores por Defecto del Producto (`domain/constants/producto.dart`)
+### Valores por Defecto del Producto (`shared/domain/constants/producto.dart`)
 
 | Constante | Valor | Descripción |
 |-----------|-------|-------------|
@@ -23,14 +23,14 @@ Constantes técnicas, preferencias y configuración en tiempo de ejecución.
 | `defaultTtsSteps` | `5` | Pasos de inferencia TTS por defecto (5–12) |
 | `defaultSpeed` | `1.1` | Velocidad de habla por defecto (0.7–2.0) |
 
-### Configuración de Segmentos (`domain/use_cases/segmentar_texto.dart`)
+### Configuración de Segmentos (`features/convert/domain/use_cases/segmentar_texto.dart`)
 
 | Constante | Valor | Descripción |
 |-----------|-------|-------------|
 | `maxCharsPerSegment` | `1500` | Máximo de caracteres por fragmento TTS |
 | `mergeThreshold` | `200` | Párrafos más cortos que este se fusionan con el siguiente |
 
-### Formatos Soportados (`domain/use_cases/formato.dart`)
+### Formatos Soportados (`features/convert/domain/use_cases/formato.dart`)
 
 ```dart
 const formatosNativos = ['wav', 'flac', 'ogg', 'mp3'];
@@ -116,7 +116,7 @@ const formatosNativos = ['wav', 'flac', 'ogg', 'mp3'];
 
 ### Detección de Plataforma
 
-Decidido en `main.dart` (composition root):
+Decidido en `main.dart` (composition root) via `providers.dart`:
 
 ```dart
 esMovil: Platform.isAndroid || Platform.isIOS,

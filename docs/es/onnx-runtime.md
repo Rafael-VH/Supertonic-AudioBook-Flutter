@@ -15,7 +15,7 @@ dependencies:
 
 ## Uso en el Proyecto
 
-El proyecto usa `flutter_onnxruntime` en `MotorTtsSupertonic` (`data/repositories/motor_tts.dart`) para:
+El proyecto usa `flutter_onnxruntime` en `MotorTtsSupertonic` (`features/convert/data/repositories/motor_tts.dart`) para:
 
 1. **Cargar el modelo** Supertonic 3 desde disco
 2. **Inferir** texto → muestras de audio Float32

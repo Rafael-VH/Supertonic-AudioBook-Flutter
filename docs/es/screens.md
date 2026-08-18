@@ -9,9 +9,7 @@ Splash
   └─→ Onboarding (primera ejecución)
        └─→ Modelo (descargar modelo)
             └─→ Dashboard (centro principal)
-                 ├─→ Home (conversión por lotes)
-                 │    └─→ Settings
-                 ├─→ Selección (archivos sueltos)
+                 ├─→ Convert (conversión por lotes)
                  │    └─→ Settings
                  ├─→ Biblioteca (escuchar audiolibros)
                  └─→ Settings
@@ -21,7 +19,7 @@ Splash
 
 ### Splash (`/splash`)
 
-**Archivo**: `lib/presentation/screens/splash/splash_screen.dart`
+**Archivo**: `lib/features/splash/presentation/screens/splash_screen.dart`
 
 Pantalla de carga inicial que se muestra mientras la app se inicializa.
 
@@ -35,7 +33,7 @@ Pantalla de carga inicial que se muestra mientras la app se inicializa.
 
 ### Onboarding (`/onboarding`)
 
-**Archivo**: `lib/presentation/screens/onboarding/onboarding_screen.dart`
+**Archivo**: `lib/features/onboarding/presentation/screens/onboarding_screen.dart`
 
 Guía interactiva de 5 pasos para usuarios nuevos.
 
@@ -47,8 +45,6 @@ Guía interactiva de 5 pasos para usuarios nuevos.
 | 4 | Procesar audio |
 | 5 | **Seleccionar carpeta de salida** (nuevo) |
 
-**Controller**: `OnboardingController` (maneja navegación de pasos y descarga del modelo)
-
 **Comportamientos clave**:
 - El paso 5 usa `FilePicker.getDirectoryPath()` para configurar la carpeta de salida
 - Completar el onboarding marca la primera ejecución como hecha
@@ -58,15 +54,15 @@ Guía interactiva de 5 pasos para usuarios nuevos.
 
 ### Dashboard (`/dashboard`)
 
-**Archivo**: `lib/presentation/screens/dashboard/dashboard_screen.dart`
+**Archivo**: `lib/features/dashboard/presentation/screens/dashboard_screen.dart`
 
-Centro principal después del onboarding. Muestra hero de bienvenida y tres cards de función.
+Centro principal después del onboarding. Muestra hero de bienvenida y cards de función.
 
 | Card | Acción | Destino |
 |------|--------|---------|
 | Convertir archivos | Procesar por lotes carpeta `.md` | `/home` |
-| Procesar archivos sueltos | Elegir archivos individuales | `/seleccion` |
 | Biblioteca | Escuchar audiolibros generados | `/biblioteca` |
+| Editor de metadatos | Editar metadatos ID3 de MP3 | `/editor-metadata` |
 
 **Layout**:
 - **Móvil** (< 600px): Columna única apilada
@@ -80,13 +76,13 @@ Centro principal después del onboarding. Muestra hero de bienvenida y tres card
 
 ---
 
-### Home (`/home`)
+### Convert (`/home`)
 
-**Archivo**: `lib/presentation/screens/home/home_screen.dart`
+**Archivo**: `lib/features/convert/presentation/screens/convert_screen.dart`
 
 Pantalla de procesamiento por lotes — el corazón de la app.
 
-**Controller**: `HomeController` → `HomeEstado`
+**Controller**: `HomeController` → `HomeEstado` (en `lib/features/convert/presentation/controllers/`)
 
 #### Estado (`HomeEstado`)
 
@@ -114,6 +110,10 @@ Pantalla de procesamiento por lotes — el corazón de la app.
 4. **Vista previa de voz**: Botón "Escuchar" para probar la voz
 5. **Procesamiento**: Barra de progreso, registro, botones procesar/cancelar
 
+**Layout responsive**:
+- **Móvil** (< 900px): Acordeón apilado (una sección abierta a la vez)
+- **Tablet** (≥ 900px): Layout de dos columnas (`Row` 50/50)
+
 #### Comportamientos clave
 
 - Persiste preferencias antes de procesar (`_guardarPreferencias`)
@@ -123,34 +123,13 @@ Pantalla de procesamiento por lotes — el corazón de la app.
 
 ---
 
-### Selección (`/seleccion`)
-
-**Archivo**: `lib/presentation/screens/seleccion/seleccion_screen.dart`
-
-Procesar archivos `.md` individuales desde cualquier ubicación.
-
-**Controller**: `SeleccionController` (extiende `HomeController`)
-
-| Diferencia con Home | Descripción |
-|---------------------|-------------|
-| `archivos: []` | Comienza vacío — sin escaneo de carpeta |
-| Selector de archivos | Abre el selector del sistema para elegir `.md` |
-| Mismo procesamiento | Usa la misma lógica de `HomeController` |
-
-**Comportamientos clave**:
-- Archivos agregados con el selector del sistema (`FilePicker.getMultipleFiles`)
-- Mismas opciones de síntesis que Home
-- Mismo pipeline de procesamiento
-
----
-
 ### Modelo (`/modelo`)
 
-**Archivo**: `lib/presentation/screens/modelo/modelo_screen.dart`
+**Archivo**: `lib/features/modelo/presentation/screens/modelo_screen.dart`
 
 Pantalla de descarga y verificación del modelo.
 
-**Controller**: `ModeloController` → `ModeloEstado`
+**Controller**: `ModeloController` → `ModeloEstado` (en `lib/features/modelo/presentation/controllers/`)
 
 | Estado | Visualización |
 |--------|---------------|
@@ -168,11 +147,11 @@ Pantalla de descarga y verificación del modelo.
 
 ### Settings (`/settings`)
 
-**Archivo**: `lib/presentation/screens/settings/settings_screen.dart`
+**Archivo**: `lib/features/settings/presentation/screens/settings_screen.dart`
 
 Pantalla de preferencias de la app.
 
-**Controller**: `SettingsController` → `SettingsEstado`
+**Controller**: `SettingsController` → `SettingsEstado` (en `lib/features/settings/presentation/controllers/`)
 
 | Ajuste | Widget | Opciones |
 |--------|--------|----------|
@@ -184,17 +163,17 @@ Pantalla de preferencias de la app.
 **Comportamientos clave**:
 - Los cambios se persisten inmediatamente
 - Cambios de tema/estilo se aplican al instante via `AppTheme`
-- La carpeta de salida afecta la ruta por defecto de Home
+- La carpeta de salida afecta la ruta por defecto de Convert
 
 ---
 
 ### Biblioteca (`/biblioteca`)
 
-**Archivo**: `lib/presentation/screens/biblioteca/biblioteca_screen.dart`
+**Archivo**: `lib/features/biblioteca/presentation/screens/biblioteca_screen.dart`
 
 Escuchar audiolibros generados.
 
-**Controller**: `BibliotecaController` → `BibliotecaEstado`
+**Controller**: `BibliotecaController` → `BibliotecaEstado` (en `lib/features/biblioteca/presentation/controllers/`)
 
 | Característica | Descripción |
 |----------------|-------------|
@@ -211,23 +190,40 @@ Escuchar audiolibros generados.
 
 ---
 
+### Editor de Metadatos (`/editor-metadata`)
+
+**Archivo**: `lib/features/editor_metadata/presentation/screens/metadata_editor_screen.dart`
+
+Editor de metadatos ID3 para archivos MP3.
+
+**Controller**: `MetadataEditorController` (en `lib/features/editor_metadata/presentation/controllers/`)
+
+| Característica | Descripción |
+|----------------|-------------|
+| Selección de archivo | Abre selector del sistema para elegir MP3 |
+| Campos editables | Título, artista, álbum, año, género, número de pista |
+| Vista previa | Muestra metadatos actuales del archivo |
+| Guardar | Aplica cambios via contrato `EditorMetadata` |
+
+---
+
 ## Layout Responsive
 
 ### Móvil (< 900px)
 
-- **Home**: Acordeón apilado (una sección abierta a la vez)
+- **Convert**: Acordeón apilado (una sección abierta a la vez)
   - Secciones de carpetas abiertas por defecto
   - Transiciones animadas (fade + slide, 250ms)
 - **Dashboard**: Cards en columna única
 
 ### Tablet (≥ 900px)
 
-- **Home**: Layout de dos columnas (`Row` 50/50)
+- **Convert**: Layout de dos columnas (`Row` 50/50)
 - **Dashboard**: Grid de 2 columnas (≥ 600px)
 
 ### Breakpoints
 
 | Pantalla | Móvil | Tablet |
 |----------|-------|--------|
-| Home | `< 900px` | `≥ 900px` |
+| Convert | `< 900px` | `≥ 900px` |
 | Dashboard | `< 600px` | `≥ 600px` |

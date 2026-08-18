@@ -1,32 +1,32 @@
 # Arquitectura
 
-Clean Architecture con reglas de dependencia estrictas en tres capas.
+Clean Architecture con módulos por feature y capa compartida (`shared/`).
 
 ## Resumen
 
 ```
-┌─────────────────────────────────────────────────────┐
-│                  presentation/                       │
-│  controllers (Riverpod)  screens  routing  l10n     │
-└──────────────────────────┬──────────────────────────┘
-                           │ depends on
-                           ▼
-┌─────────────────────────────────────────────────────┐
-│                    domain/                           │
-│  contracts (interfaces)  entities  use_cases         │
-│  ⚠ NO dart:io, NO data/, NO UI widgets             │
-└──────────────────────────▲──────────────────────────┘
-                           │ implements
-┌──────────────────────────┴──────────────────────────┐
-│                     data/                            │
-│  repositories  motor_tts  modelo_manager  config    │
-│  ⚠ implementaciones concretas de contratos domain   │
-└─────────────────────────────────────────────────────┘
-                           │
-                           │ injected in
-                           ▼
-                   lib/main.dart
-              (composition root)
+┌──────────────────────────────────────────────────────────────────────┐
+│                          features/                                    │
+│                                                                      │
+│  ┌────────────────┐  ┌────────────────┐  ┌────────────────┐         │
+│  │  convert/      │  │  biblioteca/   │  │  modelo/       │  ...   │
+│  │  domain ← data │  │  domain        │  │  domain ← data │         │
+│  │  presentation  │  │  presentation  │  │  presentation  │         │
+│  └───────┬────────┘  └───────┬────────┘  └───────┬────────┘         │
+│          │ depends on        │ depends on         │ depends on       │
+│          ▼                   ▼                    ▼                  │
+│  ┌──────────────────────────────────────────────────────────────┐   │
+│  │                     shared/                                   │   │
+│  │  domain/contracts/  entities  use_cases  constants            │   │
+│  │  data/config.dart   repositories (archivos, prefs, player)   │   │
+│  │  ⚠ NO dart:io en domain/                                     │   │
+│  └──────────────────────────────────────────────────────────────┘   │
+└──────────────────────────────────────────────────────────────────────┘
+                                     │
+                                     │ injected in
+                                     ▼
+                          lib/main.dart + providers.dart
+                        (composition root + DI)
 ```
 
 ## Regla de Dependencia
@@ -35,26 +35,30 @@ Clean Architecture con reglas de dependencia estrictas en tres capas.
 
 Este es el invariante central. Las violaciones se detectan con `flutter analyze` y tests de arquitectura.
 
-- `domain/contracts/` define interfaces abstractas (ej. `MotorTts`, `ExportadorAudio`)
-- `data/` provee implementaciones concretas (ej. `MotorTtsSupertonic`, `ExportadorAudioFfmpeg`)
-- `main.dart` los conecta mediante overrides de Riverpod
+- Cada feature tiene sus propios contratos en `features/X/domain/contracts/` (ej. `MotorTts`, `ExportadorAudio`)
+- `shared/domain/contracts/` define contratos usados por múltiples features (ej. `RepositorioArchivos`, `RepositorioPreferencias`)
+- `features/X/data/` provee implementaciones concretas del feature
+- `shared/data/` provee implementaciones de contratos compartidos
+- `main.dart` los conecta mediante overrides de Riverpod en `providers.dart`
 
 ### Por qué importa
 
 - Los use cases de dominio son testeables sin dependencias de plataforma
 - Cambiar implementaciones (ej. ffmpeg → encoder nativo) requiere cero cambios en dominio
 - `dart:io` (sistema de archivos, detección de plataforma) vive en `data/` y `presentation/`
+- Cada feature es autocontenida: puede modificarce sin afectar otras features
 
-## Composition Root (`lib/main.dart`)
+## Composition Root (`lib/main.dart` + `providers.dart`)
 
-El único archivo que importa `data/` y `presentation/`. Hace:
+`main.dart` es el único archivo que importa implementaciones concretas de `data/`. Hace:
 
 1. Inicializar bindings (WidgetsFlutterBinding / FdbBinding)
 2. Resolver rutas de plataforma (documents, support, modelo)
 3. Crear implementaciones concretas
-4. Inyectar todo en overrides de `ProviderScope`
+4. Inyectar todo en overrides de `ProviderScope` via `providers.dart`
 
 ```dart
+// main.dart
 ProviderScope(
   overrides: [
     repositorioArchivosProvider.overrideWithValue(RepositorioArchivosLocal()),
@@ -66,71 +70,87 @@ ProviderScope(
 )
 ```
 
+`providers.dart` define los contratos de `domain/` como providers de Riverpod. Es el punto de entrada único a las implementaciones concretas.
+
 ### Mapa de Inyección de Providers
 
 | Provider | Implementación | Ubicación |
 |----------|---------------|-----------|
-| `repositorioArchivosProvider` | `RepositorioArchivosLocal` | `data/repositories/` |
-| `repositorioPreferenciasProvider` | `PreferenciasJsonLocal` | `data/repositories/` |
-| `exportadorAudioProvider` | `ExportadorAudioFfmpeg` | `data/repositories/` |
-| `reproductorAudioProvider` | `ReproductorJustAudio` | `data/repositories/` |
-| `motorTtsProvider` | `MotorTtsSupertonic` | `data/repositories/` |
-| `modeloManagerProvider` | `ModeloManager` | `data/modelo/` |
-| `configTtsProvider` | Record inline | `main.dart` |
+| `repositorioArchivosProvider` | `RepositorioArchivosLocal` | `shared/data/repositories/` |
+| `repositorioPreferenciasProvider` | `PreferenciasJsonLocal` | `shared/data/repositories/` |
+| `exportadorAudioProvider` | `ExportadorAudioFfmpeg` | `features/convert/data/repositories/` |
+| `reproductorAudioProvider` | `ReproductorJustAudio` | `shared/data/repositories/` |
+| `motorTtsProvider` | `MotorTtsSupertonic` | `features/convert/data/repositories/` |
+| `modeloManagerProvider` | `ModeloManager` | `features/modelo/data/repositories/` |
+| `editorMetadataProvider` | `EditorMetadataId3Codec` | `features/editor_metadata/data/repositories/` |
+| `configTtsProvider` | Record inline | `providers.dart` |
 | `carpetaBaseProvider` | Ruta de plataforma | `main.dart` |
 
 ## Capa de Dominio
 
-### Contratos (`domain/contracts/`)
+### Contratos Compartidos (`shared/domain/contracts/`)
 
-Interfaces abstractas que definen qué necesita el dominio, no cómo se implementa.
+Interfaces abstractas usadas por múltiples features.
 
 | Contrato | Responsabilidad |
 |----------|----------------|
-| `MotorTts` | Sintetizar texto → muestras de audio Float32 |
-| `ExportadorAudio` | Escribir archivos de audio (WAV/MP3/FLAC/OGG) |
 | `RepositorioArchivos` | Listar/leer archivos, crear directorios |
 | `RepositorioPreferencias` | Cargar/guardar preferencias clave-valor |
 | `ReproductorAudio` | Reproducir/pausar/detener audio local |
-| `ModeloGestor` | Descargar, verificar y gestionar el modelo TTS |
 
-### Entidades (`domain/entities/`)
+### Contratos por Feature (`features/X/domain/contracts/`)
 
-Modelos de datos puros sin dependencias externas.
+Interfaces específicas de cada feature.
 
-| Entidad | Descripción |
-|---------|-------------|
-| `Archivo` | Un archivo Markdown a convertir (extiende `Equatable`) |
-| `LibroGenerado` | Un audiolibro agrupado con prioridad de formato |
+| Contrato | Feature | Responsabilidad |
+|----------|---------|----------------|
+| `MotorTts` | convert | Sintetizar texto → muestras de audio Float32 |
+| `ExportadorAudio` | convert | Escribir archivos de audio (WAV/MP3/FLAC/OGG) |
+| `ModeloGestor` | modelo | Descargar, verificar y gestionar el modelo TTS |
+| `EditorMetadata` | editor_metadata | Editar metadatos ID3 de archivos MP3 |
 
-### Casos de Uso (`domain/use_cases/`)
+### Entidades
 
-Lógica de orquestación que depende solo de contratos y entidades.
+| Entidad | Feature | Descripción |
+|---------|---------|-------------|
+| `Archivo` | convert | Un archivo Markdown a convertir (extiende `Equatable`) |
+| `LibroGenerado` | biblioteca | Un audiolibro agrupado con prioridad de formato |
+| `MetadatosMp3` | editor_metadata | Metadatos ID3 de un archivo MP3 |
 
-| Caso de Uso | Propósito |
-|-------------|-----------|
-| `ProcesarArchivo` | Convertir MD → audio (pipeline completo) |
-| `LimpiarMarkdown` | Eliminar sintaxis Markdown → texto plano |
-| `SegmentarTexto` | Dividir texto en chunks listos para TTS |
-| `SintetizarMuestra` | Generar vista previa de voz |
-| `ListarAudiosGenerados` | Agrupar audios generados por libro |
-| `Formato` | Validar y normalizar formatos de salida |
+### Casos de Uso
+
+| Caso de Uso | Feature | Propósito |
+|-------------|---------|-----------|
+| `ProcesarArchivo` | convert | Convertir MD → audio (pipeline completo) |
+| `LimpiarMarkdown` | convert | Eliminar sintaxis Markdown → texto plano |
+| `SegmentarTexto` | convert | Dividir texto en chunks listos para TTS |
+| `SintetizarMuestra` | convert | Generar vista previa de voz |
+| `Formato` | convert | Validar y normalizar formatos de salida |
+| `ListarAudiosGenerados` | biblioteca | Agrupar audios generados por libro |
+| `EditarMetadataMp3` | editor_metadata | Editar metadatos ID3 en archivos MP3 |
 
 ## Capa de Datos
 
-### Repositorios (`data/repositories/`)
+### Repositorios Compartidos (`shared/data/repositories/`)
 
-Implementaciones concretas de contratos de dominio.
+Implementaciones concretas de contratos compartidos.
 
 | Repositorio | Implementa | Tecnología |
 |------------|-----------|------------|
 | `RepositorioArchivosLocal` | `RepositorioArchivos` | `dart:io` |
 | `PreferenciasJsonLocal` | `RepositorioPreferencias` | `shared_preferences` |
-| `ExportadorAudioFfmpeg` | `ExportadorAudio` | `ffmpeg_kit` + `wav_io.dart` |
 | `ReproductorJustAudio` | `ReproductorAudio` | `just_audio` |
-| `MotorTtsSupertonic` | `MotorTts` | `flutter_onnxruntime` |
 
-### Gestor de Modelo (`data/modelo/`)
+### Repositorios por Feature
+
+| Repositorio | Feature | Implementa | Tecnología |
+|------------|---------|-----------|------------|
+| `ExportadorAudioFfmpeg` | convert | `ExportadorAudio` | `ffmpeg_kit` + `wav_io.dart` |
+| `MotorTtsSupertonic` | convert | `MotorTts` | `flutter_onnxruntime` |
+| `ModeloManager` | modelo | `ModeloGestor` | `Dio` |
+| `EditorMetadataId3Codec` | editor_metadata | `EditorMetadata` | ID3 codec |
+
+### Gestor de Modelo (`features/modelo/data/repositories/modelo_manager.dart`)
 
 `ModeloManager` maneja la descarga y verificación del modelo Supertonic 3 (~400 MB):
 
@@ -139,7 +159,7 @@ Implementaciones concretas de contratos de dominio.
 - Soporte de cancelación/timeout
 - Almacena el modelo en `<app_support>/modelo/onnx/` y `voice_styles/`
 
-### Configuración (`data/config.dart`)
+### Configuración (`shared/data/config.dart`)
 
 Constantes técnicas del pipeline TTS:
 
@@ -152,10 +172,35 @@ const int memoriaSafeMarginBytesMovil = 67108864;  // 64 MB móvil
 
 ## Capa de Presentación
 
+### Pantallas por Feature (`features/X/presentation/screens/`)
+
+Cada feature tiene sus propias pantallas. La pantalla principal de conversión es `ConvertScreen` (antes `HomeScreen`):
+
+| Pantalla | Feature | Archivo |
+|----------|---------|---------|
+| SplashScreen | splash | `features/splash/presentation/screens/splash_screen.dart` |
+| OnboardingScreen | onboarding | `features/onboarding/presentation/screens/onboarding_screen.dart` |
+| DashboardScreen | dashboard | `features/dashboard/presentation/screens/dashboard_screen.dart` |
+| ConvertScreen | convert | `features/convert/presentation/screens/convert_screen.dart` |
+| ModeloScreen | modelo | `features/modelo/presentation/screens/modelo_screen.dart` |
+| BibliotecaScreen | biblioteca | `features/biblioteca/presentation/screens/biblioteca_screen.dart` |
+| SettingsScreen | settings | `features/settings/presentation/screens/settings_screen.dart` |
+| MetadataEditorScreen | editor_metadata | `features/editor_metadata/presentation/screens/metadata_editor_screen.dart` |
+
+### Controllers por Feature (`features/X/presentation/controllers/`)
+
+| Controller | Feature | Responsabilidad |
+|-----------|---------|----------------|
+| `HomeController` | convert | Estado de conversión (HomeEstado) |
+| `SettingsController` | settings | Preferencias de la app |
+| `BibliotecaController` | biblioteca | Estado de la biblioteca |
+| `ModeloController` | modelo | Estado de descarga del modelo |
+| `MetadataEditorController` | editor_metadata | Estado del editor de metadatos |
+
 ### Gestión de Estado (Riverpod)
 
 - **Notifiers** para estado complejo: `HomeController`, `SettingsController`
-- **Providers** para contratos y casos de uso
+- **Providers** para contratos y casos de uso (definidos en `providers.dart`)
 - **Clases de estado**: `HomeEstado`, `SettingsEstado` (inmutables con `copyWith`)
 
 ### Routing (go_router)
@@ -167,11 +212,11 @@ abstract final class Rutas {
   static const splash = '/splash';
   static const onboarding = '/onboarding';
   static const dashboard = '/dashboard';
-  static const home = '/home';
+  static const home = '/home';           // → ConvertScreen
   static const modelo = '/modelo';
   static const settings = '/settings';
-  static const seleccion = '/seleccion';
   static const biblioteca = '/biblioteca';
+  static const editorMetadata = '/editor-metadata';
 }
 ```
 
@@ -209,6 +254,25 @@ Verifican la regla de dependencia: `domain/` nunca importa `data/` ni `dart:io`.
 
 - `ProcesarArchivo` tiene tests de integración con el pipeline real
 - Patrón `ExportadorSelectivo` para testear exportación de formatos independientemente
+
+### Estructura de Tests
+
+```
+test/
+├── core/                          # WAV I/O, natural sort
+├── data/                          # Repositorios compartidos
+├── domain/                        # Casos de uso compartidos
+├── features/editor_metadata/      # Tests del feature editor_metadata
+│   ├── data/repositories/
+│   ├── domain/{contracts,entities,use_cases}/
+│   └── presentation/{controllers,screens}/
+├── presentation/
+│   ├── controllers/               # Controllers (home, biblioteca, modelo, providers)
+│   ├── screens/                   # Widgets de pantalla
+│   ├── routing/                   # Navegación y redirects
+│   └── theme/                     # Paleta y estilos visuales
+└── support/                       # Helpers de test
+```
 
 Ver [testing.md](testing.md) para métricas y convenciones completas.
 

@@ -9,11 +9,11 @@ abstract final class Rutas {
   static const splash = '/splash';
   static const onboarding = '/onboarding';
   static const dashboard = '/dashboard';
-  static const home = '/home';
+  static const home = '/home';           // → ConvertScreen
   static const modelo = '/modelo';
   static const settings = '/settings';
-  static const seleccion = '/seleccion';
   static const biblioteca = '/biblioteca';
+  static const editorMetadata = '/editor-metadata';
 }
 ```
 
@@ -38,12 +38,11 @@ abstract final class Rutas {
           │               │               │
           ▼               ▼               ▼
     ┌──────────┐    ┌──────────┐    ┌──────────┐
-    │   Home   │    │ Seleccion│    │Biblioteca│
-    └────┬─────┘    └────┬─────┘    └──────────┘
-         │               │
-         │    ┌──────────┘
-         │    │
-         ▼    ▼
+    │ Convert  │    │Biblioteca│    │ Metadata │
+    └────┬─────┘    └──────────┘    │ Editor   │
+         │                          └──────────┘
+         │
+         ▼
     ┌─────────────────┐
     │     Modelo      │ (if model not ready)
     └────────┬────────┘
@@ -83,14 +82,13 @@ redirect: (context, state) {
 Only these routes can redirect to `/modelo`:
 
 ```dart
-const _origenesValidos = {Rutas.home, Rutas.dashboard, Rutas.seleccion};
+const _origenesValidos = {Rutas.home, Rutas.dashboard};
 ```
 
 | Origin | Trigger |
 |--------|---------|
-| `/home` | Normal gate — user navigates to Home |
+| `/home` | Normal gate — user navigates to Convert |
 | `/dashboard` | CTA card — "Convert files" button |
-| `/seleccion` | Process loose files button |
 
 ### Model Ready Listener
 
@@ -133,11 +131,11 @@ ref.listen(
 
 - **Screen**: `DashboardScreen`
 - **Purpose**: Main hub with function cards
-- **Actions**: Navigate to home, seleccion, biblioteca, settings
+- **Actions**: Navigate to home, biblioteca, editorMetadata, settings
 
 ### `/home`
 
-- **Screen**: `HomeScreen`
+- **Screen**: `ConvertScreen`
 - **Purpose**: Batch file processing
 - **Gate**: Requires model (redirects to `/modelo` if not ready)
 
@@ -147,17 +145,17 @@ ref.listen(
 - **Purpose**: Model download and verification
 - **Exit**: Redirects to origin when model is ready
 
-### `/seleccion`
-
-- **Screen**: `SeleccionScreen`
-- **Purpose**: Process individual files
-- **Gate**: No redirect — warns on processing if model not ready
-
 ### `/biblioteca`
 
 - **Screen**: `BibliotecaScreen`
 - **Purpose**: Listen to generated audiobooks
 - **Gate**: None — reads from output folder
+
+### `/editor-metadata`
+
+- **Screen**: `MetadataEditorScreen`
+- **Purpose**: Edit ID3 metadata of MP3 files
+- **Gate**: None
 
 ### `/settings`
 
@@ -173,10 +171,11 @@ Used in screens via `context.go()` or `context.push()`:
 // From Dashboard
 context.push(Rutas.home);
 context.push(Rutas.settings);
-context.push(Rutas.modelo, extra: Rutas.dashboard);
+context.push(Rutas.editorMetadata);
 
-// From Home
+// From Convert
 context.push(Rutas.settings);
+context.push(Rutas.modelo, extra: Rutas.home);
 
 // From Biblioteca
 context.push(Rutas.home);

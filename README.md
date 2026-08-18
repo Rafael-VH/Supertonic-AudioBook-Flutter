@@ -94,43 +94,73 @@ Guía interactiva de 5 pasos al iniciar la app por primera vez:
 
 ## Arquitectura
 
-Clean Architecture con separación estricta de dependencias:
+Clean Architecture con módulos por feature y capa compartida:
 
 ```
 lib/
-├── core/                    # Utilidades de bajo nivel
-│   ├── audio/wav_io.dart        # Escritura WAV PCM16
-│   └── utils/natural_sort.dart  # Ordenamiento natural
+├── core/                        # Utilidades de bajo nivel
+│   ├── audio/wav_io.dart            # Escritura WAV PCM16
+│   └── utils/natural_sort.dart      # Ordenamiento natural
 │
-├── data/                    # Implementaciones concretas
-│   ├── config.dart              # Constantes técnicas del pipeline
-│   ├── modelo/                  # Gestión del modelo ONNX
-│   └── repositories/            # FFmpeg, archivos, preferencias
+├── shared/                      # Infraestructura compartida entre features
+│   ├── data/
+│   │   ├── config.dart              # Constantes técnicas del pipeline
+│   │   └── repositories/            # Archivos, preferencias, reproductor
+│   └── domain/
+│       ├── constants/producto.dart  # Valores por defecto del producto
+│       └── contracts/               # Interfaces compartidas
 │
-├── domain/                  # Lógica de negocio (sin dart:io)
-│   ├── contracts/               # Interfaces abstractas
+├── features/                    # Módulos por feature (cada uno autocontenido)
+│   ├── biblioteca/             # Escuchar audiolibros generados
+│   ├── convert/                # Conversión MD → Audio (core de la app)
+│   ├── dashboard/              # Centro principal
+│   ├── editor_metadata/        # Edición de metadatos ID3
+│   ├── home/                   # Pantalla de inicio
+│   ├── modelo/                 # Descarga del modelo TTS
+│   ├── onboarding/             # Guía de primera ejecución
+│   ├── settings/               # Preferencias de la app
+│   └── splash/                 # Pantalla de carga
+│
+├── presentation/                # Capa compartida de presentación
+│   ├── controllers/providers.dart  # Inyección de dependencias (Riverpod)
+│   ├── l10n/                        # Internacionalización (ES/EN)
+│   ├── routing/app_router.dart      # Navegación centralizada (go_router)
+│   └── theme/                       # Tema y paleta de colores
+│
+├── app.dart                     # Widget raíz
+└── main.dart                    # Composition root
+```
+
+Cada feature sigue Clean Architecture internamente:
+
+```
+features/convert/
+├── domain/
+│   ├── contracts/               # Interfaces abstractas del feature
 │   ├── entities/                # Modelos de dominio
 │   └── use_cases/               # Casos de uso puros
-│
-└── presentation/            # UI y orquestación
+├── data/
+│   ├── helpers/                 # Helpers específicos del feature
+│   └── repositories/            # Implementaciones concretas
+└── presentation/
     ├── controllers/             # State management (Riverpod)
-    ├── routing/                 # Navegación (go_router)
-    ├── screens/                 # 8 pantallas agrupadas por feature
-    ├── widgets/                 # Componentes reutilizables
-    └── l10n/                    # Internacionalización (ES/EN)
+    ├── screens/                 # Pantallas (movil/ y tablet/)
+    └── widgets/                 # Componentes UI del feature
 ```
 
 ### Regla de dependencia
 
 ```
-presentation → domain ← data
-       ↑                   ↑
-       └──── main.dart ────┘  (composición con ProviderScope)
+features/X/presentation → features/X/domain ← features/X/data
+       ↑                                        ↑
+       └──── main.dart (providers.dart) ────────┘
 ```
 
 - `domain/` **nunca** importa `data/` ni usa `dart:io`
 - `presentation/` **nunca** importa `data/` directamente
-- La inyección ocurre en `main.dart` con overrides de Riverpod
+- `shared/domain/` define contratos usados por múltiples features
+- `shared/data/` provee implementaciones de contratos compartidos
+- La inyección ocurre en `main.dart` con overrides de Riverpod en `providers.dart`
 
 ### Stack técnico
 
@@ -163,10 +193,11 @@ flutter test --coverage
 | Directorio | Cubre |
 |------------|-------|
 | `test/core/` | WAV I/O, natural sort |
-| `test/data/` | Modelo manager, repositorios |
-| `test/domain/` | Casos de uso (procesar, segmentar, listar) |
-| `test/presentation/controllers/` | Controllers (home, settings, biblioteca, modelo) |
-| `test/presentation/screens/` | Widgets de pantalla (home, settings, dashboard, etc.) |
+| `test/data/` | Repositorios compartidos |
+| `test/domain/` | Casos de uso compartidos (procesar, segmentar, listar) |
+| `test/features/editor_metadata/` | Editor de metadatos (domain, data, presentation) |
+| `test/presentation/controllers/` | Controllers (home, biblioteca, modelo, providers) |
+| `test/presentation/screens/` | Widgets de pantalla (convert, settings, dashboard, etc.) |
 | `test/presentation/routing/` | Navegación y redirects |
 | `test/presentation/theme/` | Paleta y estilos visuales |
 

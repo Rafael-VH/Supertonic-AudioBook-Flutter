@@ -39,9 +39,6 @@ test/
 │       └── repositorio_preferencias_test.dart # Preferences
 │
 ├── domain/
-│   ├── entities/
-│   │   ├── archivo_test.dart              # Archivo entity
-│   │   └── libro_generado_test.dart       # LibroGenerado entity
 │   └── use_cases/
 │       ├── procesar_archivo_test.dart         # Process file (unit)
 │       ├── procesar_archivo_integration_test.dart  # Process file (integration)
@@ -51,10 +48,26 @@ test/
 │       ├── listar_audios_generados_test.dart  # Audio listing
 │       └── formato_test.dart                  # Format validation
 │
+├── features/
+│   └── editor_metadata/
+│       ├── data/repositories/
+│       │   └── editor_metadata_id3_codec_test.dart  # ID3 codec
+│       ├── domain/
+│       │   ├── contracts/
+│       │   │   └── editor_metadata_test.dart         # EditorMetadata contract
+│       │   ├── entities/
+│       │   │   └── metadatos_mp3_test.dart           # MetadatosMp3 entity
+│       │   └── use_cases/
+│       │       └── editar_metadata_mp3_test.dart     # Edit metadata
+│       └── presentation/
+│           ├── controllers/
+│           │   └── metadata_editor_controller_test.dart  # Controller
+│           └── screens/
+│               └── metadata_editor_screen_test.dart      # UI
+│
 └── presentation/
     ├── controllers/
     │   ├── home_controller_test.dart       # Home state management
-    │   ├── settings_controller_test.dart   # Settings state
     │   ├── biblioteca_controller_test.dart # Library state
     │   ├── modelo_controller_test.dart     # Model screen state
     │   └── providers_test.dart             # Provider overrides
@@ -63,16 +76,15 @@ test/
     │   └── app_router_test.dart            # Navigation/redirects
     │
     ├── screens/
-    │   ├── home_screen_test.dart           # Home UI
-    │   ├── home_screen_movil_test.dart     # Home mobile layout
+    │   ├── convert_screen_test.dart        # Convert UI
+    │   ├── home_movil_diag_test.dart       # Convert mobile layout
     │   ├── settings_screen_test.dart       # Settings UI
     │   ├── dashboard_screen_test.dart      # Dashboard UI
-    │   ├── biblioteca_screen_test.dart     # Library UI
-    │   ├── seleccion_screen_test.dart      # Selection UI
-    │   └── modelo_screen_test.dart         # Model screen UI
+    │   ├── modelo_screen_test.dart         # Model screen UI
+    │   └── biblioteca/
+    │       └── biblioteca_screen_test.dart # Library UI
     │
     └── theme/
-        ├── app_theme_test.dart             # Theme building
         └── paleta_test.dart                # Color palette
 ```
 
@@ -117,11 +129,11 @@ test('procesar genera WAV y MP3', () async {
 Full screen tests with mocked providers:
 
 ```dart
-testWidgets('HomeScreen shows folder picker', (tester) async {
+testWidgets('ConvertScreen shows folder picker', (tester) async {
   await tester.pumpWidget(
     ProviderScope(
       overrides: [/* mocked providers */],
-      child: const MaterialApp(home: HomeScreen()),
+      child: const MaterialApp(home: ConvertScreen()),
     ),
   );
   expect(find.text('Select folder'), findsOneWidget);
@@ -135,6 +147,8 @@ Verify dependency rules:
 ```dart
 test('domain does not import data', () {
   // Verify no imports from data/ in domain/ files
+  // within each feature (features/X/domain/ doesn't import features/X/data/)
+  // and shared/domain/ doesn't import shared/data/
 });
 ```
 
@@ -160,7 +174,7 @@ ProviderScope(
     motorTtsProvider.overrideWithValue(mockMotor),
     carpetaBaseProvider.overrideWithValue('/test/path'),
   ],
-  child: const MaterialApp(home: HomeScreen()),
+  child: const MaterialApp(home: ConvertScreen()),
 )
 ```
 

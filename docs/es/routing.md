@@ -13,10 +13,10 @@ Flujo de navegación de la aplicación con go_router.
                                            ▼
 ┌─────────────────────────────────────────────────┐
 │                  Dashboard                       │
-│  ┌──────────┐  ┌──────────────┐  ┌───────────┐  │
-│  │   Home   │  │  Selección   │  │Biblioteca │  │
-│  │ (lotes)  │  │ (sueltos)    │  │ (escuchar)│  │
-│  └────┬─────┘  └──────────────┘  └───────────┘  │
+│  ┌──────────┐  ┌───────────┐  ┌──────────────┐  │
+│  │ Convert  │  │Biblioteca │  │  Editor      │  │
+│  │ (lotes)  │  │(escuchar) │  │  Metadatos   │  │
+│  └────┬─────┘  └───────────┘  └──────────────┘  │
 │       │                                          │
 │       └──── Settings ◄───────────────────────    │
 └─────────────────────────────────────────────────┘
@@ -31,11 +31,11 @@ abstract final class Rutas {
   static const splash = '/splash';
   static const onboarding = '/onboarding';
   static const dashboard = '/dashboard';
-  static const home = '/home';
+  static const home = '/home';           // → ConvertScreen
   static const modelo = '/modelo';
   static const settings = '/settings';
-  static const seleccion = '/seleccion';
   static const biblioteca = '/biblioteca';
+  static const editorMetadata = '/editor-metadata';
 }
 ```
 
@@ -49,10 +49,10 @@ El router se construye con `GoRouter` y define:
 | `/onboarding` | OnboardingScreen | Guía de 5 pasos para nuevos usuarios |
 | `/modelo` | ModeloScreen | Pantalla de descarga del modelo |
 | `/dashboard` | DashboardScreen | Centro principal de la app |
-| `/home` | HomeScreen | Conversión por lotes de archivos `.md` |
-| `/seleccion` | SeleccionScreen | Conversión de archivos individuales |
+| `/home` | ConvertScreen | Conversión por lotes de archivos `.md` |
 | `/settings` | SettingsScreen | Preferencias de la aplicación |
 | `/biblioteca` | BibliotecaScreen | Escuchar audiolibros generados |
+| `/editor-metadata` | MetadataEditorScreen | Editor de metadatos ID3 |
 
 ## Flujo de Navegación Inicial
 
@@ -75,9 +75,15 @@ El `ModelGate` verifica si el modelo está disponible. Si no lo está, redirige 
 
 ```dart
 redirect: (context, state) {
-  final modeloDisponible = ref.read(modeloDisponibleProvider);
-  if (!modeloDisponible && state.matchedLocation != '/modelo') {
-    return '/modelo';
+  final destino = state.matchedLocation;
+  final listo = ref.read(modeloControllerProvider).listo;
+  if (destino == Rutas.home && !listo) return Rutas.modelo;
+  if (destino == Rutas.modelo && listo) {
+    final origen = state.extra;
+    if (origen is String && _origenesValidos.contains(origen)) {
+      return origen;
+    }
+    return Rutas.home;
   }
   return null;
 }
@@ -88,9 +94,9 @@ redirect: (context, state) {
 El Dashboard usa `GoRouter` para navegación con `push()`:
 
 ```dart
-onTap: () => context.push(Rutas.home)        // Archivos por lotes
-onTap: () => context.push(Rutas.seleccion)   // Archivos sueltos
-onTap: () => context.push(Rutas.biblioteca)  // Biblioteca
+onTap: () => context.push(Rutas.home)             // Conversión por lotes
+onTap: () => context.push(Rutas.biblioteca)        // Biblioteca
+onTap: () => context.push(Rutas.editorMetadata)    // Editor de metadatos
 ```
 
 ## Configuración del Router
@@ -103,15 +109,21 @@ final router = GoRouter(
     GoRoute(path: Rutas.onboarding, builder: (_, __) => const OnboardingScreen()),
     GoRoute(path: Rutas.modelo, builder: (_, __) => const ModeloScreen()),
     GoRoute(path: Rutas.dashboard, builder: (_, __) => const DashboardScreen()),
-    GoRoute(path: Rutas.home, builder: (_, __) => const HomeScreen()),
-    GoRoute(path: Rutas.seleccion, builder: (_, __) => const SeleccionScreen()),
-    GoRoute(path: Rutas.settings, builder: (_, __) => const SettingsScreen()),
+    GoRoute(path: Rutas.home, builder: (_, __) => const ConvertScreen()),
     GoRoute(path: Rutas.biblioteca, builder: (_, __) => const BibliotecaScreen()),
+    GoRoute(path: Rutas.settings, builder: (_, __) => const SettingsScreen()),
+    GoRoute(path: Rutas.editorMetadata, builder: (_, __) => const MetadataEditorScreen()),
   ],
   redirect: (context, state) {
-    final modeloDisponible = ref.read(modeloDisponibleProvider);
-    if (!modeloDisponible && state.matchedLocation != '/modelo') {
-      return '/modelo';
+    final destino = state.matchedLocation;
+    final listo = ref.read(modeloControllerProvider).listo;
+    if (destino == Rutas.home && !listo) return Rutas.modelo;
+    if (destino == Rutas.modelo && listo) {
+      final origen = state.extra;
+      if (origen is String && _origenesValidos.contains(origen)) {
+        return origen;
+      }
+      return Rutas.home;
     }
     return null;
   },
@@ -125,7 +137,7 @@ Los tests de routing verifican:
 1. **Splash → Onboarding**: Primera ejecución
 2. **Splash → Dashboard**: Ejecuciones posteriores
 3. **Model Gate**: Redirección a modelo cuando no está disponible
-4. **Dashboard push**: Navegación correcta a Home/Selección/Biblioteca
+4. **Dashboard push**: Navegación correcta a Convert/Biblioteca/Editor
 5. **Settings push**: Navegación desde cualquier pantalla
 
 Ver `test/presentation/routing/app_router_test.dart` para tests completos.

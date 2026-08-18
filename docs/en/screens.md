@@ -9,9 +9,7 @@ Splash
   └─→ Onboarding (first run)
        └─→ Modelo (download model)
             └─→ Dashboard (main hub)
-                 ├─→ Home (batch conversion)
-                 │    └─→ Settings
-                 ├─→ Selección (single files)
+                 ├─→ Convert (batch conversion)
                  │    └─→ Settings
                  ├─→ Biblioteca (listen to books)
                  └─→ Settings
@@ -21,7 +19,7 @@ Splash
 
 ### Splash (`/splash`)
 
-**File**: `lib/presentation/screens/splash/splash_screen.dart`
+**File**: `lib/features/splash/presentation/screens/splash_screen.dart`
 
 Initial loading screen shown while the app initializes.
 
@@ -35,7 +33,7 @@ Initial loading screen shown while the app initializes.
 
 ### Onboarding (`/onboarding`)
 
-**File**: `lib/presentation/screens/onboarding/onboarding_screen.dart`
+**File**: `lib/features/onboarding/presentation/screens/onboarding_screen.dart`
 
 Interactive 5-step guide for first-time users.
 
@@ -47,8 +45,6 @@ Interactive 5-step guide for first-time users.
 | 4 | Process audio |
 | 5 | **Select output folder** (new) |
 
-**Controller**: `OnboardingController` (manages step navigation and model download)
-
 **Key behaviors**:
 - Step 5 uses `FilePicker.getDirectoryPath()` to set output folder
 - Completing onboarding marks first-run as done
@@ -58,15 +54,15 @@ Interactive 5-step guide for first-time users.
 
 ### Dashboard (`/dashboard`)
 
-**File**: `lib/presentation/screens/dashboard/dashboard_screen.dart`
+**File**: `lib/features/dashboard/presentation/screens/dashboard_screen.dart`
 
-Main hub after onboarding. Shows welcome hero and three function cards.
+Main hub after onboarding. Shows welcome hero and function cards.
 
 | Card | Action | Target |
 |------|--------|--------|
 | Convert files | Batch process `.md` folder | `/home` |
-| Process loose files | Pick individual files | `/seleccion` |
 | Library | Listen to generated audiobooks | `/biblioteca` |
+| Metadata editor | Edit ID3 metadata of MP3 files | `/editor-metadata` |
 
 **Layout**:
 - **Mobile** (< 600px): Single column stack
@@ -80,13 +76,13 @@ Main hub after onboarding. Shows welcome hero and three function cards.
 
 ---
 
-### Home (`/home`)
+### Convert (`/home`)
 
-**File**: `lib/presentation/screens/home/home_screen.dart`
+**File**: `lib/features/convert/presentation/screens/convert_screen.dart`
 
 Batch processing screen — the core of the app.
 
-**Controller**: `HomeController` → `HomeEstado`
+**Controller**: `HomeController` → `HomeEstado` (in `lib/features/convert/presentation/controllers/`)
 
 #### State (`HomeEstado`)
 
@@ -114,6 +110,12 @@ Batch processing screen — the core of the app.
 4. **Voice preview**: "Listen" button to test voice
 5. **Processing**: Progress bar, log, process/cancel buttons
 
+**Responsive layout**:
+- **Mobile** (< 900px): Stacked accordion (one section open at a time)
+  - Folder sections open by default
+  - Animated transitions (fade + slide, 250ms)
+- **Tablet** (≥ 900px): Two-column layout (`Row` 50/50)
+
 #### Key behaviors
 
 - Persists preferences before processing (`_guardarPreferencias`)
@@ -123,34 +125,13 @@ Batch processing screen — the core of the app.
 
 ---
 
-### Selección (`/seleccion`)
-
-**File**: `lib/presentation/screens/seleccion/seleccion_screen.dart`
-
-Process individual `.md` files from any location.
-
-**Controller**: `SeleccionController` (extends `HomeController`)
-
-| Difference from Home | Description |
-|---------------------|-------------|
-| `archivos: []` | Starts empty — no folder scan |
-| File picker | Opens system file picker for `.md` selection |
-| Same processing | Uses identical `HomeController` logic |
-
-**Key behaviors**:
-- Files added via system file picker (`FilePicker.getMultipleFiles`)
-- Same synthesis options as Home
-- Same processing pipeline
-
----
-
 ### Modelo (`/modelo`)
 
-**File**: `lib/presentation/screens/modelo/modelo_screen.dart`
+**File**: `lib/features/modelo/presentation/screens/modelo_screen.dart`
 
 Model download and verification screen.
 
-**Controller**: `ModeloController` → `ModeloEstado`
+**Controller**: `ModeloController` → `ModeloEstado` (in `lib/features/modelo/presentation/controllers/`)
 
 | State | Display |
 |-------|---------|
@@ -168,11 +149,11 @@ Model download and verification screen.
 
 ### Settings (`/settings`)
 
-**File**: `lib/presentation/screens/settings/settings_screen.dart`
+**File**: `lib/features/settings/presentation/screens/settings_screen.dart`
 
 App preferences screen.
 
-**Controller**: `SettingsController` → `SettingsEstado`
+**Controller**: `SettingsController` → `SettingsEstado` (in `lib/features/settings/presentation/controllers/`)
 
 | Setting | Widget | Options |
 |---------|--------|---------|
@@ -184,17 +165,17 @@ App preferences screen.
 **Key behaviors**:
 - Changes persist immediately
 - Theme/style changes apply instantly via `AppTheme`
-- Output folder affects Home default path
+- Output folder affects Convert default path
 
 ---
 
 ### Biblioteca (`/biblioteca`)
 
-**File**: `lib/presentation/screens/biblioteca/biblioteca_screen.dart`
+**File**: `lib/features/biblioteca/presentation/screens/biblioteca_screen.dart`
 
 Listen to generated audiobooks.
 
-**Controller**: `BibliotecaController` → `BibliotecaEstado`
+**Controller**: `BibliotecaController` → `BibliotecaEstado` (in `lib/features/biblioteca/presentation/controllers/`)
 
 | Feature | Description |
 |---------|-------------|
@@ -211,23 +192,40 @@ Listen to generated audiobooks.
 
 ---
 
+### Metadata Editor (`/editor-metadata`)
+
+**File**: `lib/features/editor_metadata/presentation/screens/metadata_editor_screen.dart`
+
+ID3 metadata editor for MP3 files.
+
+**Controller**: `MetadataEditorController` (in `lib/features/editor_metadata/presentation/controllers/`)
+
+| Feature | Description |
+|---------|-------------|
+| File selection | Opens system file picker for MP3 selection |
+| Editable fields | Title, artist, album, year, genre, track number |
+| Preview | Shows current file metadata |
+| Save | Applies changes via `EditorMetadata` contract |
+
+---
+
 ## Responsive Layout
 
 ### Mobile (< 900px)
 
-- **Home**: Stacked accordion (one section open at a time)
+- **Convert**: Stacked accordion (one section open at a time)
   - Folder sections open by default
   - Animated transitions (fade + slide, 250ms)
 - **Dashboard**: Single column cards
 
 ### Tablet (≥ 900px)
 
-- **Home**: Two-column layout (`Row` 50/50)
+- **Convert**: Two-column layout (`Row` 50/50)
 - **Dashboard**: 2-column grid (≥ 600px)
 
 ### Breakpoints
 
 | Screen | Mobile | Tablet |
 |--------|--------|--------|
-| Home | `< 900px` | `≥ 900px` |
+| Convert | `< 900px` | `≥ 900px` |
 | Dashboard | `< 600px` | `≥ 600px` |
