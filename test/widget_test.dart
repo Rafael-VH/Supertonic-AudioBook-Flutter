@@ -123,7 +123,7 @@ void main() {
     expect(find.text('Acerca de'), findsOneWidget);
   });
 
-  testWidgets('el dashboard muestra el workspace de conversión',
+  testWidgets('el dashboard muestra el hub de funciones',
       (WidgetTester tester) async {
     await tester.pumpWidget(_construirApp(preferencias: {
       'onboarding_visto': true,
@@ -131,9 +131,10 @@ void main() {
 
     await _saltarSplash(tester);
 
-    // El workspace de conversión (ConvertBody) ya está embebido en el tab 0
-    // del dashboard — no hay navegación separada.
-    expect(find.text('Carpeta de origen'), findsOneWidget);
+    // El hub (HomeScreen) muestra las funciones disponibles en el tab 0.
+    expect(find.text('¿Qué quieres hacer hoy?'), findsOneWidget);
+    expect(find.text('Convertir archivos a audio'), findsOneWidget);
+    expect(find.text('Próximamente'), findsOneWidget);
   });
 
   testWidgets('el segundo botón del dashboard es Biblioteca',

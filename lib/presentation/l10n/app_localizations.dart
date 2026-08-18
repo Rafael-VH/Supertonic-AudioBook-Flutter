@@ -985,6 +985,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Settings'**
   String get nav_settings;
+
+  /// No description provided for @home_proximamente.
+  ///
+  /// In en, this message translates to:
+  /// **'Coming soon'**
+  String get home_proximamente;
+
+  /// No description provided for @home_proximamente_desc.
+  ///
+  /// In en, this message translates to:
+  /// **'This feature will be available in a future version.'**
+  String get home_proximamente_desc;
 }
 
 class _AppLocalizationsDelegate

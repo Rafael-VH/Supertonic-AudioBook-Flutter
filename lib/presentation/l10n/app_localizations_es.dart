@@ -533,4 +533,11 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get nav_settings => 'Configuración';
+
+  @override
+  String get home_proximamente => 'Próximamente';
+
+  @override
+  String get home_proximamente_desc =>
+      'Esta función estará disponible en una próxima versión.';
 }

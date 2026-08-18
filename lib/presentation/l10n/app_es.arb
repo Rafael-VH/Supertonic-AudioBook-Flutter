@@ -330,5 +330,7 @@
   "btn_archivos": "Archivos",
   "nav_home": "Inicio",
   "nav_biblioteca": "Biblioteca",
-  "nav_settings": "Configuración"
+  "nav_settings": "Configuración",
+  "home_proximamente": "Próximamente",
+  "home_proximamente_desc": "Esta función estará disponible en una próxima versión."
 }
