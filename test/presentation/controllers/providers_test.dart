@@ -5,11 +5,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:supertonic_audiobook/shared/data/config.dart';
+import 'package:supertonic_audiobook/features/convert/data/repositories/file_system_local.dart';
 import 'package:supertonic_audiobook/features/convert/domain/contracts/exportador_audio.dart';
 import 'package:supertonic_audiobook/features/convert/domain/contracts/motor_tts.dart';
 import 'package:supertonic_audiobook/shared/domain/contracts/repositorio_archivos.dart';
 import 'package:supertonic_audiobook/shared/domain/contracts/repositorio_preferencias.dart';
-import 'package:supertonic_audiobook/features/convert/domain/entities/archivo.dart';
+import 'package:supertonic_audiobook/shared/domain/entities/archivo.dart';
 import 'package:supertonic_audiobook/presentation/controllers/providers.dart';
 import 'package:supertonic_audiobook/features/settings/presentation/controllers/settings_controller.dart';
 import 'package:supertonic_audiobook/presentation/theme/paleta.dart';
@@ -101,6 +102,7 @@ void main() {
       expect(() => contenedor.read(repositorioArchivosProvider),
           fallaComposicion);
       expect(() => contenedor.read(exportadorAudioProvider), fallaComposicion);
+      expect(() => contenedor.read(fileSystemProvider), fallaComposicion);
       expect(() => contenedor.read(repositorioPreferenciasProvider),
           fallaComposicion);
       expect(() => contenedor.read(reproductorAudioProvider), fallaComposicion);
@@ -146,6 +148,7 @@ void main() {
         motorTtsProvider.overrideWithValue(motor),
         repositorioArchivosProvider.overrideWithValue(archivos),
         exportadorAudioProvider.overrideWithValue(exportador),
+        fileSystemProvider.overrideWithValue(FileSystemLocal()),
         configTtsProvider.overrideWithValue((
           silencioMuestras: silenceSamples,
           memoriaSafeMarginBytes: memoriaSafeMarginBytes,

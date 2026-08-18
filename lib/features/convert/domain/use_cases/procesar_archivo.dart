@@ -1,17 +1,13 @@
-import 'dart:io';
 import 'dart:typed_data';
-
-import 'package:logger/logger.dart';
 
 import 'package:supertonic_audiobook/shared/domain/constants/producto.dart';
 import 'package:supertonic_audiobook/features/convert/domain/contracts/exportador_audio.dart';
+import 'package:supertonic_audiobook/features/convert/domain/contracts/file_system.dart';
 import 'package:supertonic_audiobook/features/convert/domain/contracts/motor_tts.dart';
 import 'package:supertonic_audiobook/shared/domain/contracts/repositorio_archivos.dart';
-import 'package:supertonic_audiobook/features/convert/domain/entities/archivo.dart';
+import 'package:supertonic_audiobook/shared/domain/entities/archivo.dart';
 import 'package:supertonic_audiobook/features/convert/domain/use_cases/limpiar_markdown.dart';
 import 'package:supertonic_audiobook/features/convert/domain/use_cases/segmentar_texto.dart';
-
-final _log = Logger();
 
 /// Resultado de convertir un archivo con [ProcesarArchivo.procesar].
 ///
@@ -31,6 +27,7 @@ class ProcesarArchivo {
     required this._motor,
     required this._archivos,
     required this._exportador,
+    required this._fileSystem,
     required this._silencioMuestras,
     required this._memoriaSafeMarginBytes,
     required this._topeMovilBytes,
@@ -40,6 +37,7 @@ class ProcesarArchivo {
   final MotorTts _motor;
   final RepositorioArchivos _archivos;
   final ExportadorAudio _exportador;
+  final FileSystemContract _fileSystem;
   final int _silencioMuestras;
   final int _memoriaSafeMarginBytes;
 
@@ -92,28 +90,28 @@ class ProcesarArchivo {
     void Function(int procesados, int total)? onProgreso,
     bool Function()? debeDetenerse,
   }) async {
-    _log.i('=' * 50);
-    _log.i('  Procesando: ${archivo.nombre}');
-    _log.i('=' * 50);
+    print('=' * 50);
+    print('  Procesando: ${archivo.nombre}');
+    print('=' * 50);
 
     // --- Leer y limpiar ---
     String textoPlano;
     try {
       textoPlano = limpiarMarkdown(_archivos.leerArchivo(archivo.ruta));
     } catch (exc) {
-      _log.e("No se pudo leer '${archivo.ruta}': $exc");
+      print("No se pudo leer '${archivo.ruta}': $exc");
       return ResultadoProceso.error;
     }
 
     if (textoPlano.trim().isEmpty) {
-      _log.w('El archivo está vacío después de limpiar. Se omite.');
+      print('El archivo está vacío después de limpiar. Se omite.');
       return ResultadoProceso.omitido;
     }
 
     // --- Segmentar ---
     final segmentos = segmentarTexto(textoPlano);
     final total = segmentos.length;
-    _log.i('  → $total segmento(s) para procesar.');
+    print('  → $total segmento(s) para procesar.');
 
     // Formatos normalizados sin duplicados: un repetido haría fallar la
     // publicación del mismo temporal dos veces.
@@ -124,14 +122,14 @@ class ProcesarArchivo {
 
     // El WAV de trabajo es SIEMPRE un temporal: nada se escribe sobre la
     // ruta final hasta que la corrida terminó con éxito.
-    final dirSalida = File(rutaBase).parent;
-    dirSalida.createSync(recursive: true);
+    final dirSalida = _fileSystem.parentOf(rutaBase);
+    _fileSystem.createDirectory(dirSalida);
     final temporales = <String>[];
     final rutaWavTrabajo = _nuevoTemporal(dirSalida, 'wav', temporales);
     temporales.add(rutaWavTrabajo);
 
     // --- Sintetizar incrementalmente ---
-    _log.i('Generando voz sintética...');
+    print('Generando voz sintética...');
     final presupuesto = presupuestoMemoria(
       memoriaSafeMarginBytes: _memoriaSafeMarginBytes,
       esMovil: _esMovil,
@@ -162,7 +160,7 @@ class ProcesarArchivo {
 
         // Si acumulamos mucha RAM, volcamos a disco.
         if (memoriaAcumulada > presupuesto) {
-          _log.i('Volcando a disco por límite de memoria...');
+          print('Volcando a disco por límite de memoria...');
           await _exportador.wavAppend(fragmentos, rutaWavTrabajo);
           fragmentos.clear();
           memoriaAcumulada = 0;
@@ -171,16 +169,16 @@ class ProcesarArchivo {
       }
 
       if (cancelado) {
-        _log.w('Cancelado por el usuario. Exportando lo generado hasta ahora...');
+        print('Cancelado por el usuario. Exportando lo generado hasta ahora...');
       }
 
       if (fragmentos.isEmpty && !parcialEscrito) {
-        _log.e('No se generó ningún fragmento de audio.');
+        print('No se generó ningún fragmento de audio.');
         return ResultadoProceso.omitido;
       }
 
       // --- Exportar ---
-      _log.i('Exportando audio...');
+      print('Exportando audio...');
       // Fase 1: generar todo a archivos temporales. Un fallo de conversión
       // en un formato no aborta los demás: se loguea y se continua. Solo los
       // formatos que convirtieron exitosamente se publican.
@@ -197,7 +195,7 @@ class ProcesarArchivo {
               salidas.add((temporal, '$rutaBase.$formato'));
             }
           } catch (exc) {
-            _log.e("Fallo al exportar formato '$formato': $exc");
+            print("Fallo al exportar formato '$formato': $exc");
           }
         }
       } else {
@@ -207,7 +205,7 @@ class ProcesarArchivo {
             await _exportador.escribirAudio(fragmentos, temporal, formato);
             salidas.add((temporal, '$rutaBase.$formato'));
           } catch (exc) {
-            _log.e("Fallo al exportar formato '$formato': $exc");
+            print("Fallo al exportar formato '$formato': $exc");
           }
         }
       }
@@ -218,41 +216,31 @@ class ProcesarArchivo {
       // conserva: nunca se pisa audio completo con el truncado de la corrida
       // cancelada (semántica prometida en el docstring).
       for (final par in ordenPublicacion(salidas)) {
-        if (cancelado && File(par.$2).existsSync()) {
-          _log.w("Cancelado: se conserva el output previo '${par.$2}'.");
+        if (cancelado && _fileSystem.fileExists(par.$2)) {
+          print("Cancelado: se conserva el output previo '${par.$2}'.");
           continue;
         }
         _publicar(par.$1, par.$2, temporales);
       }
     } finally {
       for (final temporal in temporales) {
-        try {
-          File(temporal).deleteSync();
-        } catch (_) {
-          // FileNotFoundError / PermissionError → ignorar (paridad).
-        }
+        _fileSystem.deleteFile(temporal);
       }
     }
 
     for (final formato in formatosUnicos) {
       final ruta = '$rutaBase.$formato';
       final duracion = await _exportador.duracionAudio(ruta);
-      _log.i('  + ${File(ruta).uri.pathSegments.last} (${formato.toUpperCase()}): ${duracion.toStringAsFixed(1)} s');
+      print('  + ${_fileSystem.fileName(ruta)} (${formato.toUpperCase()}): ${duracion.toStringAsFixed(1)} s');
     }
     return ResultadoProceso.ok;
   }
 
   /// Publica [origen] como [destino] solo en éxito.
   void _publicar(String origen, String destino, List<String> temporales) {
-    try {
-      File(origen).renameSync(destino);
-    } on FileSystemException catch (e) {
-      // EACCES (13) en POSIX y ERROR_SHARING_VIOLATION (32) en Windows son el
-      // "archivo en uso"; no se actualiza la salida en ese caso.
-      if (e.osError?.errorCode == 13 || e.osError?.errorCode == 32) {
-        _log.e("El archivo '$destino' está en uso por otra aplicación; no se actualizó.");
-      }
-      rethrow;
+    final ok = _fileSystem.renameFile(origen, destino);
+    if (!ok) {
+      print("El archivo '$destino' está en uso por otra aplicación; no se actualizó.");
     }
     temporales.remove(origen);
   }
@@ -270,11 +258,11 @@ class ProcesarArchivo {
   }
 
   /// Crea un archivo temporal de salida y lo registra para limpieza.
-  String _nuevoTemporal(Directory carpeta, String sufijo, List<String> temporales) {
+  String _nuevoTemporal(String carpeta, String sufijo, List<String> temporales) {
     final path =
-        '${carpeta.path}${Platform.pathSeparator}.tmp_${DateTime.now().microsecondsSinceEpoch}_'
+        '${carpeta}${_fileSystem.pathSeparator}.tmp_${DateTime.now().microsecondsSinceEpoch}_'
         '${temporales.length}_$sufijo';
-    File(path).createSync();
+    _fileSystem.createFile(path);
     return path;
   }
 }

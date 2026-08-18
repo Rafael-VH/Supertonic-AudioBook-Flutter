@@ -102,11 +102,12 @@ class ModeloManager implements ModeloGestor {
     return dir;
   }
 
-  /// Garantiza el modelo descargado y verificado. Devuelve el directorio raíz.
+  /// Garantiza el modelo descargado y verificado. Devuelve la ruta del
+  /// directorio raíz.
   ///
   /// [onProgreso] recibe `(bytesDescargados, bytesTotales, archivoActual)`.
   @override
-  Future<Directory> asegurarModelo({
+  Future<String> asegurarModelo({
     void Function(int bytes, int total, String archivo)? onProgreso,
   }) async {
     final raiz = await _directorioModelo();
@@ -176,7 +177,7 @@ class ModeloManager implements ModeloGestor {
         onProgreso?.call(descargados, totalBytes, archivo.ruta);
       }
 
-      return raiz;
+      return raiz.path;
     } finally {
       if (identical(_activo, token)) _activo = null;
     }

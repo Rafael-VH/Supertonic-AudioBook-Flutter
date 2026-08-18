@@ -6,12 +6,13 @@ import 'package:file_picker/file_picker.dart';
 import 'package:file_picker/src/platform/file_picker_platform_interface.dart';
 
 import 'package:supertonic_audiobook/features/convert/domain/contracts/exportador_audio.dart';
+import 'package:supertonic_audiobook/features/convert/domain/contracts/file_system.dart';
 import 'package:supertonic_audiobook/features/modelo/domain/contracts/modelo_gestor.dart';
 import 'package:supertonic_audiobook/features/convert/domain/contracts/motor_tts.dart';
 import 'package:supertonic_audiobook/shared/domain/contracts/repositorio_archivos.dart';
 import 'package:supertonic_audiobook/shared/domain/contracts/repositorio_preferencias.dart';
 import 'package:supertonic_audiobook/shared/domain/contracts/reproductor_audio.dart';
-import 'package:supertonic_audiobook/features/convert/domain/entities/archivo.dart';
+import 'package:supertonic_audiobook/shared/domain/entities/archivo.dart';
 import 'package:supertonic_audiobook/features/convert/domain/use_cases/procesar_archivo.dart';
 
 /// Preferencias en memoria para los tests (sin disco).
@@ -196,7 +197,7 @@ class ModeloGestorFake implements ModeloGestor {
   }
 
   @override
-  Future<Directory> asegurarModelo({
+  Future<String> asegurarModelo({
     void Function(int bytes, int total, String archivo)? onProgreso,
   }) async {
     descargas++;
@@ -207,7 +208,7 @@ class ModeloGestorFake implements ModeloGestor {
     for (var i = 2; i <= 10; i++) {
       onProgreso?.call(i * _mb, total, 'onnx/vocoder.onnx');
     }
-    return Directory('C:/modelo');
+    return 'C:/modelo';
   }
 
   @override
@@ -257,6 +258,7 @@ class ProcesarArchivoStub extends ProcesarArchivo {
     required super.motor,
     required super.archivos,
     required super.exportador,
+    required super.fileSystem,
     required super.silencioMuestras,
     required super.memoriaSafeMarginBytes,
     required super.topeMovilBytes,

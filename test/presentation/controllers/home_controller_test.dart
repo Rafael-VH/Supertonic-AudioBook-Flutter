@@ -6,7 +6,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:supertonic_audiobook/features/convert/domain/entities/archivo.dart';
+import 'package:supertonic_audiobook/shared/domain/entities/archivo.dart';
+import 'package:supertonic_audiobook/features/convert/data/repositories/file_system_local.dart';
 import 'package:supertonic_audiobook/features/convert/domain/use_cases/procesar_archivo.dart';
 import 'package:supertonic_audiobook/features/convert/presentation/controllers/home_controller.dart';
 import 'package:supertonic_audiobook/presentation/controllers/providers.dart';
@@ -47,6 +48,7 @@ void main() {
         motor: motor,
         archivos: repositorio,
         exportador: exportador,
+        fileSystem: FileSystemLocal(),
         silencioMuestras: 0,
         memoriaSafeMarginBytes: 0,
         topeMovilBytes: 0,
@@ -74,6 +76,7 @@ void main() {
         motor: motor,
         archivos: repositorio,
         exportador: exportador,
+        fileSystem: FileSystemLocal(),
         silencioMuestras: 0,
         memoriaSafeMarginBytes: 0,
         topeMovilBytes: 0,

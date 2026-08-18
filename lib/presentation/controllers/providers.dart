@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:supertonic_audiobook/features/convert/domain/contracts/exportador_audio.dart';
+import 'package:supertonic_audiobook/features/convert/domain/contracts/file_system.dart';
 import 'package:supertonic_audiobook/features/modelo/domain/contracts/modelo_gestor.dart';
 import 'package:supertonic_audiobook/features/convert/domain/contracts/motor_tts.dart';
 import 'package:supertonic_audiobook/shared/domain/contracts/repositorio_archivos.dart';
@@ -43,6 +44,10 @@ final exportadorAudioProvider = Provider<ExportadorAudio>(
       'exportadorAudioProvider se inyecta en main.dart'),
 );
 
+final fileSystemProvider = Provider<FileSystemContract>(
+  (_) => throw UnimplementedError('fileSystemProvider se inyecta en main.dart'),
+);
+
 final repositorioPreferenciasProvider = Provider<RepositorioPreferencias>(
   (_) => throw UnimplementedError(
       'repositorioPreferenciasProvider se inyecta en main.dart'),
@@ -79,6 +84,7 @@ final procesarArchivoProvider = Provider<ProcesarArchivo>((ref) {
     motor: ref.watch(motorTtsProvider),
     archivos: ref.watch(repositorioArchivosProvider),
     exportador: ref.watch(exportadorAudioProvider),
+    fileSystem: ref.watch(fileSystemProvider),
     silencioMuestras: config.silencioMuestras,
     memoriaSafeMarginBytes: config.memoriaSafeMarginBytes,
     topeMovilBytes: config.topeMovilBytes,

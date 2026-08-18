@@ -1,6 +1,6 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:supertonic_audiobook/features/convert/domain/entities/archivo.dart';
+import 'package:supertonic_audiobook/shared/domain/entities/archivo.dart';
 import 'package:supertonic_audiobook/features/convert/presentation/controllers/home_controller.dart';
 import 'package:supertonic_audiobook/presentation/l10n/app_localizations.dart';
 import 'package:supertonic_audiobook/features/convert/presentation/widgets/archivo_tile.dart';

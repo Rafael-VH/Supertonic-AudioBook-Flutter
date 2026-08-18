@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'package:supertonic_audiobook/features/convert/domain/entities/archivo.dart';
+import 'package:supertonic_audiobook/shared/domain/entities/archivo.dart';
 
 /// Fila de un archivo `.md` con su checkbox de selección.
 class ArchivoTile extends StatelessWidget {

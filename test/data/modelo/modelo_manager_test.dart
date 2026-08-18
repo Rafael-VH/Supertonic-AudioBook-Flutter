@@ -77,7 +77,7 @@ void main() {
 
     final raiz = await manager.asegurarModelo();
 
-    expect(raiz.path, destinoArchivo('onnx/tts.json').parent.parent.path);
+    expect(raiz, destinoArchivo('onnx/tts.json').parent.parent.path);
     final destino = destinoArchivo('onnx/tts.json');
     expect(destino.existsSync(), isTrue);
     expect(destino.readAsStringSync(), json);

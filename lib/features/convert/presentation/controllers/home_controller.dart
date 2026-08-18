@@ -7,7 +7,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import 'package:supertonic_audiobook/shared/domain/constants/producto.dart';
-import 'package:supertonic_audiobook/features/convert/domain/entities/archivo.dart';
+import 'package:supertonic_audiobook/shared/domain/entities/archivo.dart';
 import 'package:supertonic_audiobook/features/convert/domain/use_cases/procesar_archivo.dart';
 import 'package:supertonic_audiobook/features/convert/presentation/constants/muestra_voz.dart';
 import 'package:supertonic_audiobook/presentation/controllers/providers.dart';

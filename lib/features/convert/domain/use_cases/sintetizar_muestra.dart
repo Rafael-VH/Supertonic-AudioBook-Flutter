@@ -1,10 +1,6 @@
-import 'package:logger/logger.dart';
-
 import 'package:supertonic_audiobook/shared/domain/constants/producto.dart';
 import 'package:supertonic_audiobook/features/convert/domain/contracts/exportador_audio.dart';
 import 'package:supertonic_audiobook/features/convert/domain/contracts/motor_tts.dart';
-
-final _log = Logger();
 
 /// Sintetiza un texto de muestra para verificar que el motor funciona.
 ///
@@ -33,9 +29,9 @@ class SintetizarMuestra {
         lang: lang,
       );
       await _exportador.escribirAudio([wav], ruta, 'wav');
-      _log.i('  → Muestra escrita en $ruta (${wav.length} muestras).');
+      print('  → Muestra escrita en $ruta (${wav.length} muestras).');
     } catch (exc) {
-      _log.e('Error al sintetizar la muestra: $exc');
+      print('Error al sintetizar la muestra: $exc');
       rethrow;
     }
     return ruta;

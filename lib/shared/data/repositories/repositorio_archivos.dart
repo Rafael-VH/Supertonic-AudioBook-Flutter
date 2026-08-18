@@ -3,7 +3,7 @@ import 'dart:io';
 
 import 'package:supertonic_audiobook/core/utils/natural_sort.dart';
 import 'package:supertonic_audiobook/shared/domain/contracts/repositorio_archivos.dart';
-import 'package:supertonic_audiobook/features/convert/domain/entities/archivo.dart';
+import 'package:supertonic_audiobook/shared/domain/entities/archivo.dart';
 
 /// Implementación local (filesystem) de [RepositorioArchivos].
 class RepositorioArchivosLocal implements RepositorioArchivos {

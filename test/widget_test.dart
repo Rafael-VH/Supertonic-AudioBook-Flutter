@@ -5,7 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:supertonic_audiobook/app.dart';
 import 'package:supertonic_audiobook/shared/domain/contracts/repositorio_archivos.dart';
 import 'package:supertonic_audiobook/shared/domain/contracts/repositorio_preferencias.dart';
-import 'package:supertonic_audiobook/features/convert/domain/entities/archivo.dart';
+import 'package:supertonic_audiobook/shared/domain/entities/archivo.dart';
 import 'package:supertonic_audiobook/presentation/controllers/providers.dart';
 
 import 'support/fakes.dart';

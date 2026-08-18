@@ -4,10 +4,11 @@ import 'dart:typed_data';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:supertonic_audiobook/core/audio/wav_io.dart' as wav;
 import 'package:supertonic_audiobook/features/convert/data/repositories/exportador_audio_ffmpeg.dart';
+import 'package:supertonic_audiobook/features/convert/data/repositories/file_system_local.dart';
 import 'package:supertonic_audiobook/features/convert/domain/contracts/exportador_audio.dart';
 import 'package:supertonic_audiobook/features/convert/domain/contracts/motor_tts.dart';
 import 'package:supertonic_audiobook/shared/domain/contracts/repositorio_archivos.dart';
-import 'package:supertonic_audiobook/features/convert/domain/entities/archivo.dart';
+import 'package:supertonic_audiobook/shared/domain/entities/archivo.dart';
 import 'package:supertonic_audiobook/features/convert/domain/use_cases/procesar_archivo.dart';
 import 'package:supertonic_audiobook/features/convert/domain/use_cases/sintetizar_muestra.dart';
 
@@ -119,6 +120,7 @@ ProcesarArchivo _caso(
     motor: motor,
     archivos: archivos,
     exportador: exportador ?? ExportadorAudioFfmpeg(),
+    fileSystem: FileSystemLocal(),
     silencioMuestras: silencio,
     memoriaSafeMarginBytes: margenMemoria,
     topeMovilBytes: margenMemoria,

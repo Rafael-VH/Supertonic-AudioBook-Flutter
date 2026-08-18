@@ -10,6 +10,7 @@ import 'package:supertonic_audiobook/app.dart';
 import 'package:supertonic_audiobook/shared/data/config.dart';
 import 'package:supertonic_audiobook/features/modelo/data/repositories/modelo_manager.dart';
 import 'package:supertonic_audiobook/features/convert/data/repositories/exportador_audio_ffmpeg.dart';
+import 'package:supertonic_audiobook/features/convert/data/repositories/file_system_local.dart';
 import 'package:supertonic_audiobook/features/convert/data/repositories/motor_tts.dart';
 import 'package:supertonic_audiobook/shared/data/repositories/repositorio_archivos.dart';
 import 'package:supertonic_audiobook/shared/data/repositories/repositorio_preferencias.dart';
@@ -45,6 +46,7 @@ Future<void> main() async {
           PreferenciasJsonLocal(ruta: '${docsBase}preferencias.json'),
         ),
         exportadorAudioProvider.overrideWithValue(ExportadorAudioFfmpeg()),
+        fileSystemProvider.overrideWithValue(FileSystemLocal()),
         reproductorAudioProvider.overrideWithValue(ReproductorJustAudio()),
         motorTtsProvider.overrideWith(
           (ref) => MotorTtsSupertonic(
