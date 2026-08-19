@@ -1,5 +1,6 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:supertonic_audiobook/features/convert/domain/entities/selection_mode.dart';
 import 'package:supertonic_audiobook/shared/domain/entities/archivo.dart';
 import 'package:supertonic_audiobook/features/convert/presentation/controllers/home_controller.dart';
 import 'package:supertonic_audiobook/presentation/l10n/app_localizations.dart';
@@ -50,6 +51,7 @@ class ContenidoArchivos extends StatelessWidget {
     final t = AppLocalizations.of(context)!;
     final sel = estado.seleccion.length;
     final total = estado.archivos.length;
+    final esModoArchivos = estado.modoSeleccion == SelectionMode.archivos;
     final etiquetaConteo = sel > 0
         ? t.conteo_seleccionados(sel, total)
         : total > 0
@@ -79,33 +81,35 @@ class ContenidoArchivos extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        // Selector de origen: carpeta o archivos sueltos
-        Row(
-          children: [
-            Expanded(
-              child: OutlinedButton.icon(
-                onPressed: habilitado ? () => controller.examinarCarpetaIn() : null,
-                icon: const Icon(Icons.folder_open, size: 18),
-                label: Text(t.btn_carpeta),
-                style: OutlinedButton.styleFrom(
-                  visualDensity: VisualDensity.compact,
+        // Selector de origen: solo en modo carpeta
+        if (!esModoArchivos) ...[
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: habilitado ? () => controller.examinarCarpetaIn() : null,
+                  icon: const Icon(Icons.folder_open, size: 18),
+                  label: Text(t.btn_carpeta),
+                  style: OutlinedButton.styleFrom(
+                    visualDensity: VisualDensity.compact,
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: OutlinedButton.icon(
-                onPressed: habilitado ? () => _agregarArchivos(context) : null,
-                icon: const Icon(Icons.description_outlined, size: 18),
-                label: Text(t.btn_archivos),
-                style: OutlinedButton.styleFrom(
-                  visualDensity: VisualDensity.compact,
+              const SizedBox(width: 8),
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: habilitado ? () => _agregarArchivos(context) : null,
+                  icon: const Icon(Icons.description_outlined, size: 18),
+                  label: Text(t.btn_archivos),
+                  style: OutlinedButton.styleFrom(
+                    visualDensity: VisualDensity.compact,
+                  ),
                 ),
               ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 8),
+            ],
+          ),
+          const SizedBox(height: 8),
+        ],
         Row(
           children: [
             const Spacer(),
@@ -121,19 +125,21 @@ class ContenidoArchivos extends StatelessWidget {
               icon: const Icon(Icons.deselect),
               onPressed: habilitado ? onNada : null,
             ),
-            IconButton(
-              tooltip: t.refrescar,
-              visualDensity: VisualDensity.compact,
-              icon: const Icon(Icons.refresh),
-              onPressed: habilitado ? onRefrescar : null,
-            ),
+            if (!esModoArchivos)
+              IconButton(
+                tooltip: t.refrescar,
+                visualDensity: VisualDensity.compact,
+                icon: const Icon(Icons.refresh),
+                onPressed: habilitado ? onRefrescar : null,
+              ),
           ],
         ),
         Text(etiquetaConteo, style: Theme.of(context).textTheme.bodySmall),
-        Text(
-          t.ayuda_seleccion,
-          style: Theme.of(context).textTheme.bodySmall,
-        ),
+        if (!esModoArchivos)
+          Text(
+            t.ayuda_seleccion,
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
         const SizedBox(height: 8),
         if (listaExpandida)
           Expanded(child: lista)

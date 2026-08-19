@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 
+import 'package:supertonic_audiobook/features/convert/domain/entities/selection_mode.dart';
 import 'package:supertonic_audiobook/features/convert/presentation/controllers/home_controller.dart';
 import 'package:supertonic_audiobook/presentation/l10n/app_localizations.dart';
 import 'package:supertonic_audiobook/features/convert/presentation/screens/tablet/card_archivos.dart';
 import 'package:supertonic_audiobook/features/convert/presentation/screens/tablet/card_carpetas.dart';
 
 /// Panel de entrada: carpetas de origen/salida y lista de archivos.
+/// En modo archivos, las carpetas se ocultan.
 class PanelEntrada extends StatelessWidget {
   const PanelEntrada({
     super.key,
@@ -23,29 +25,34 @@ class PanelEntrada extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final habilitado = !estado.ejecutando;
+    final esModoArchivos = estado.modoSeleccion == SelectionMode.archivos;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        if (listaExpandida)
-          Flexible(
-            fit: FlexFit.loose,
-            child: SingleChildScrollView(
-              child: CardCarpetas(
-                estado: estado,
-                habilitado: habilitado,
-                onExaminarIn: controller.examinarCarpetaIn,
-                onExaminarOut: controller.examinarCarpetaOut,
+        // CardCarpetas: solo en modo carpeta
+        if (!esModoArchivos) ...[
+          if (listaExpandida)
+            Flexible(
+              fit: FlexFit.loose,
+              child: SingleChildScrollView(
+                child: CardCarpetas(
+                  estado: estado,
+                  habilitado: habilitado,
+                  onExaminarIn: controller.examinarCarpetaIn,
+                  onExaminarOut: controller.examinarCarpetaOut,
+                ),
               ),
+            )
+          else
+            CardCarpetas(
+              estado: estado,
+              habilitado: habilitado,
+              onExaminarIn: controller.examinarCarpetaIn,
+              onExaminarOut: controller.examinarCarpetaOut,
             ),
-          )
-        else
-          CardCarpetas(
-            estado: estado,
-            habilitado: habilitado,
-            onExaminarIn: controller.examinarCarpetaIn,
-            onExaminarOut: controller.examinarCarpetaOut,
-          ),
-        const SizedBox(height: 16),
+          const SizedBox(height: 16),
+        ],
         if (listaExpandida)
           Expanded(
             child: CardArchivos(

@@ -794,6 +794,36 @@ abstract class AppLocalizations {
   /// **'Pick one or more .md files from anywhere and convert them to audio.'**
   String get dashboard_procesar_sueltos_desc;
 
+  /// No description provided for @home_seleccionar_fuente.
+  ///
+  /// In en, this message translates to:
+  /// **'What do you want to convert?'**
+  String get home_seleccionar_fuente;
+
+  /// No description provided for @home_seleccionar_carpeta.
+  ///
+  /// In en, this message translates to:
+  /// **'Select folder'**
+  String get home_seleccionar_carpeta;
+
+  /// No description provided for @home_seleccionar_carpeta_desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a folder with .md files to convert'**
+  String get home_seleccionar_carpeta_desc;
+
+  /// No description provided for @home_seleccionar_archivos.
+  ///
+  /// In en, this message translates to:
+  /// **'Select files'**
+  String get home_seleccionar_archivos;
+
+  /// No description provided for @home_seleccionar_archivos_desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick one or more .md files from anywhere'**
+  String get home_seleccionar_archivos_desc;
+
   /// No description provided for @dashboard_biblioteca.
   ///
   /// In en, this message translates to:

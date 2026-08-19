@@ -432,6 +432,23 @@ class AppLocalizationsEs extends AppLocalizations {
       'Elegí uno o más archivos .md de cualquier lugar y convertilos en audio.';
 
   @override
+  String get home_seleccionar_fuente => '¿Qué querés convertir?';
+
+  @override
+  String get home_seleccionar_carpeta => 'Seleccionar carpeta';
+
+  @override
+  String get home_seleccionar_carpeta_desc =>
+      'Elegí una carpeta con archivos .md para convertir';
+
+  @override
+  String get home_seleccionar_archivos => 'Seleccionar archivos';
+
+  @override
+  String get home_seleccionar_archivos_desc =>
+      'Elegí uno o más archivos .md sueltos';
+
+  @override
   String get dashboard_biblioteca => 'Biblioteca';
 
   @override

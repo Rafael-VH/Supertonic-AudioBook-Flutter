@@ -4,6 +4,7 @@ import 'dart:math' as math;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:supertonic_audiobook/shared/domain/constants/producto.dart';
+import 'package:supertonic_audiobook/features/convert/domain/entities/selection_mode.dart';
 import 'package:supertonic_audiobook/shared/domain/entities/archivo.dart';
 import 'package:supertonic_audiobook/shared/domain/entities/voice_config.dart';
 import 'package:supertonic_audiobook/features/convert/domain/use_cases/procesar_archivo.dart';
@@ -40,6 +41,7 @@ class HomeEstado {
     required this.estado,
     required this.lineasLog,
     required this.snackbar,
+    this.modoSeleccion = SelectionMode.carpeta,
   });
 
   final String carpetaIn;
@@ -67,6 +69,9 @@ class HomeEstado {
 
   final MensajeSnackbar? snackbar;
 
+  /// Modo de selección de entrada: carpeta o archivos individuales.
+  final SelectionMode modoSeleccion;
+
   HomeEstado copyWith({
     String? carpetaIn,
     String? carpetaOut,
@@ -83,6 +88,7 @@ class HomeEstado {
     List<String>? lineasLog,
     MensajeSnackbar? snackbar,
     bool clearSnackbar = false,
+    SelectionMode? modoSeleccion,
   }) {
     return HomeEstado(
       carpetaIn: carpetaIn ?? this.carpetaIn,
@@ -98,9 +104,8 @@ class HomeEstado {
       progresoTotal: progresoTotal ?? this.progresoTotal,
       estado: estado ?? this.estado,
       lineasLog: lineasLog ?? this.lineasLog,
-      // El snackbar solo cambia cuando el controller emite uno nuevo; el resto
-      // de las actualizaciones lo conservan.
       snackbar: clearSnackbar ? null : (snackbar ?? this.snackbar),
+      modoSeleccion: modoSeleccion ?? this.modoSeleccion,
     );
   }
 }
@@ -178,6 +183,30 @@ class HomeController extends Notifier<HomeEstado> {
     final carpeta = await _persistence.pickCarpetaOut();
     if (carpeta == null) return;
     state = state.copyWith(carpetaOut: carpeta);
+  }
+
+  /// Setea la carpeta de entrada directamente (usado desde HomeScreen).
+  void setCarpetaIn(String carpeta) {
+    state = state.copyWith(carpetaIn: carpeta);
+    cargarArchivos();
+  }
+
+  /// Establece el modo de selección y carga los archivos correspondientes.
+  /// En modo `archivos`, [archivosExternos] son las rutas pre-seleccionadas.
+  void setModo(SelectionMode modo, {List<Archivo>? archivosExternos}) {
+    if (modo == SelectionMode.archivos && archivosExternos != null) {
+      state = state.copyWith(
+        modoSeleccion: modo,
+        archivos: archivosExternos,
+        seleccion: {},
+        carpetaIn: '',
+      );
+    } else {
+      state = state.copyWith(modoSeleccion: modo);
+      if (modo == SelectionMode.carpeta) {
+        cargarArchivos();
+      }
+    }
   }
 
   /// Recarga la lista de `.md` de la carpeta de entrada (botón **Refrescar**).

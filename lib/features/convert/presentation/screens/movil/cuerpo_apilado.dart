@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'package:supertonic_audiobook/features/convert/domain/entities/selection_mode.dart';
 import 'package:supertonic_audiobook/features/convert/presentation/controllers/home_controller.dart';
 import 'package:supertonic_audiobook/presentation/l10n/app_localizations.dart';
 import 'package:supertonic_audiobook/features/convert/presentation/screens/movil/acordeon_movil.dart';
@@ -32,18 +33,22 @@ class _CuerpoApiladoState extends State<CuerpoApilado> {
   /// Índice del acordeón abierto. -1 = ninguno abierto.
   int _activo = 0;
 
+  bool get _esModoArchivos =>
+      widget.estado.modoSeleccion == SelectionMode.archivos;
+
   Widget _contenidoSeccion(int index) {
     final estado = widget.estado;
     final controller = widget.controller;
     final habilitado = !estado.ejecutando;
 
+    // En modo archivos, los índices se desplazan: Archivos=0, Opciones=1, Registro=2
     return switch (index) {
       1 => ContenidoArchivos(
           key: const ValueKey(1),
           estado: estado,
           controller: controller,
           habilitado: habilitado,
-          listaExpandida: false, // false dentro de SingleChildScrollView
+          listaExpandida: false,
           onRefrescar: controller.cargarArchivos,
           onTodo: controller.seleccionarTodo,
           onNada: controller.limpiarSeleccion,
@@ -117,14 +122,31 @@ class _CuerpoApiladoState extends State<CuerpoApilado> {
   Widget build(BuildContext context) {
     final t = widget.t;
 
+    // En modo archivos: Archivos(0), Opciones(1), Registro(2)
+    // En modo carpeta: Carpetas(0), Archivos(1), Opciones(2), Registro(3)
+    final secciones = _esModoArchivos
+        ? [
+            (1, t.archivos_encontrados),
+            (2, t.opciones_sintesis),
+            (3, t.registro),
+          ]
+        : [
+            (0, t.carpetas),
+            (1, t.archivos_encontrados),
+            (2, t.opciones_sintesis),
+            (3, t.registro),
+          ];
+
+    // Ajustar _activo si quedó fuera de rango
+    if (_activo >= secciones.length) {
+      _activo = 0;
+    }
+
     return SingleChildScrollView(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          _seccionAcordeon(0, t.carpetas),
-          _seccionAcordeon(1, t.archivos_encontrados),
-          _seccionAcordeon(2, t.opciones_sintesis),
-          _seccionAcordeon(3, t.registro),
+          for (final (idx, titulo) in secciones) _seccionAcordeon(idx, titulo),
           const SizedBox(height: 16),
         ],
       ),
