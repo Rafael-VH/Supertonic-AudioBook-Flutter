@@ -257,18 +257,8 @@ class TextToSpeech {
     throw Exception('Cannot convert $raw to List<$T>');
   }
 
-  List<T> _flattenList<T>(dynamic list) {
-    if (list is List) {
-      return list.expand((e) => _flattenList<T>(e)).toList();
-    }
-    if (T == double && list is num) {
-      return [list.toDouble()] as List<T>;
-    }
-    return [list as T];
-  }
-
   Future<OrtValue> _toTensor(dynamic array, List<int> dims) async {
-    final flat = _flattenList<double>(array);
+    final flat = flattenToDouble(array);
     return await OrtValue.fromList(Float32List.fromList(flat), dims);
   }
 

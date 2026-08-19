@@ -9,6 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:supertonic_audiobook/shared/domain/entities/archivo.dart';
 import 'package:supertonic_audiobook/features/convert/data/repositories/file_system_local.dart';
 import 'package:supertonic_audiobook/features/convert/domain/use_cases/procesar_archivo.dart';
+import 'package:supertonic_audiobook/features/convert/domain/use_cases/sintetizar_muestra.dart';
 import 'package:supertonic_audiobook/features/convert/presentation/controllers/home_controller.dart';
 import 'package:supertonic_audiobook/presentation/controllers/providers.dart';
 import 'package:supertonic_audiobook/presentation/l10n/app_localizations.dart';
@@ -35,6 +36,14 @@ void main() {
             reproductorAudioProvider.overrideWithValue(reproductor),
             procesarArchivoProvider.overrideWithValue(procesador),
             carpetaBaseProvider.overrideWithValue('C:/base'),
+            domainLoggerProvider.overrideWithValue(NoOpLogger()),
+            sintetizarMuestraProvider.overrideWithValue(
+              SintetizarMuestra(
+                motor: motor,
+                exportador: exportador,
+                logger: NoOpLogger(),
+              ),
+            ),
           ],
         );
 
@@ -52,6 +61,7 @@ void main() {
         silencioMuestras: 0,
         memoriaSafeMarginBytes: 0,
         topeMovilBytes: 0,
+        logger: NoOpLogger(),
       );
     }
 
@@ -80,6 +90,7 @@ void main() {
         silencioMuestras: 0,
         memoriaSafeMarginBytes: 0,
         topeMovilBytes: 0,
+        logger: NoOpLogger(),
       );
 
       final container = crearContenedor();

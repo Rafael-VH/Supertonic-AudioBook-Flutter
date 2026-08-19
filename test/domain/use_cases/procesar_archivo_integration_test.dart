@@ -12,6 +12,8 @@ import 'package:supertonic_audiobook/shared/domain/entities/archivo.dart';
 import 'package:supertonic_audiobook/features/convert/domain/use_cases/procesar_archivo.dart';
 import 'package:supertonic_audiobook/features/convert/domain/use_cases/sintetizar_muestra.dart';
 
+import '../../support/fakes.dart';
+
 /// Devuelve [cantidad] muestras float32 (1 s de silencio = 44100 muestras).
 Float32List _audio(double segundos) => Float32List((segundos * wav.wavSampleRate).round());
 
@@ -124,6 +126,7 @@ ProcesarArchivo _caso(
     silencioMuestras: silencio,
     memoriaSafeMarginBytes: margenMemoria,
     topeMovilBytes: margenMemoria,
+    logger: NoOpLogger(),
   );
 }
 
@@ -358,6 +361,7 @@ void main() {
       final caso = SintetizarMuestra(
         motor: _FakeMotor(),
         exportador: exportador,
+        logger: NoOpLogger(),
       );
       final ruta = '${temp.path}/muestra.wav';
       final resultado = await caso.generar('Hola', ruta: ruta);
@@ -371,6 +375,7 @@ void main() {
       final caso = SintetizarMuestra(
         motor: _FakeMotor(fallar: true),
         exportador: exportador,
+        logger: NoOpLogger(),
       );
       final ruta = '${temp.path}/muestra.wav';
 
@@ -385,6 +390,7 @@ void main() {
       final caso = SintetizarMuestra(
         motor: _FakeMotor(vaciar: true),
         exportador: exportador,
+        logger: NoOpLogger(),
       );
       final ruta = '${temp.path}/muestra.wav';
       final resultado = await caso.generar('Hola', ruta: ruta);

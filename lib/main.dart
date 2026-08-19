@@ -15,6 +15,7 @@ import 'package:supertonic_audiobook/features/convert/data/repositories/motor_tt
 import 'package:supertonic_audiobook/shared/data/repositories/repositorio_archivos.dart';
 import 'package:supertonic_audiobook/shared/data/repositories/repositorio_preferencias.dart';
 import 'package:supertonic_audiobook/shared/data/repositories/reproductor_just_audio.dart';
+import 'package:supertonic_audiobook/shared/data/repositories/print_logger.dart';
 import 'package:supertonic_audiobook/features/editor_metadata/data/repositories/editor_metadata_id3_codec.dart';
 import 'package:supertonic_audiobook/presentation/controllers/providers.dart';
 
@@ -65,6 +66,7 @@ Future<void> main() async {
         carpetaBaseProvider.overrideWithValue(docsBase),
         modeloManagerProvider.overrideWithValue(ModeloManager()),
         editorMetadataProvider.overrideWithValue(EditorMetadataId3Codec()),
+        domainLoggerProvider.overrideWithValue(const PrintLogger()),
       ],
       child: const App(),
     ),

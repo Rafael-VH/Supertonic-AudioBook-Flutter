@@ -10,6 +10,7 @@ import 'package:supertonic_audiobook/features/convert/domain/use_cases/procesar_
 import 'package:supertonic_audiobook/features/convert/presentation/constants/muestra_voz.dart';
 import 'package:supertonic_audiobook/features/convert/presentation/controllers/selection_manager.dart';
 import 'package:supertonic_audiobook/features/convert/presentation/controllers/preferences_persistence.dart';
+import 'package:supertonic_audiobook/features/convert/presentation/controllers/voice_preview_service.dart';
 import 'package:supertonic_audiobook/presentation/controllers/providers.dart';
 import 'package:supertonic_audiobook/presentation/l10n/app_localizations.dart';
 
@@ -298,16 +299,16 @@ class HomeController extends Notifier<HomeEstado> {
     final lang = state.voiceConfig.langVoz;
     try {
       _appendLog(t.log_muestra(voz, lang));
-      await ref.read(motorTtsProvider).cambiarVoz(voz);
-      final temp = await getTemporaryDirectory();
-      final ruta = '${temp.path}${Platform.pathSeparator}'
-          'supertonic_muestra_${voz}_$lang.wav';
-      await ref.read(sintetizarMuestraProvider).generar(
-            textoMuestraIdiomas[lang] ?? t.muestra_texto,
-            lang: lang,
-            ruta: ruta,
-          );
-      await ref.read(reproductorAudioProvider).reproducir(ruta);
+      final service = VoicePreviewService(
+        motorTts: ref.read(motorTtsProvider),
+        sintetizarMuestra: ref.read(sintetizarMuestraProvider),
+        reproductorAudio: ref.read(reproductorAudioProvider),
+      );
+      await service.reproducirMuestra(
+        voz: voz,
+        lang: lang,
+        textoMuestra: textoMuestraIdiomas[lang] ?? t.muestra_texto,
+      );
       _appendLog(t.log_muestra_fin);
     } catch (exc) {
       // SintetizarMuestra relanza la causa real: se reporta en el log para

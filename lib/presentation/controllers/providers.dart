@@ -4,6 +4,7 @@ import 'package:supertonic_audiobook/features/convert/domain/contracts/exportado
 import 'package:supertonic_audiobook/features/convert/domain/contracts/file_system.dart';
 import 'package:supertonic_audiobook/features/modelo/domain/contracts/modelo_gestor.dart';
 import 'package:supertonic_audiobook/features/convert/domain/contracts/motor_tts.dart';
+import 'package:supertonic_audiobook/shared/domain/contracts/domain_logger.dart';
 import 'package:supertonic_audiobook/shared/domain/contracts/repositorio_archivos.dart';
 import 'package:supertonic_audiobook/shared/domain/contracts/repositorio_preferencias.dart';
 import 'package:supertonic_audiobook/shared/domain/contracts/reproductor_audio.dart';
@@ -77,6 +78,11 @@ final modeloManagerProvider = Provider<ModeloGestor>(
       'modeloManagerProvider se inyecta en main.dart'),
 );
 
+/// Domain logger inyectado desde la composición.
+final domainLoggerProvider = Provider<DomainLogger>(
+  (_) => throw UnimplementedError('domainLoggerProvider se inyecta en main.dart'),
+);
+
 /// Caso de uso de conversión, compuesto con los contratos y la config técnica.
 final procesarArchivoProvider = Provider<ProcesarArchivo>((ref) {
   final config = ref.watch(configTtsProvider);
@@ -89,6 +95,7 @@ final procesarArchivoProvider = Provider<ProcesarArchivo>((ref) {
     memoriaSafeMarginBytes: config.memoriaSafeMarginBytes,
     topeMovilBytes: config.topeMovilBytes,
     esMovil: config.esMovil,
+    logger: ref.watch(domainLoggerProvider),
   );
 });
 
@@ -97,6 +104,7 @@ final sintetizarMuestraProvider = Provider<SintetizarMuestra>((ref) {
   return SintetizarMuestra(
     motor: ref.watch(motorTtsProvider),
     exportador: ref.watch(exportadorAudioProvider),
+    logger: ref.watch(domainLoggerProvider),
   );
 });
 

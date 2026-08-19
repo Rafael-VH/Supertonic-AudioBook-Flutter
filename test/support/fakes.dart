@@ -9,11 +9,24 @@ import 'package:supertonic_audiobook/features/convert/domain/contracts/exportado
 import 'package:supertonic_audiobook/features/convert/domain/contracts/file_system.dart';
 import 'package:supertonic_audiobook/features/modelo/domain/contracts/modelo_gestor.dart';
 import 'package:supertonic_audiobook/features/convert/domain/contracts/motor_tts.dart';
+import 'package:supertonic_audiobook/shared/domain/contracts/domain_logger.dart';
 import 'package:supertonic_audiobook/shared/domain/contracts/repositorio_archivos.dart';
 import 'package:supertonic_audiobook/shared/domain/contracts/repositorio_preferencias.dart';
 import 'package:supertonic_audiobook/shared/domain/contracts/reproductor_audio.dart';
 import 'package:supertonic_audiobook/shared/domain/entities/archivo.dart';
 import 'package:supertonic_audiobook/features/convert/domain/use_cases/procesar_archivo.dart';
+
+/// Logger no-op para tests.
+class NoOpLogger implements DomainLogger {
+  @override
+  void i(String message) {}
+  @override
+  void d(String message) {}
+  @override
+  void w(String message) {}
+  @override
+  void e(String message) {}
+}
 
 /// Preferencias en memoria para los tests (sin disco).
 class PreferenciasMemoria implements RepositorioPreferencias {
@@ -262,6 +275,7 @@ class ProcesarArchivoStub extends ProcesarArchivo {
     required super.silencioMuestras,
     required super.memoriaSafeMarginBytes,
     required super.topeMovilBytes,
+    required super.logger,
     super.esMovil,
   });
 

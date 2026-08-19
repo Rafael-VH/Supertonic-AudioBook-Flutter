@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:supertonic_audiobook/features/editor_metadata/domain/entities/metadatos_mp3.dart';
 import 'package:supertonic_audiobook/features/editor_metadata/presentation/controllers/metadata_editor_controller.dart';
+import 'package:supertonic_audiobook/features/editor_metadata/presentation/widgets/metadata_field.dart';
 import 'package:supertonic_audiobook/presentation/l10n/app_localizations.dart';
 
 /// Pantalla del editor de metadatos MP3.
@@ -112,9 +113,9 @@ class _MetadataEditorScreenState
             _buildCoverArtSection(t, metadata),
             const Divider(height: 32),
             // Form fields
-            TextFormField(
+            MetadataField(
+              label: t.editor_metadata_titulo_campo,
               initialValue: metadata.titulo,
-              decoration: InputDecoration(labelText: t.editor_metadata_titulo_campo),
               onChanged: (value) => _actualizarCampo(
                 (actual) => actual.copyWith(
                   titulo: value.isEmpty ? '' : value,
@@ -123,9 +124,9 @@ class _MetadataEditorScreenState
               ),
             ),
             const SizedBox(height: 16),
-            TextFormField(
+            MetadataField(
+              label: t.editor_metadata_artista_campo,
               initialValue: metadata.artista,
-              decoration: InputDecoration(labelText: t.editor_metadata_artista_campo),
               onChanged: (value) => _actualizarCampo(
                 (actual) => actual.copyWith(
                   artista: value.isEmpty ? '' : value,
@@ -134,9 +135,9 @@ class _MetadataEditorScreenState
               ),
             ),
             const SizedBox(height: 16),
-            TextFormField(
+            MetadataField(
+              label: t.editor_metadata_album_campo,
               initialValue: metadata.album,
-              decoration: InputDecoration(labelText: t.editor_metadata_album_campo),
               onChanged: (value) => _actualizarCampo(
                 (actual) => actual.copyWith(
                   album: value.isEmpty ? '' : value,
@@ -148,11 +149,9 @@ class _MetadataEditorScreenState
             Row(
               children: [
                 Expanded(
-                  child: TextFormField(
+                  child: MetadataField(
+                    label: t.editor_metadata_pista_campo,
                     initialValue: metadata.pista?.toString(),
-                    decoration: InputDecoration(
-                      labelText: t.editor_metadata_pista_campo,
-                    ),
                     keyboardType: TextInputType.number,
                     onChanged: (value) => _actualizarCampo(
                       (actual) => actual.copyWith(
@@ -164,11 +163,9 @@ class _MetadataEditorScreenState
                 ),
                 const SizedBox(width: 16),
                 Expanded(
-                  child: TextFormField(
+                  child: MetadataField(
+                    label: t.editor_metadata_disco_campo,
                     initialValue: metadata.disco?.toString(),
-                    decoration: InputDecoration(
-                      labelText: t.editor_metadata_disco_campo,
-                    ),
                     keyboardType: TextInputType.number,
                     onChanged: (value) => _actualizarCampo(
                       (actual) => actual.copyWith(
@@ -184,11 +181,9 @@ class _MetadataEditorScreenState
             Row(
               children: [
                 Expanded(
-                  child: TextFormField(
+                  child: MetadataField(
+                    label: t.editor_metadata_anio_campo,
                     initialValue: metadata.anio?.toString(),
-                    decoration: InputDecoration(
-                      labelText: t.editor_metadata_anio_campo,
-                    ),
                     keyboardType: TextInputType.number,
                     onChanged: (value) => _actualizarCampo(
                       (actual) => actual.copyWith(
@@ -200,11 +195,9 @@ class _MetadataEditorScreenState
                 ),
                 const SizedBox(width: 16),
                 Expanded(
-                  child: TextFormField(
+                  child: MetadataField(
+                    label: t.editor_metadata_genero_campo,
                     initialValue: metadata.genero,
-                    decoration: InputDecoration(
-                      labelText: t.editor_metadata_genero_campo,
-                    ),
                     onChanged: (value) => _actualizarCampo(
                       (actual) => actual.copyWith(
                         genero: value.isEmpty ? '' : value,
@@ -216,11 +209,9 @@ class _MetadataEditorScreenState
               ],
             ),
             const SizedBox(height: 16),
-            TextFormField(
+            MetadataField(
+              label: t.editor_metadata_comentario_campo,
               initialValue: metadata.comentario,
-              decoration: InputDecoration(
-                labelText: t.editor_metadata_comentario_campo,
-              ),
               maxLines: 3,
               onChanged: (value) => _actualizarCampo(
                 (actual) => actual.copyWith(
