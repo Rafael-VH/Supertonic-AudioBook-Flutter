@@ -12,6 +12,8 @@ import 'package:supertonic_audiobook/shared/domain/contracts/repositorio_archivo
 import 'package:supertonic_audiobook/shared/domain/contracts/repositorio_preferencias.dart';
 import 'package:supertonic_audiobook/shared/domain/entities/archivo.dart';
 import 'package:supertonic_audiobook/presentation/controllers/providers.dart';
+
+import '../../support/fakes.dart';
 import 'package:supertonic_audiobook/features/settings/presentation/controllers/settings_controller.dart';
 import 'package:supertonic_audiobook/presentation/theme/paleta.dart';
 
@@ -149,6 +151,7 @@ void main() {
         repositorioArchivosProvider.overrideWithValue(archivos),
         exportadorAudioProvider.overrideWithValue(exportador),
         fileSystemProvider.overrideWithValue(FileSystemLocal()),
+        domainLoggerProvider.overrideWithValue(NoOpLogger()),
         configTtsProvider.overrideWithValue((
           silencioMuestras: silenceSamples,
           memoriaSafeMarginBytes: memoriaSafeMarginBytes,

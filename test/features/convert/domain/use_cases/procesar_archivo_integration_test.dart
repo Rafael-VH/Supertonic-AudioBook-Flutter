@@ -12,7 +12,7 @@ import 'package:supertonic_audiobook/shared/domain/entities/archivo.dart';
 import 'package:supertonic_audiobook/features/convert/domain/use_cases/procesar_archivo.dart';
 import 'package:supertonic_audiobook/features/convert/domain/use_cases/sintetizar_muestra.dart';
 
-import '../../support/fakes.dart';
+import '../../../../support/fakes.dart';
 
 /// Devuelve [cantidad] muestras float32 (1 s de silencio = 44100 muestras).
 Float32List _audio(double segundos) => Float32List((segundos * wav.wavSampleRate).round());

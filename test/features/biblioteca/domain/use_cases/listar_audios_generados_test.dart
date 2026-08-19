@@ -2,7 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:supertonic_audiobook/features/biblioteca/domain/use_cases/listar_audios_generados.dart';
 
-import '../../support/fakes.dart';
+import '../../../../support/fakes.dart';
 
 void main() {
   const carpeta = 'C:/audio';
