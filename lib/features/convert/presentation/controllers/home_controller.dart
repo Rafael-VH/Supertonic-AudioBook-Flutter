@@ -185,9 +185,12 @@ class HomeController extends Notifier<HomeEstado> {
     state = state.copyWith(carpetaOut: carpeta);
   }
 
-  /// Setea la carpeta de entrada directamente (usado desde HomeScreen).
+  /// Setea la carpeta de entrada y cambia a modo carpeta (usado desde HomeScreen).
   void setCarpetaIn(String carpeta) {
-    state = state.copyWith(carpetaIn: carpeta);
+    state = state.copyWith(
+      carpetaIn: carpeta,
+      modoSeleccion: SelectionMode.carpeta,
+    );
     cargarArchivos();
   }
 
