@@ -245,7 +245,7 @@ class TextToSpeech {
     if (raw is List<T>) return raw;
     if (raw is List) {
       if (raw.isNotEmpty && raw.first is List) {
-        return _flattenList<T>(raw);
+        return flattenToDouble(raw) as List<T>;
       }
       if (T == double) {
         return raw
