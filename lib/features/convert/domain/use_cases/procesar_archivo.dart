@@ -18,6 +18,27 @@ import 'package:supertonic_audiobook/features/convert/domain/use_cases/segmentar
 /// propagándose: el caller las cuenta como errores.
 enum ResultadoProceso { ok, omitido, error }
 
+/// Envuelve el [ResultadoProceso] con métricas adicionales del procesamiento.
+///
+/// Agrega cantidad de segmentos y duración total del audio generado,
+/// información que el caller puede usar para logs, estimaciones y UI.
+class ProcesarResultado {
+  const ProcesarResultado({
+    required this.estado,
+    required this.segmentos,
+    required this.duracionAudioSeg,
+  });
+
+  /// Estado semántico del procesamiento.
+  final ResultadoProceso estado;
+
+  /// Cantidad de segmentos de texto procesados.
+  final int segmentos;
+
+  /// Duración total del audio generado en segundos.
+  final double duracionAudioSeg;
+}
+
 /// Orquesta la conversión de un archivo Markdown a audios.
 ///
 /// Paridad con `app/domain/use_cases/procesar_archivo.py`: depende SOLO de
@@ -83,7 +104,7 @@ class ProcesarArchivo {
   /// existía previamente, para no pisar audio completo con audio truncado.
   /// En la fase de publicación el WAV va último: si falla un formato no-WAV,
   /// el WAV previo no se reemplaza.
-  Future<ResultadoProceso> procesar(
+  Future<ProcesarResultado> procesar(
     Archivo archivo,
     String rutaBase, {
     required int steps,
@@ -103,12 +124,12 @@ class ProcesarArchivo {
       textoPlano = limpiarMarkdown(_archivos.leerArchivo(archivo.ruta));
     } catch (exc) {
       _logger.e("No se pudo leer '${archivo.ruta}': $exc");
-      return ResultadoProceso.error;
+      return const ProcesarResultado(estado: ResultadoProceso.error, segmentos: 0, duracionAudioSeg: 0);
     }
 
     if (textoPlano.trim().isEmpty) {
       _logger.i('El archivo está vacío después de limpiar. Se omite.');
-      return ResultadoProceso.omitido;
+      return const ProcesarResultado(estado: ResultadoProceso.omitido, segmentos: 0, duracionAudioSeg: 0);
     }
 
     // --- Segmentar ---
@@ -177,7 +198,7 @@ class ProcesarArchivo {
 
       if (fragmentos.isEmpty && !parcialEscrito) {
         _logger.i('No se generó ningún fragmento de audio.');
-        return ResultadoProceso.omitido;
+        return const ProcesarResultado(estado: ResultadoProceso.omitido, segmentos: 0, duracionAudioSeg: 0);
       }
 
       // --- Exportar ---
@@ -231,12 +252,18 @@ class ProcesarArchivo {
       }
     }
 
+    var duracionTotal = 0.0;
     for (final formato in formatosUnicos) {
       final ruta = '$rutaBase.$formato';
       final duracion = await _exportador.duracionAudio(ruta);
+      duracionTotal += duracion;
       _logger.i('  + ${_fileSystem.fileName(ruta)} (${formato.toUpperCase()}): ${duracion.toStringAsFixed(1)} s');
     }
-    return ResultadoProceso.ok;
+    return ProcesarResultado(
+      estado: ResultadoProceso.ok,
+      segmentos: segmentos.length,
+      duracionAudioSeg: duracionTotal,
+    );
   }
 
   /// Publica [origen] como [destino] solo en éxito.

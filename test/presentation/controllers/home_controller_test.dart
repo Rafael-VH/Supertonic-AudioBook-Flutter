@@ -487,7 +487,7 @@ void main() {
       final container = crearContenedor();
       final controller = container.read(homeControllerProvider.notifier);
       final t = es();
-      procesador.resultado = ResultadoProceso.omitido;
+      procesador.resultado = const ProcesarResultado(estado: ResultadoProceso.omitido, segmentos: 0, duracionAudioSeg: 0);
 
       await controller.procesar(t);
 
@@ -506,7 +506,7 @@ void main() {
       final container = crearContenedor();
       final controller = container.read(homeControllerProvider.notifier);
       final t = es();
-      procesador.resultado = ResultadoProceso.error;
+      procesador.resultado = const ProcesarResultado(estado: ResultadoProceso.error, segmentos: 0, duracionAudioSeg: 0);
 
       await controller.procesar(t);
 

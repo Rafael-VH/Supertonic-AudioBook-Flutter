@@ -310,10 +310,10 @@ class ProcesarArchivoStub extends ProcesarArchivo {
   alProcesar;
 
   /// Resultado devuelto por `procesar` (por defecto `ok`).
-  ResultadoProceso resultado = ResultadoProceso.ok;
+  ProcesarResultado resultado = const ProcesarResultado(estado: ResultadoProceso.ok, segmentos: 0, duracionAudioSeg: 0);
 
   @override
-  Future<ResultadoProceso> procesar(
+  Future<ProcesarResultado> procesar(
     Archivo archivo,
     String rutaBase, {
     required int steps,

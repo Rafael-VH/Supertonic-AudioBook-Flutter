@@ -8,6 +8,8 @@ import 'package:supertonic_audiobook/features/convert/domain/entities/selection_
 import 'package:supertonic_audiobook/shared/domain/entities/archivo.dart';
 import 'package:supertonic_audiobook/shared/domain/entities/voice_config.dart';
 import 'package:supertonic_audiobook/features/convert/domain/use_cases/procesar_archivo.dart';
+import 'package:supertonic_audiobook/features/benchmark/domain/entities/benchmark_result.dart';
+import 'package:supertonic_audiobook/features/benchmark/domain/use_cases/estimar_tiempo.dart';
 import 'package:supertonic_audiobook/features/convert/presentation/constants/muestra_voz.dart';
 import 'package:supertonic_audiobook/features/convert/presentation/controllers/selection_manager.dart';
 import 'package:supertonic_audiobook/features/convert/presentation/controllers/preferences_persistence.dart';
@@ -452,9 +454,10 @@ class HomeController extends Notifier<HomeEstado> {
             onProgreso: (actual, total) => _onProgreso(t, actual, total),
             debeDetenerse: () => state.cancelar,
           );
-          switch (resultado) {
+          switch (resultado.estado) {
             case ResultadoProceso.ok:
               _appendLog(t.log_archivo_fin(i + 1, totalArchivos));
+              _appendLog('  Segmentos: ${resultado.segmentos}, Audio: ${resultado.duracionAudioSeg.toStringAsFixed(1)}s');
               exitos++;
             case ResultadoProceso.omitido:
               _appendLog(
@@ -484,6 +487,7 @@ class HomeController extends Notifier<HomeEstado> {
         );
         _appendLog('=' * 60);
         _appendLog(t.log_completado(exitos, textoElapsed));
+        _mostrarEstimacion(t, seleccion);
         _appendLog('=' * 60);
       } else if (finalizadoOk && errores > 0) {
         state = state.copyWith(
@@ -544,6 +548,27 @@ class HomeController extends Notifier<HomeEstado> {
       state = state.copyWith(lineasLog: lineas.sublist(lineas.length - 2500));
     } else {
       state = state.copyWith(lineasLog: lineas);
+    }
+  }
+
+  /// Muestra la estimación de tiempo si hay un benchmark guardado.
+  void _mostrarEstimacion(AppLocalizations t, List<Archivo> archivos) {
+    final prefs = ref.read(repositorioPreferenciasProvider).cargar();
+    final benchmarkData = prefs['benchmark_results'];
+    if (benchmarkData is! Map<String, Object?>) return;
+
+    final benchmark = BenchmarkResult.fromMap(benchmarkData);
+    if (benchmark.tamanios.isEmpty) return;
+
+    // Calcular total de caracteres aproximados de los archivos seleccionados.
+    var totalChars = 0;
+    for (final archivo in archivos) {
+      totalChars += archivo.nombre.length * 50; // estimación rough
+    }
+
+    final estimated = estimarTiempo(benchmark: benchmark, textoChars: totalChars);
+    if (estimated != null) {
+      _appendLog('  Estimado (benchmark): ${_formatearTiempo(t, estimated)}');
     }
   }
 }

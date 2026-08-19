@@ -157,7 +157,8 @@ void main() {
         onProgreso: (procesados, total) => progresos.add(procesados),
       );
 
-      expect(resultado, ResultadoProceso.ok);
+      expect(resultado.estado, ResultadoProceso.ok);
+      expect(resultado.segmentos, 2);
       final ruta = '${temp.path}/salida.wav';
       expect(File(ruta).existsSync(), isTrue);
       // 2 segmentos de 1 s = 2.0 s (sin silencio intermedio).
@@ -212,7 +213,7 @@ void main() {
       );
 
       // Se sintetizó 1 segmento; el resto nunca se procesó.
-      expect(resultado, ResultadoProceso.ok);
+      expect(resultado.estado, ResultadoProceso.ok);
       expect(motor.llamadas, 1);
       final ruta = '${temp.path}/salida.wav';
       expect(File(ruta).existsSync(), isTrue);
@@ -276,7 +277,7 @@ void main() {
         speed: 1.1,
         formatos: ['wav'],
       );
-      expect(resultado, ResultadoProceso.omitido);
+      expect(resultado.estado, ResultadoProceso.omitido);
       expect(motor.llamadas, 0);
       expect(File('${temp.path}/salida.wav').existsSync(), isFalse);
     });
@@ -290,7 +291,7 @@ void main() {
         speed: 1.1,
         formatos: ['wav'],
       );
-      expect(resultado, ResultadoProceso.error);
+      expect(resultado.estado, ResultadoProceso.error);
       expect(File('${temp.path}/salida.wav').existsSync(), isFalse);
     });
 
@@ -303,7 +304,7 @@ void main() {
         speed: 1.1,
         formatos: ['wav'],
       );
-      expect(resultado, ResultadoProceso.omitido);
+      expect(resultado.estado, ResultadoProceso.omitido);
       expect(File('${temp.path}/salida.wav').existsSync(), isFalse);
     });
 
@@ -348,7 +349,7 @@ void main() {
         formatos: ['mp3', 'flac', 'wav'],
       );
 
-      expect(resultado, ResultadoProceso.ok);
+      expect(resultado.estado, ResultadoProceso.ok);
       // MP3 y WAV se publicaron; FLAC no (fallo de conversión).
       expect(File('${temp.path}/salida.mp3').existsSync(), isTrue);
       expect(File('${temp.path}/salida.wav').existsSync(), isTrue);
