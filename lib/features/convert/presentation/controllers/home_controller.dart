@@ -1,16 +1,15 @@
 import 'dart:io';
 import 'dart:math' as math;
 
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:permission_handler/permission_handler.dart';
 
 import 'package:supertonic_audiobook/shared/domain/constants/producto.dart';
 import 'package:supertonic_audiobook/shared/domain/entities/archivo.dart';
 import 'package:supertonic_audiobook/shared/domain/entities/voice_config.dart';
 import 'package:supertonic_audiobook/features/convert/domain/use_cases/procesar_archivo.dart';
 import 'package:supertonic_audiobook/features/convert/presentation/constants/muestra_voz.dart';
+import 'package:supertonic_audiobook/features/convert/presentation/controllers/selection_manager.dart';
+import 'package:supertonic_audiobook/features/convert/presentation/controllers/preferences_persistence.dart';
 import 'package:supertonic_audiobook/presentation/controllers/providers.dart';
 import 'package:supertonic_audiobook/presentation/l10n/app_localizations.dart';
 
@@ -112,6 +111,9 @@ class HomeEstado {
 /// procesamiento y mantiene el throttle del log (`paso = max(1, total ~/ 20)`)
 /// y el truncado a 2500 líneas.
 class HomeController extends Notifier<HomeEstado> {
+  late final SelectionManager _selectionManager;
+  late final PreferencesPersistence _persistence;
+
   @override
   HomeEstado build() {
     final prefs = ref.watch(repositorioPreferenciasProvider).cargar();
@@ -133,6 +135,11 @@ class HomeController extends Notifier<HomeEstado> {
 
     final archivos =
         ref.read(repositorioArchivosProvider).listarArchivosMd(carpetaIn);
+
+    _selectionManager = SelectionManager();
+    _persistence = PreferencesPersistence(
+      repositorio: ref.read(repositorioPreferenciasProvider),
+    );
 
     return HomeEstado(
       carpetaIn: carpetaIn,
@@ -159,26 +166,15 @@ class HomeController extends Notifier<HomeEstado> {
 
   // ------------------------------------------------------- carpetas y lista
 
-  /// Pide el permiso de acceso al almacenamiento compartido (Android) y
-  /// devuelve si el escaneo por `dart:io` puede leer la carpeta elegida.
-  Future<bool> _tieneAccesoAlmacenamiento() async {
-    if (!Platform.isAndroid) return true;
-    if (await Permission.manageExternalStorage.isGranted) return true;
-    final estado = await Permission.manageExternalStorage.request();
-    return estado.isGranted;
-  }
-
   Future<void> examinarCarpetaIn() async {
-    if (!await _tieneAccesoAlmacenamiento()) return;
-    final carpeta = await FilePicker.getDirectoryPath();
+    final carpeta = await _persistence.pickCarpetaIn();
     if (carpeta == null) return;
     state = state.copyWith(carpetaIn: carpeta);
     cargarArchivos();
   }
 
   Future<void> examinarCarpetaOut() async {
-    if (!await _tieneAccesoAlmacenamiento()) return;
-    final carpeta = await FilePicker.getDirectoryPath();
+    final carpeta = await _persistence.pickCarpetaOut();
     if (carpeta == null) return;
     state = state.copyWith(carpetaOut: carpeta);
   }
@@ -187,10 +183,10 @@ class HomeController extends Notifier<HomeEstado> {
   void cargarArchivos() {
     final archivos =
         ref.read(repositorioArchivosProvider).listarArchivosMd(state.carpetaIn);
-    final rutas = archivos.map((a) => a.ruta).toSet();
+    _selectionManager.filtrarSeleccion(archivos);
     state = state.copyWith(
       archivos: archivos,
-      seleccion: state.seleccion.where(rutas.contains).toSet(),
+      seleccion: _selectionManager.seleccion,
     );
   }
 
@@ -203,10 +199,10 @@ class HomeController extends Notifier<HomeEstado> {
   /// segunda corrida concurrente sobre el mismo motor TTS.
   void cargarArchivosExternos(List<Archivo> archivos) {
     if (state.ejecutando || state.probandoVoz) return;
-    final rutas = archivos.map((a) => a.ruta).toSet();
+    _selectionManager.mergeArchivosExternos(archivos);
     state = state.copyWith(
       archivos: archivos,
-      seleccion: state.seleccion.where(rutas.contains).toSet(),
+      seleccion: _selectionManager.seleccion,
       ejecutando: false,
       cancelar: false,
       progresoActual: 0,
@@ -229,10 +225,10 @@ class HomeController extends Notifier<HomeEstado> {
       for (final a in archivos) a.ruta: a,
     };
     final fusionados = porRuta.values.toList();
-    final rutas = porRuta.keys.toSet();
+    _selectionManager.mergeArchivosExternos(fusionados);
     state = state.copyWith(
       archivos: fusionados,
-      seleccion: state.seleccion.where(rutas.contains).toSet(),
+      seleccion: _selectionManager.seleccion,
     );
   }
 
@@ -246,19 +242,18 @@ class HomeController extends Notifier<HomeEstado> {
   // ----------------------------------------------------------- selección
 
   void alternarSeleccion(String ruta) {
-    final seleccion = {...state.seleccion};
-    if (!seleccion.add(ruta)) seleccion.remove(ruta);
-    state = state.copyWith(seleccion: seleccion);
+    _selectionManager.alternarSeleccion(ruta);
+    state = state.copyWith(seleccion: _selectionManager.seleccion);
   }
 
   void seleccionarTodo() {
-    state = state.copyWith(
-      seleccion: state.archivos.map((a) => a.ruta).toSet(),
-    );
+    _selectionManager.seleccionarTodo(state.archivos);
+    state = state.copyWith(seleccion: _selectionManager.seleccion);
   }
 
   void limpiarSeleccion() {
-    state = state.copyWith(seleccion: const {});
+    _selectionManager.limpiarSeleccion();
+    state = state.copyWith(seleccion: _selectionManager.seleccion);
   }
 
   // ----------------------------------------------------------- opciones
@@ -339,7 +334,12 @@ class HomeController extends Notifier<HomeEstado> {
   Future<void> procesar(AppLocalizations t) async {
     if (state.ejecutando || state.probandoVoz) return;
 
-    _guardarPreferencias();
+    _persistence.guardarPreferencias(
+      voiceConfig: state.voiceConfig,
+      formatos: state.formatos,
+      carpetaIn: state.carpetaIn,
+      carpetaOut: state.carpetaOut,
+    );
 
     final formatos = state.formatos.toList()..sort();
     if (formatos.isEmpty) {
@@ -478,20 +478,6 @@ class HomeController extends Notifier<HomeEstado> {
   }
 
   // ------------------------------------------------------------- helpers
-
-  void _guardarPreferencias() {
-    final prefs = {
-      ...ref.read(repositorioPreferenciasProvider).cargar(),
-      'voz': state.voiceConfig.voz,
-      'steps': state.voiceConfig.steps,
-      'speed': state.voiceConfig.speed,
-      'lang_voz': state.voiceConfig.langVoz,
-      'formatos': [...state.formatos]..sort(),
-      'carpeta_in': state.carpetaIn,
-      'carpeta_out': state.carpetaOut,
-    };
-    ref.read(repositorioPreferenciasProvider).guardar(prefs);
-  }
 
   void _onProgreso(AppLocalizations t, int actual, int total) {
     final paso = math.max(1, total ~/ 20);
