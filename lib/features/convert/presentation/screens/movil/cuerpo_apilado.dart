@@ -43,7 +43,11 @@ class _CuerpoApiladoState extends State<CuerpoApilado> {
     final habilitado = !estado.ejecutando;
 
     return switch (index) {
-      1 when _esModoArchivos => ContenidoArchivosSeleccionados(t: widget.t),
+      1 when _esModoArchivos => ContenidoArchivosSeleccionados(
+          t: widget.t,
+          estado: estado,
+          controller: controller,
+        ),
       1 => ContenidoArchivos(
           key: const ValueKey(1),
           estado: estado,
