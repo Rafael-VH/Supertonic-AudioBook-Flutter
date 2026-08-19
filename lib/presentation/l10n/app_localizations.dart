@@ -248,6 +248,12 @@ abstract class AppLocalizations {
   /// **'Files Found'**
   String get archivos_encontrados;
 
+  /// No description provided for @archivos_seleccionados.
+  ///
+  /// In en, this message translates to:
+  /// **'Selected Files'**
+  String get archivos_seleccionados;
+
   /// No description provided for @todo.
   ///
   /// In en, this message translates to:

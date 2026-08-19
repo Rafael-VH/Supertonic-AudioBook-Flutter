@@ -5,6 +5,7 @@ import 'package:supertonic_audiobook/features/convert/presentation/controllers/h
 import 'package:supertonic_audiobook/presentation/l10n/app_localizations.dart';
 import 'package:supertonic_audiobook/features/convert/presentation/screens/movil/acordeon_movil.dart';
 import 'package:supertonic_audiobook/features/convert/presentation/screens/movil/contenido_archivos.dart';
+import 'package:supertonic_audiobook/features/convert/presentation/screens/movil/contenido_archivos_seleccionados.dart';
 import 'package:supertonic_audiobook/features/convert/presentation/screens/movil/contenido_carpetas.dart';
 import 'package:supertonic_audiobook/features/convert/presentation/widgets/contenido_opciones.dart';
 import 'package:supertonic_audiobook/features/convert/presentation/widgets/contenido_registro.dart';
@@ -41,8 +42,8 @@ class _CuerpoApiladoState extends State<CuerpoApilado> {
     final controller = widget.controller;
     final habilitado = !estado.ejecutando;
 
-    // En modo archivos, los índices se desplazan: Archivos=0, Opciones=1, Registro=2
     return switch (index) {
+      1 when _esModoArchivos => ContenidoArchivosSeleccionados(t: widget.t),
       1 => ContenidoArchivos(
           key: const ValueKey(1),
           estado: estado,
@@ -120,7 +121,7 @@ class _CuerpoApiladoState extends State<CuerpoApilado> {
     // En modo carpeta: Carpetas(0), Archivos(1), Opciones(2), Registro(3)
     final secciones = _esModoArchivos
         ? [
-            (1, t.archivos_encontrados),
+            (1, t.archivos_seleccionados),
             (2, t.opciones_sintesis),
             (3, t.registro),
           ]
@@ -131,9 +132,10 @@ class _CuerpoApiladoState extends State<CuerpoApilado> {
             (3, t.registro),
           ];
 
-    // Ajustar _activo si quedó fuera de rango
-    if (_activo >= secciones.length) {
-      _activo = 0;
+    // Ajustar _activo si quedó fuera de rango (-1 = ninguno abierto, es válido)
+    final indicesValidos = secciones.map((e) => e.$1).toSet();
+    if (_activo != -1 && !indicesValidos.contains(_activo)) {
+      _activo = secciones.first.$1;
     }
 
     return SingleChildScrollView(

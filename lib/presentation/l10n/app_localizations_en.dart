@@ -86,6 +86,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get archivos_encontrados => 'Files Found';
 
   @override
+  String get archivos_seleccionados => 'Selected Files';
+
+  @override
   String get todo => 'All';
 
   @override

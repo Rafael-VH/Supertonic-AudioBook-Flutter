@@ -53,7 +53,21 @@ class PanelEntrada extends StatelessWidget {
             ),
           const SizedBox(height: 16),
         ],
-        if (listaExpandida)
+        if (esModoArchivos)
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Center(
+                child: Text(
+                  t.archivos_seleccionados,
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                ),
+              ),
+            ),
+          )
+        else if (listaExpandida)
           Expanded(
             child: CardArchivos(
               estado: estado,
