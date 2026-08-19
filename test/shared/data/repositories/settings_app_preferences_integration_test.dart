@@ -69,7 +69,9 @@ void main() {
       final merged = <String, Object>{
         ...repo.cargar(),
         ...Map<String, Object>.fromEntries(
-          voicePrefs.toMap().entries.where((e) => e.value != null),
+          voicePrefs.toMap().entries
+              .where((e) => e.value != null)
+              .map((e) => MapEntry(e.key, e.value!)),
         ),
       };
       repo.guardar(merged);

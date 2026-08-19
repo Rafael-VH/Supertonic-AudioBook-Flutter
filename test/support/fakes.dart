@@ -14,6 +14,7 @@ import 'package:supertonic_audiobook/shared/domain/contracts/repositorio_archivo
 import 'package:supertonic_audiobook/shared/domain/contracts/repositorio_preferencias.dart';
 import 'package:supertonic_audiobook/shared/domain/contracts/reproductor_audio.dart';
 import 'package:supertonic_audiobook/shared/domain/entities/archivo.dart';
+import 'package:supertonic_audiobook/shared/domain/entities/app_preferences.dart';
 import 'package:supertonic_audiobook/features/convert/domain/use_cases/procesar_archivo.dart';
 
 /// Logger no-op para tests.
@@ -42,6 +43,18 @@ class PreferenciasMemoria implements RepositorioPreferencias {
     _datos
       ..clear()
       ..addAll(preferencias);
+  }
+
+  @override
+  AppPreferences cargarPreferenciasTyped() => AppPreferences.fromMap(_datos);
+
+  @override
+  void guardarPreferenciasTyped(AppPreferences prefs) {
+    final newEntries = <String, Object>{
+      for (final e in prefs.toMap().entries)
+        if (e.value != null) e.key: e.value!,
+    };
+    guardar({..._datos, ...newEntries});
   }
 
   Map<String, Object> get datos => Map.unmodifiable(_datos);

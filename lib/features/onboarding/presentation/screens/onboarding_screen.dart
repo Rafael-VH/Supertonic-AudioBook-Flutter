@@ -36,7 +36,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       setState(() => _carpetaSeleccionada = carpeta);
       final repo = ref.read(repositorioPreferenciasProvider);
       final current = repo.cargarPreferenciasTyped();
-      await repo.guardarPreferenciasTyped(
+      repo.guardarPreferenciasTyped(
         current.copyWith(carpetaSalida: carpeta),
       );
     }

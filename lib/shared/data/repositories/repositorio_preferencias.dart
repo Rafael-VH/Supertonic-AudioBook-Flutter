@@ -37,6 +37,7 @@ class PreferenciasJsonLocal implements RepositorioPreferencias {
   }
 
   /// Persist an [AppPreferences] to disk, merging with existing preferences.
+  @override
   void guardarPreferenciasTyped(AppPreferences prefs) {
     final existing = cargar();
     final newEntries = <String, Object>{
@@ -47,6 +48,7 @@ class PreferenciasJsonLocal implements RepositorioPreferencias {
   }
 
   /// Load an [AppPreferences] from disk (returns defaults if missing/empty).
+  @override
   AppPreferences cargarPreferenciasTyped() {
     final map = cargar();
     return AppPreferences.fromMap(map);

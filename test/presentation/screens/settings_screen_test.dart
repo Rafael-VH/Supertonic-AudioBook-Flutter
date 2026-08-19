@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:supertonic_audiobook/shared/domain/contracts/repositorio_preferencias.dart';
+import 'package:supertonic_audiobook/shared/domain/entities/app_preferences.dart';
 import 'package:supertonic_audiobook/presentation/controllers/providers.dart';
 import 'package:supertonic_audiobook/features/settings/presentation/controllers/settings_controller.dart';
 import 'package:supertonic_audiobook/presentation/l10n/app_localizations.dart';
@@ -185,5 +186,17 @@ class _PreferenciasMemoria implements RepositorioPreferencias {
   @override
   void guardar(Map<String, Object> preferencias) {
     _datos..clear()..addAll(preferencias);
+  }
+
+  @override
+  AppPreferences cargarPreferenciasTyped() => AppPreferences.fromMap(_datos);
+
+  @override
+  void guardarPreferenciasTyped(AppPreferences prefs) {
+    final newEntries = <String, Object>{
+      for (final e in prefs.toMap().entries)
+        if (e.value != null) e.key: e.value!,
+    };
+    guardar({..._datos, ...newEntries});
   }
 }
