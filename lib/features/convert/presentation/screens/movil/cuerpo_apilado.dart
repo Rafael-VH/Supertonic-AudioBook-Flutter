@@ -54,14 +54,8 @@ class _CuerpoApiladoState extends State<CuerpoApilado> {
           onNada: controller.limpiarSeleccion,
           onAlternar: controller.alternarSeleccion,
         ),
-      2 => SingleChildScrollView(
-          key: const ValueKey(2),
-          child: ContenidoOpciones(estado: estado, controller: controller),
-        ),
-      3 => SingleChildScrollView(
-          key: const ValueKey(3),
-          child: ContenidoRegistro(estado: estado, controller: controller),
-        ),
+      2 => ContenidoOpciones(estado: estado, controller: controller),
+      3 => ContenidoRegistro(estado: estado, controller: controller),
       _ => ContenidoCarpetas(
           key: const ValueKey(0),
           estado: estado,
