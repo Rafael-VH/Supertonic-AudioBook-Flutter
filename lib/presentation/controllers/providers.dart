@@ -11,6 +11,7 @@ import 'package:supertonic_audiobook/shared/domain/contracts/reproductor_audio.d
 import 'package:supertonic_audiobook/features/biblioteca/domain/use_cases/listar_audios_generados.dart';
 import 'package:supertonic_audiobook/features/convert/domain/use_cases/procesar_archivo.dart';
 import 'package:supertonic_audiobook/features/convert/domain/use_cases/sintetizar_muestra.dart';
+import 'package:supertonic_audiobook/features/benchmark/presentation/controllers/benchmark_controller.dart';
 import 'package:supertonic_audiobook/features/editor_metadata/domain/contracts/editor_metadata.dart';
 import 'package:supertonic_audiobook/features/editor_metadata/domain/use_cases/editar_metadata_mp3.dart';
 
@@ -131,3 +132,13 @@ final editorMetadataProvider = Provider<EditorMetadata>(
 final editarMetadataMp3Provider = Provider<EditarMetadataMp3>((ref) {
   return EditarMetadataMp3(ref.watch(editorMetadataProvider));
 });
+
+// ---------------------------------------------------------------------------
+// Benchmark
+// ---------------------------------------------------------------------------
+
+/// Controller del benchmark de rendimiento del motor TTS.
+final benchmarkControllerProvider =
+    NotifierProvider<BenchmarkController, BenchmarkEstado>(
+  BenchmarkController.new,
+);

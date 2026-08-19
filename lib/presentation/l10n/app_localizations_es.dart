@@ -635,4 +635,57 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get editor_metadata_error_portada =>
       'La portada debe ser JPEG y no superar 500KB.';
+
+  @override
+  String get benchmark_titulo => 'Benchmark del motor';
+
+  @override
+  String get benchmark_subtitle =>
+      'Mide la velocidad de tu motor TTS con textos de prueba.';
+
+  @override
+  String get benchmark_sin_datos =>
+      'Sin datos. Ejecutá un benchmark para ver resultados.';
+
+  @override
+  String get benchmark_btn_ejecutar => 'Ejecutar benchmark';
+
+  @override
+  String get benchmark_btn_cancelar => 'Cancelar';
+
+  @override
+  String benchmark_progreso(int paso, int tamanio) {
+    return 'Paso $paso/6 — $tamanio caracteres';
+  }
+
+  @override
+  String benchmark_ultima_corrida(String fecha) {
+    return 'Última corrida: $fecha';
+  }
+
+  @override
+  String benchmark_avg_chars_sec(String valor) {
+    return '$valor chars/s';
+  }
+
+  @override
+  String get benchmark_tab_tamano => 'Tamaño';
+
+  @override
+  String get benchmark_tab_tiempo => 'Tiempo';
+
+  @override
+  String get benchmark_tab_chars_seg => 'Chars/seg';
+
+  @override
+  String get benchmark_estimacion_label => 'Tiempo estimado para tu texto:';
+
+  @override
+  String benchmark_estimacion_valor(String tiempo) {
+    return '~$tiempo';
+  }
+
+  @override
+  String get benchmark_modelo_no_listo =>
+      'El modelo de voz no está descargado. Descargalo primero desde Ajustes.';
 }

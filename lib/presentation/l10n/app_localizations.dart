@@ -1171,6 +1171,90 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Cover art must be JPEG and under 500KB.'**
   String get editor_metadata_error_portada;
+
+  /// No description provided for @benchmark_titulo.
+  ///
+  /// In en, this message translates to:
+  /// **'Engine benchmark'**
+  String get benchmark_titulo;
+
+  /// No description provided for @benchmark_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Measure your TTS engine speed with test texts.'**
+  String get benchmark_subtitle;
+
+  /// No description provided for @benchmark_sin_datos.
+  ///
+  /// In en, this message translates to:
+  /// **'No data. Run a benchmark to see results.'**
+  String get benchmark_sin_datos;
+
+  /// No description provided for @benchmark_btn_ejecutar.
+  ///
+  /// In en, this message translates to:
+  /// **'Run benchmark'**
+  String get benchmark_btn_ejecutar;
+
+  /// No description provided for @benchmark_btn_cancelar.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get benchmark_btn_cancelar;
+
+  /// No description provided for @benchmark_progreso.
+  ///
+  /// In en, this message translates to:
+  /// **'Step {paso}/6 — {tamanio} characters'**
+  String benchmark_progreso(int paso, int tamanio);
+
+  /// No description provided for @benchmark_ultima_corrida.
+  ///
+  /// In en, this message translates to:
+  /// **'Last run: {fecha}'**
+  String benchmark_ultima_corrida(String fecha);
+
+  /// No description provided for @benchmark_avg_chars_sec.
+  ///
+  /// In en, this message translates to:
+  /// **'{valor} chars/s'**
+  String benchmark_avg_chars_sec(String valor);
+
+  /// No description provided for @benchmark_tab_tamano.
+  ///
+  /// In en, this message translates to:
+  /// **'Size'**
+  String get benchmark_tab_tamano;
+
+  /// No description provided for @benchmark_tab_tiempo.
+  ///
+  /// In en, this message translates to:
+  /// **'Time'**
+  String get benchmark_tab_tiempo;
+
+  /// No description provided for @benchmark_tab_chars_seg.
+  ///
+  /// In en, this message translates to:
+  /// **'Chars/s'**
+  String get benchmark_tab_chars_seg;
+
+  /// No description provided for @benchmark_estimacion_label.
+  ///
+  /// In en, this message translates to:
+  /// **'Estimated time for your text:'**
+  String get benchmark_estimacion_label;
+
+  /// No description provided for @benchmark_estimacion_valor.
+  ///
+  /// In en, this message translates to:
+  /// **'~{tiempo}'**
+  String benchmark_estimacion_valor(String tiempo);
+
+  /// No description provided for @benchmark_modelo_no_listo.
+  ///
+  /// In en, this message translates to:
+  /// **'The voice model is not downloaded. Download it first from Settings.'**
+  String get benchmark_modelo_no_listo;
 }
 
 class _AppLocalizationsDelegate

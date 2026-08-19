@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:supertonic_audiobook/features/benchmark/presentation/screens/benchmark_screen.dart';
 import 'package:supertonic_audiobook/features/modelo/presentation/controllers/modelo_controller.dart';
 import 'package:supertonic_audiobook/features/biblioteca/presentation/screens/biblioteca_screen.dart';
 import 'package:supertonic_audiobook/features/dashboard/presentation/screens/dashboard_screen.dart';
@@ -22,6 +23,7 @@ abstract final class Rutas {
   static const settings = '/settings';
   static const biblioteca = '/biblioteca';
   static const editorMetadata = '/editor-metadata';
+  static const benchmark = '/benchmark';
 }
 
 /// Orígenes admitidos para el redirect del gate del modelo (D5): el modelo se
@@ -82,6 +84,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: Rutas.editorMetadata,
         builder: (_, __) => const MetadataEditorScreen(),
+      ),
+      GoRoute(
+        path: Rutas.benchmark,
+        builder: (_, __) => const BenchmarkScreen(),
       ),
     ],
   );

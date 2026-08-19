@@ -1,8 +1,11 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:supertonic_audiobook/features/settings/presentation/controllers/settings_controller.dart';
+import 'package:supertonic_audiobook/presentation/controllers/providers.dart';
 import 'package:supertonic_audiobook/presentation/l10n/app_localizations.dart';
+import 'package:supertonic_audiobook/presentation/routing/app_router.dart';
 import 'package:supertonic_audiobook/presentation/theme/paleta.dart';
 import 'package:supertonic_audiobook/features/settings/presentation/widgets/acerca_de_section.dart';
 import 'package:supertonic_audiobook/features/settings/presentation/widgets/card_estado_modelo.dart';
@@ -124,6 +127,7 @@ class SettingsBody extends ConsumerWidget {
             ],
           ),
         ),
+        const _BenchmarkSectionCard(),
         _SeccionCard(
           titulo: t.acerca_de,
           child: const AcercaDeSection(),
@@ -155,6 +159,40 @@ class _SeccionCard extends StatelessWidget {
             child,
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _BenchmarkSectionCard extends ConsumerWidget {
+  const _BenchmarkSectionCard();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final t = AppLocalizations.of(context)!;
+    final estado = ref.watch(benchmarkControllerProvider);
+    final resultado = estado.resultado;
+
+    return _SeccionCard(
+      titulo: t.benchmark_titulo,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            resultado != null
+                ? t.benchmark_avg_chars_sec(
+                    resultado.avgCharsPerSec.toStringAsFixed(1),
+                  )
+                : t.benchmark_sin_datos,
+            style: Theme.of(context).textTheme.bodyMedium,
+          ),
+          const SizedBox(height: 8),
+          FilledButton.tonalIcon(
+            onPressed: () => context.push(Rutas.benchmark),
+            icon: const Icon(Icons.speed),
+            label: Text(t.benchmark_btn_ejecutar),
+          ),
+        ],
       ),
     );
   }

@@ -361,5 +361,40 @@
   "editor_metadata_exito": "Metadatos guardados correctamente.",
   "editor_metadata_error_lectura": "No se pudo leer los metadatos del archivo.",
   "editor_metadata_error_escritura": "No se pudieron guardar los metadatos.",
-  "editor_metadata_error_portada": "La portada debe ser JPEG y no superar 500KB."
+  "editor_metadata_error_portada": "La portada debe ser JPEG y no superar 500KB.",
+  "benchmark_titulo": "Benchmark del motor",
+  "benchmark_subtitle": "Mide la velocidad de tu motor TTS con textos de prueba.",
+  "benchmark_sin_datos": "Sin datos. Ejecutá un benchmark para ver resultados.",
+  "benchmark_btn_ejecutar": "Ejecutar benchmark",
+  "benchmark_btn_cancelar": "Cancelar",
+  "benchmark_progreso": "Paso {paso}/6 — {tamanio} caracteres",
+  "@benchmark_progreso": {
+    "placeholders": {
+      "paso": {"type": "int"},
+      "tamanio": {"type": "int"}
+    }
+  },
+  "benchmark_ultima_corrida": "Última corrida: {fecha}",
+  "@benchmark_ultima_corrida": {
+    "placeholders": {
+      "fecha": {"type": "String"}
+    }
+  },
+  "benchmark_avg_chars_sec": "{valor} chars/s",
+  "@benchmark_avg_chars_sec": {
+    "placeholders": {
+      "valor": {"type": "String"}
+    }
+  },
+  "benchmark_tab_tamano": "Tamaño",
+  "benchmark_tab_tiempo": "Tiempo",
+  "benchmark_tab_chars_seg": "Chars/seg",
+  "benchmark_estimacion_label": "Tiempo estimado para tu texto:",
+  "benchmark_estimacion_valor": "~{tiempo}",
+  "@benchmark_estimacion_valor": {
+    "placeholders": {
+      "tiempo": {"type": "String"}
+    }
+  },
+  "benchmark_modelo_no_listo": "El modelo de voz no está descargado. Descargalo primero desde Ajustes."
 }

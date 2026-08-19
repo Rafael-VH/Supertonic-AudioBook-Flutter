@@ -629,4 +629,56 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get editor_metadata_error_portada =>
       'Cover art must be JPEG and under 500KB.';
+
+  @override
+  String get benchmark_titulo => 'Engine benchmark';
+
+  @override
+  String get benchmark_subtitle =>
+      'Measure your TTS engine speed with test texts.';
+
+  @override
+  String get benchmark_sin_datos => 'No data. Run a benchmark to see results.';
+
+  @override
+  String get benchmark_btn_ejecutar => 'Run benchmark';
+
+  @override
+  String get benchmark_btn_cancelar => 'Cancel';
+
+  @override
+  String benchmark_progreso(int paso, int tamanio) {
+    return 'Step $paso/6 — $tamanio characters';
+  }
+
+  @override
+  String benchmark_ultima_corrida(String fecha) {
+    return 'Last run: $fecha';
+  }
+
+  @override
+  String benchmark_avg_chars_sec(String valor) {
+    return '$valor chars/s';
+  }
+
+  @override
+  String get benchmark_tab_tamano => 'Size';
+
+  @override
+  String get benchmark_tab_tiempo => 'Time';
+
+  @override
+  String get benchmark_tab_chars_seg => 'Chars/s';
+
+  @override
+  String get benchmark_estimacion_label => 'Estimated time for your text:';
+
+  @override
+  String benchmark_estimacion_valor(String tiempo) {
+    return '~$tiempo';
+  }
+
+  @override
+  String get benchmark_modelo_no_listo =>
+      'The voice model is not downloaded. Download it first from Settings.';
 }

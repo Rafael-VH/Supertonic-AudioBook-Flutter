@@ -361,5 +361,40 @@
   "editor_metadata_exito": "Metadata saved successfully.",
   "editor_metadata_error_lectura": "Could not read file metadata.",
   "editor_metadata_error_escritura": "Could not save metadata.",
-  "editor_metadata_error_portada": "Cover art must be JPEG and under 500KB."
+  "editor_metadata_error_portada": "Cover art must be JPEG and under 500KB.",
+  "benchmark_titulo": "Engine benchmark",
+  "benchmark_subtitle": "Measure your TTS engine speed with test texts.",
+  "benchmark_sin_datos": "No data. Run a benchmark to see results.",
+  "benchmark_btn_ejecutar": "Run benchmark",
+  "benchmark_btn_cancelar": "Cancel",
+  "benchmark_progreso": "Step {paso}/6 — {tamanio} characters",
+  "@benchmark_progreso": {
+    "placeholders": {
+      "paso": {"type": "int"},
+      "tamanio": {"type": "int"}
+    }
+  },
+  "benchmark_ultima_corrida": "Last run: {fecha}",
+  "@benchmark_ultima_corrida": {
+    "placeholders": {
+      "fecha": {"type": "String"}
+    }
+  },
+  "benchmark_avg_chars_sec": "{valor} chars/s",
+  "@benchmark_avg_chars_sec": {
+    "placeholders": {
+      "valor": {"type": "String"}
+    }
+  },
+  "benchmark_tab_tamano": "Size",
+  "benchmark_tab_tiempo": "Time",
+  "benchmark_tab_chars_seg": "Chars/s",
+  "benchmark_estimacion_label": "Estimated time for your text:",
+  "benchmark_estimacion_valor": "~{tiempo}",
+  "@benchmark_estimacion_valor": {
+    "placeholders": {
+      "tiempo": {"type": "String"}
+    }
+  },
+  "benchmark_modelo_no_listo": "The voice model is not downloaded. Download it first from Settings."
 }
