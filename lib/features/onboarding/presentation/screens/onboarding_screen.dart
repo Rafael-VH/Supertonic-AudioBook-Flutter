@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:supertonic_audiobook/presentation/controllers/providers.dart';
 import 'package:supertonic_audiobook/presentation/l10n/app_localizations.dart';
 import 'package:supertonic_audiobook/presentation/routing/app_router.dart';
+import 'package:supertonic_audiobook/features/onboarding/presentation/widgets/paso_onboarding.dart';
 
 /// Onboarding de primera ejecución. Explica cómo generar audio en 4 pasos
 /// (modelo → archivos → voz → procesar) antes de entrar al dashboard.
@@ -63,22 +64,22 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     final colores = Theme.of(context).colorScheme;
 
     final pasos = [
-      _PasoOnboarding(
+      PasoOnboarding(
         icono: Icons.download_outlined,
         titulo: t.onboarding_paso1_titulo,
         descripcion: t.onboarding_paso1_descripcion,
       ),
-      _PasoOnboarding(
+      PasoOnboarding(
         icono: Icons.folder_open_outlined,
         titulo: t.onboarding_paso2_titulo,
         descripcion: t.onboarding_paso2_descripcion,
       ),
-      _PasoOnboarding(
+      PasoOnboarding(
         icono: Icons.record_voice_over_outlined,
         titulo: t.onboarding_paso3_titulo,
         descripcion: t.onboarding_paso3_descripcion,
       ),
-      _PasoOnboarding(
+      PasoOnboarding(
         icono: Icons.graphic_eq_outlined,
         titulo: t.onboarding_paso4_titulo,
         descripcion: t.onboarding_paso4_descripcion,
@@ -113,7 +114,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 onPageChanged: (pagina) => setState(() => _paso = pagina),
                 itemBuilder: (context, indice) {
                   if (indice == 4) {
-                    return _PasoOnboardingCarpeta(
+                    return PasoOnboardingCarpeta(
                       ruta: _carpetaSeleccionada,
                       onElegir: _elegirCarpeta,
                     );
@@ -158,117 +159,6 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class _PasoOnboarding extends StatelessWidget {
-  const _PasoOnboarding({
-    required this.icono,
-    required this.titulo,
-    required this.descripcion,
-  });
-
-  final IconData icono;
-  final String titulo;
-  final String descripcion;
-
-  @override
-  Widget build(BuildContext context) {
-    final colores = Theme.of(context).colorScheme;
-    final texto = Theme.of(context).textTheme;
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 32),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(24),
-            decoration: BoxDecoration(
-              color: colores.primaryContainer,
-              shape: BoxShape.circle,
-            ),
-            child: Icon(icono, size: 48, color: colores.onPrimaryContainer),
-          ),
-          const SizedBox(height: 32),
-          Text(
-            titulo,
-            style: texto.headlineSmall,
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 16),
-          Text(
-            descripcion,
-            style: texto.bodyLarge,
-            textAlign: TextAlign.center,
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _PasoOnboardingCarpeta extends StatelessWidget {
-  const _PasoOnboardingCarpeta({
-    required this.ruta,
-    required this.onElegir,
-  });
-
-  final String? ruta;
-  final VoidCallback onElegir;
-
-  @override
-  Widget build(BuildContext context) {
-    final t = AppLocalizations.of(context)!;
-    final colores = Theme.of(context).colorScheme;
-    final texto = Theme.of(context).textTheme;
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 32),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(24),
-            decoration: BoxDecoration(
-              color: colores.primaryContainer,
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              Icons.folder_open_outlined,
-              size: 48,
-              color: colores.onPrimaryContainer,
-            ),
-          ),
-          const SizedBox(height: 32),
-          Text(
-            t.onboarding_paso5_titulo,
-            style: texto.headlineSmall,
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 16),
-          Text(
-            t.onboarding_paso5_descripcion,
-            style: texto.bodyLarge,
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 24),
-          FilledButton.tonalIcon(
-            onPressed: onElegir,
-            icon: const Icon(Icons.folder_open),
-            label: Text(t.onboarding_paso5_examinar),
-          ),
-          if (ruta != null) ...[
-            const SizedBox(height: 12),
-            Text(
-              t.onboarding_paso5_ruta(ruta!),
-              style: texto.bodyMedium,
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ],
       ),
     );
   }

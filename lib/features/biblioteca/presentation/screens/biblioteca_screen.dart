@@ -6,6 +6,7 @@ import 'package:supertonic_audiobook/features/biblioteca/presentation/controller
 import 'package:supertonic_audiobook/presentation/l10n/app_localizations.dart';
 import 'package:supertonic_audiobook/presentation/routing/app_router.dart';
 import 'package:supertonic_audiobook/presentation/theme/app_theme.dart';
+import 'package:supertonic_audiobook/features/biblioteca/presentation/widgets/estado_widgets.dart';
 
 /// Pantalla Biblioteca (BIB-1..BIB-5): lista los audiolibros generados en la
 /// carpeta de salida agrupados por libro, con play/pausa por tile, estado
@@ -78,14 +79,14 @@ class _Cuerpo extends StatelessWidget {
   Widget build(BuildContext context) {
     final error = estado.error;
     if (error != null) {
-      return _EstadoError(
+      return EstadoError(
         error: error,
         t: t,
         onReintentar: controller.recargar,
       );
     }
     if (estado.vacio) {
-      return _EstadoVacio(t: t, onIrAConvertir: () => context.push(Rutas.home));
+      return EstadoVacio(t: t, onIrAConvertir: () => context.push(Rutas.home));
     }
     return ListView.builder(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
@@ -116,89 +117,6 @@ class _Cuerpo extends StatelessWidget {
           ),
         );
       },
-    );
-  }
-}
-
-/// Estado de error: mensaje localizado + botón reintentar (`recargar()`).
-class _EstadoError extends StatelessWidget {
-  const _EstadoError({
-    required this.error,
-    required this.t,
-    required this.onReintentar,
-  });
-
-  final String error;
-  final AppLocalizations t;
-  final VoidCallback onReintentar;
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              Icons.error_outline,
-              size: 48,
-              color: Theme.of(context).colorScheme.error,
-            ),
-            const SizedBox(height: 12),
-            Text(
-              t.biblioteca_error(error),
-              textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.bodyMedium,
-            ),
-            const SizedBox(height: 16),
-            FilledButton.icon(
-              onPressed: onReintentar,
-              icon: const Icon(Icons.refresh),
-              label: Text(t.refrescar),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-/// Estado vacío (BIB-4): mensaje + acción que lleva a la conversión.
-class _EstadoVacio extends StatelessWidget {
-  const _EstadoVacio({required this.t, required this.onIrAConvertir});
-
-  final AppLocalizations t;
-  final VoidCallback onIrAConvertir;
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              Icons.library_books_outlined,
-              size: 48,
-              color: Theme.of(context).colorScheme.outline,
-            ),
-            const SizedBox(height: 12),
-            Text(
-              t.biblioteca_vacio,
-              textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.bodyMedium,
-            ),
-            const SizedBox(height: 16),
-            FilledButton.icon(
-              onPressed: onIrAConvertir,
-              icon: const Icon(Icons.auto_awesome_outlined),
-              label: Text(t.biblioteca_vacio_accion),
-            ),
-          ],
-        ),
-      ),
     );
   }
 }
