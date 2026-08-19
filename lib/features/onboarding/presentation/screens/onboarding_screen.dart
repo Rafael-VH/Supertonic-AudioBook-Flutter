@@ -34,18 +34,20 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     final carpeta = await FilePicker.getDirectoryPath();
     if (carpeta != null) {
       setState(() => _carpetaSeleccionada = carpeta);
-      final prefs = ref.read(repositorioPreferenciasProvider);
-      final datos = prefs.cargar();
-      datos['carpeta_out'] = carpeta;
-      prefs.guardar(datos);
+      final repo = ref.read(repositorioPreferenciasProvider);
+      final current = repo.cargarPreferenciasTyped();
+      await repo.guardarPreferenciasTyped(
+        current.copyWith(carpetaSalida: carpeta),
+      );
     }
   }
 
   void _finalizar() {
-    final prefs = ref.read(repositorioPreferenciasProvider);
-    final datos = prefs.cargar();
-    datos['onboarding_visto'] = true;
-    prefs.guardar(datos);
+    final repo = ref.read(repositorioPreferenciasProvider);
+    final current = repo.cargarPreferenciasTyped();
+    repo.guardarPreferenciasTyped(
+      current.copyWith(onboardingVisto: true),
+    );
     context.go(Rutas.dashboard);
   }
 

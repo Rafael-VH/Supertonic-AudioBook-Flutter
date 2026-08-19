@@ -26,8 +26,8 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
   Future<void> _decidirDestino() async {
     await Future<void>.delayed(_duracionMinima);
     if (!mounted) return;
-    final prefs = ref.read(repositorioPreferenciasProvider).cargar();
-    final destino = prefs['onboarding_visto'] == true
+    final prefs = ref.read(repositorioPreferenciasProvider).cargarPreferenciasTyped();
+    final destino = prefs.onboardingVisto
         ? Rutas.dashboard
         : Rutas.onboarding;
     context.go(destino);

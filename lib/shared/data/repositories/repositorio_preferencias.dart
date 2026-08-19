@@ -36,13 +36,14 @@ class PreferenciasJsonLocal implements RepositorioPreferencias {
     }
   }
 
-  /// Persist an [AppPreferences] to disk.
+  /// Persist an [AppPreferences] to disk, merging with existing preferences.
   void guardarPreferenciasTyped(AppPreferences prefs) {
-    final map = <String, Object>{
+    final existing = cargar();
+    final newEntries = <String, Object>{
       for (final e in prefs.toMap().entries)
         if (e.value != null) e.key: e.value!,
     };
-    guardar(map);
+    guardar({...existing, ...newEntries});
   }
 
   /// Load an [AppPreferences] from disk (returns defaults if missing/empty).

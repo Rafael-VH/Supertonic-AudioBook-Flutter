@@ -49,6 +49,22 @@ class AppPreferences extends Equatable {
     };
   }
 
+  AppPreferences copyWith({
+    VoiceConfig? voiceConfig,
+    String? carpetaSalida,
+    bool? onboardingVisto,
+    String? modeloState,
+    String? modeloPath,
+  }) {
+    return AppPreferences(
+      voiceConfig: voiceConfig ?? this.voiceConfig,
+      carpetaSalida: carpetaSalida ?? this.carpetaSalida,
+      onboardingVisto: onboardingVisto ?? this.onboardingVisto,
+      modeloState: modeloState ?? this.modeloState,
+      modeloPath: modeloPath ?? this.modeloPath,
+    );
+  }
+
   @override
   List<Object?> get props => [
         voiceConfig,
