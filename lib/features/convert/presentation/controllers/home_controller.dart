@@ -210,6 +210,7 @@ class HomeController extends Notifier<HomeEstado> {
 
   /// Establece el modo de selección y carga los archivos correspondientes.
   /// En modo `archivos`, [archivosExternos] son las rutas pre-seleccionadas.
+  /// En modo archivos se resetea formato a solo MP3 por defecto.
   void setModo(SelectionMode modo, {List<Archivo>? archivosExternos}) {
     if (modo == SelectionMode.archivos && archivosExternos != null) {
       state = state.copyWith(
@@ -217,6 +218,7 @@ class HomeController extends Notifier<HomeEstado> {
         archivos: archivosExternos,
         seleccion: {},
         carpetaIn: '',
+        formatos: {'mp3'},
       );
     } else {
       state = state.copyWith(modoSeleccion: modo);

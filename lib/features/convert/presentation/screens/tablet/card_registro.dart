@@ -30,7 +30,7 @@ class CardRegistro extends StatelessWidget {
             Text(t.registro, style: Theme.of(context).textTheme.titleMedium),
             const SizedBox(height: 8),
             Container(
-              height: 200,
+              height: 280,
               decoration: BoxDecoration(
                 color: Theme.of(context).colorScheme.surfaceContainerHighest,
                 borderRadius: BorderRadius.circular(8),
