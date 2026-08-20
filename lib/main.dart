@@ -46,6 +46,12 @@ Future<void> main() async {
         repositorioPreferenciasProvider.overrideWithValue(
           PreferenciasJsonLocal(ruta: '${docsBase}preferencias.json'),
         ),
+        repositorioBenchmarkProvider.overrideWithValue(
+          PreferenciasJsonLocal(ruta: '${docsBase}benchmark.json'),
+        ),
+        repositorioHistorialProvider.overrideWithValue(
+          PreferenciasJsonLocal(ruta: '${docsBase}historial_conversiones.json'),
+        ),
         exportadorAudioProvider.overrideWithValue(ExportadorAudioFfmpeg()),
         fileSystemProvider.overrideWithValue(FileSystemLocal()),
         reproductorAudioProvider.overrideWithValue(ReproductorJustAudio()),

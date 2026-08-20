@@ -55,6 +55,18 @@ final repositorioPreferenciasProvider = Provider<RepositorioPreferencias>(
       'repositorioPreferenciasProvider se inyecta en main.dart'),
 );
 
+/// Repositorio para datos de benchmark (benchmark.json).
+final repositorioBenchmarkProvider = Provider<RepositorioPreferencias>(
+  (_) => throw UnimplementedError(
+      'repositorioBenchmarkProvider se inyecta en main.dart'),
+);
+
+/// Repositorio para historial de conversiones (historial_conversiones.json).
+final repositorioHistorialProvider = Provider<RepositorioPreferencias>(
+  (_) => throw UnimplementedError(
+      'repositorioHistorialProvider se inyecta en main.dart'),
+);
+
 /// Reproducción de audio del botón **Escuchar**.
 final reproductorAudioProvider = Provider<ReproductorAudio>(
   (_) => throw UnimplementedError('reproductorAudioProvider se inyecta en main.dart'),

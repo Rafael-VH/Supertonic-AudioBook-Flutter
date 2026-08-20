@@ -560,7 +560,7 @@ class HomeController extends Notifier<HomeEstado> {
 
   /// Muestra la estimación de tiempo si hay un benchmark guardado.
   void _mostrarEstimacion(AppLocalizations t, List<Archivo> archivos) {
-    final prefs = ref.read(repositorioPreferenciasProvider).cargar();
+    final prefs = ref.read(repositorioBenchmarkProvider).cargar();
     final benchmarkData = prefs['benchmark_results'];
     if (benchmarkData is! Map<String, Object?>) return;
 
@@ -588,7 +588,7 @@ class HomeController extends Notifier<HomeEstado> {
     required int segmentos,
     required double duracionAudioSeg,
   }) {
-    final prefsRepo = ref.read(repositorioPreferenciasProvider);
+    final prefsRepo = ref.read(repositorioHistorialProvider);
     final datos = prefsRepo.cargar();
     final raw = datos['conversion_history'];
     final historial = <Map<String, Object?>>[];
