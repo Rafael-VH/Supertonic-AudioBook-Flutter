@@ -1,10 +1,12 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import 'package:supertonic_audiobook/features/audio_manager/domain/entities/audio_pendiente.dart';
 import 'package:supertonic_audiobook/presentation/controllers/providers.dart';
 import 'package:supertonic_audiobook/presentation/l10n/app_localizations.dart';
+import 'package:supertonic_audiobook/presentation/routing/app_router.dart';
 
 /// Pantalla de audios pendientes: muestra los WAVs generados recién y permite
 /// renombrar, elegir carpeta destino y guardar (individual o todos).
@@ -158,6 +160,7 @@ class _AudioTileState extends ConsumerState<_AudioTile> {
             messenger.showSnackBar(
               SnackBar(content: Text(t.audio_manager_saved)),
             );
+            context.go(Rutas.home);
           }
         }
       case 'rename':
@@ -274,6 +277,7 @@ class _SaveAllBar extends ConsumerWidget {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(t.audio_manager_saved_all)),
       );
+      context.go(Rutas.home);
     }
   }
 }
