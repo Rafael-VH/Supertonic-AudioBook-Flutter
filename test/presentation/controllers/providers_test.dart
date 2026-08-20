@@ -64,7 +64,9 @@ class RepositorioArchivosFalso implements RepositorioArchivos {
 
   @override
   String get pathSeparator => '/';
-} implements ExportadorAudio {
+}
+
+class ExportadorFalso implements ExportadorAudio {
   final List<Float32List> escritos = [];
 
   @override
