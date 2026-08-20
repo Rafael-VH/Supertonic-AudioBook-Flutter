@@ -98,9 +98,15 @@ class BenchmarkController extends Notifier<BenchmarkEstado> {
 
   BenchmarkResult? _cargarResultado() {
     final prefs = ref.read(repositorioPreferenciasProvider).cargar();
+    // Soporte legacy: benchmark_results como Map (único resultado)
     final raw = prefs['benchmark_results'];
     if (raw is Map<String, Object?>) {
       return BenchmarkResult.fromMap(raw);
+    }
+    // Nuevo formato: benchmark_history como Lista (múltiples corridas)
+    final history = prefs['benchmark_history'];
+    if (history is List && history.isNotEmpty) {
+      return BenchmarkResult.fromMap(history.last as Map<String, Object?>);
     }
     return null;
   }
@@ -160,9 +166,19 @@ class BenchmarkController extends Notifier<BenchmarkEstado> {
         return;
       }
 
-      // Persist
+      // Persist — append to history array (keep last 20 runs)
       final prefsRepo = ref.read(repositorioPreferenciasProvider);
       final datos = prefsRepo.cargar();
+      final history = (datos['benchmark_history'] as List?)
+              ?.map((e) => (e as Map).cast<String, Object?>())
+              .toList() ??
+          [];
+      history.add(resultado.toMap());
+      if (history.length > 20) {
+        history.removeRange(0, history.length - 20);
+      }
+      datos['benchmark_history'] = history;
+      // Also keep legacy key for backward compat
       datos['benchmark_results'] = resultado.toMap();
       prefsRepo.guardar(datos);
 
