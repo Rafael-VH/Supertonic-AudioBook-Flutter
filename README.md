@@ -24,7 +24,7 @@ Sin nube. Sin API. Sin GPU. Todo ocurre en tu dispositivo.
 |---|---------|-------------|
 | 🎙️ | **Conversión MD → Audio** | Lee archivos `.md` (carpeta o sueltos), limpia Markdown, segmenta y sintetiza voz |
 | 🎧 | **Gestión de audios pendientes** | Revisá, renombrá y guardá cada audio recién generado antes de publicarlo |
-| 📚 | **Biblioteca** | Audiolibros agrupados por libro con play/pausa |
+| 📚 | **Biblioteca** | Audios generados con play/pausa |
 | 🏷️ | **Editor de metadatos** | Tags ID3 de MP3: título, artista, álbum, año, género, pista, carátula |
 | ⚡ | **Benchmark del motor** | Mide chars/seg de tu dispositivo en 6 tamaños y estima tiempos de conversión |
 | 🌍 | **31 idiomas + auto** | Voces sintéticas en español, inglés, francés, alemán, japonés y más |
@@ -57,30 +57,39 @@ flutter run
 ### Flujo principal
 
 ```
-Splash → Onboarding (1ª vez) → Dashboard
-                                  │
-        ┌─────────────────────────┼─────────────────────────┐
-        ▼                         ▼                         ▼
-     Home (hub)             Biblioteca                 Settings
-        │
-        ├─ "Procesar" → Convert (carpeta o archivos .md)
-        └─ "Editor de metadatos" → Editor ID3
+1ª ejecución                              Ejecuciones siguientes
+    │                                          │
+    ▼                                          ▼
+ Splash ──→ Onboarding ──→ Dashboard      Splash ──→ Dashboard
+                               │                          │
+              ┌────────────────┼────────────────┐        │
+              ▼                ▼                ▼        │
+           Home           Biblioteca        Settings     │
+              │                                │        │
+    ┌─────────┴──────────┐          ┌─────────┤        │
+    ▼                    ▼          ▼         ▼        │
+ Convertir           Editor ID3  Audios   Configuración │
+ (carpeta o           (tags      generados  (voz, tema, │
+  archivos .md)        MP3)      (play/     idioma,      │
+              │                   pausa)    benchmark)   │
+              ▼                                     │
+ AudioManager                                      │
+ (renombrar,                                       │
+  guardar,                                         │
+  cancelar) ────────────────────────────────────────┘
 ```
 
-El **Dashboard** es un shell con `NavigationBar` de 3 pestañas: **Home** (hub de funciones), **Biblioteca** y **Settings**.
+**Dashboard** = `NavigationBar` con 3 pestañas: Home (hub), Biblioteca, Settings.
 
-### Convertir archivos
-
-1. Tocá **Procesar** en el hub → elegí carpeta o archivos `.md` sueltos
+**Convertir**:
+1. Tocá **Convertir archivos** en Home → elegí carpeta o archivos `.md`
 2. Configurá voz, velocidad, pasos e idioma en **Opciones**
-3. Tocá **Procesar** en la barra inferior — los archivos se convierten secuencialmente con registro en vivo
-4. Al terminar se abre la pantalla de **audios pendientes**: renombrá, elegí carpeta y guardá (o cancelá para descartar)
+3. Tocá **Procesar** — los archivos se convierten secuencialmente con registro en vivo
+4. Al terminar se abre **AudioManager**: renombrá, elegí carpeta y guardá (o cancelá para descartar WAVs temporales)
 
-Si el lote supera el presupuesto de memoria estimado, la app avisa antes de empezar.
+**Biblioteca**: lista los audios guardados en la carpeta de salida con play/pausa.
 
-### Benchmark
-
-En **Settings → Benchmark** podés medir el rendimiento del motor en tu dispositivo (6 tamaños, 2500–15000 caracteres). El resultado se usa para estimar cuánto tardará una conversión real.
+**Benchmark** (Settings → Benchmark): medí chars/seg en tu dispositivo (6 tamaños, 2500–15000 chars). Resultado usado para estimar tiempos de conversión.
 
 ## Arquitectura
 
@@ -104,7 +113,7 @@ lib/
 ├── features/                    # Módulos por feature (cada uno autocontenido)
 │   ├── audio_manager/           # Audios pendientes: guardar/cancelar/limpiar temps
 │   ├── benchmark/               # Benchmark del motor + historial de conversiones
-│   ├── biblioteca/              # Escuchar audiolibros generados
+│   ├── biblioteca/              # Audios generados con play/pausa
 │   ├── convert/                 # Conversión MD → Audio (core de la app)
 │   ├── dashboard/               # Shell con NavigationBar (3 pestañas)
 │   ├── editor_metadata/         # Edición de metadatos ID3

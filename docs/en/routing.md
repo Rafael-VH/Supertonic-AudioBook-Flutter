@@ -49,7 +49,7 @@ abstract final class Rutas {
 | `/dashboard` | DashboardScreen | Shell with NavigationBar (3 tabs) |
 | `/home` | ConvertScreen | Batch conversion of `.md` files |
 | `/modelo` | ModeloScreen | Model download/verification |
-| `/biblioteca` | BibliotecaScreen | Generated audiobooks |
+| `/biblioteca` | BibliotecaScreen | Generated audios |
 | `/settings` | SettingsScreen | App preferences |
 | `/editor-metadata` | MetadataEditorScreen | ID3 metadata editor |
 | `/benchmark` | BenchmarkScreen | TTS engine benchmark |

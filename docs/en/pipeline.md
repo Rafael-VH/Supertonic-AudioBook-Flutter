@@ -1,6 +1,6 @@
 # Audio Processing Pipeline
 
-How Markdown files become audiobooks — the full transformation flow.
+How Markdown files become audios — the full transformation flow.
 
 ## Overview
 

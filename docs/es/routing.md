@@ -49,7 +49,7 @@ abstract final class Rutas {
 | `/dashboard` | DashboardScreen | Shell con NavigationBar (3 tabs) |
 | `/home` | ConvertScreen | Conversión por lotes de archivos `.md` |
 | `/modelo` | ModeloScreen | Descarga/verificación del modelo |
-| `/biblioteca` | BibliotecaScreen | Audiolibros generados |
+| `/biblioteca` | BibliotecaScreen | Audios generados |
 | `/settings` | SettingsScreen | Preferencias de la aplicación |
 | `/editor-metadata` | MetadataEditorScreen | Editor de metadatos ID3 |
 | `/benchmark` | BenchmarkScreen | Benchmark del motor TTS |

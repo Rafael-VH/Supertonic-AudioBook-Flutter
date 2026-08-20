@@ -11,7 +11,7 @@ Splash
             ├─ Tab Home (hub de funciones)
             │    ├─→ Convert (/home) ─→ Audio Manager (audios pendientes)
             │    └─→ Editor de metadatos
-            ├─ Tab Biblioteca (audiolibros)
+            ├─ Tab Biblioteca (audios generados)
             └─ Tab Settings
                  └─→ Benchmark
 ```
@@ -155,7 +155,7 @@ Descarga y verificación del modelo Supertonic 3 (~400 MB).
 
 **Archivo**: `lib/features/biblioteca/presentation/screens/biblioteca_screen.dart`
 
-Lista los audiolibros generados en la carpeta de salida.
+Lista los audios generados en la carpeta de salida.
 
 **Controller**: `BibliotecaController` → `BibliotecaEstado`
 

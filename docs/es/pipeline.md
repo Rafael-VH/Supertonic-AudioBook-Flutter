@@ -1,6 +1,6 @@
 # Pipeline de Procesamiento de Audio
 
-Cómo los archivos Markdown se convierten en audiolibros — el flujo completo de transformación.
+Cómo los archivos Markdown se convierten en audios — el flujo completo de transformación.
 
 ## Resumen
 
