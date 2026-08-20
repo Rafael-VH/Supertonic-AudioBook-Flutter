@@ -4,10 +4,7 @@ import 'package:supertonic_audiobook/features/convert/domain/use_cases/segmentar
 import 'package:supertonic_audiobook/shared/domain/contracts/domain_logger.dart';
 import 'package:supertonic_audiobook/shared/domain/entities/voice_config.dart';
 
-/// Tamaños de texto de prueba (cantidad de caracteres).
-const _tamaniosPrueba = [1500, 3000, 5000, 7500, 10000, 15000];
-
-/// Lorem ipsum suficientemente largo para cubrir 15000 caracteres.
+/// Lorem ipsum suficientemente largo para cubrir 30000 caracteres.
 ///
 /// Se repite el patrón base hasta superar el tamaño máximo de prueba.
 const _loremBase =
@@ -39,12 +36,14 @@ class RunBenchmark {
     required VoiceConfig voiceConfig,
     required void Function(int paso, int total, int tamanio) onProgreso,
     bool Function()? debeDetenerse,
+    List<int>? tamanios,
   }) async {
     _logger.i('Iniciando benchmark con voz ${voiceConfig.voz}...');
     await _motor.cambiarVoz(voiceConfig.voz);
 
+    final sizes = tamanios ?? [1500, 3000, 6000, 9000, 12000, 15000];
     final resultados = <int, int>{};
-    final total = _tamaniosPrueba.length;
+    final total = sizes.length;
 
     for (var i = 0; i < total; i++) {
       if (debeDetenerse != null && debeDetenerse()) {
@@ -52,7 +51,7 @@ class RunBenchmark {
         break;
       }
 
-      final tamanio = _tamaniosPrueba[i];
+      final tamanio = sizes[i];
       final texto = _lorem.substring(0, tamanio);
       final segmentos = segmentarTexto(texto);
 

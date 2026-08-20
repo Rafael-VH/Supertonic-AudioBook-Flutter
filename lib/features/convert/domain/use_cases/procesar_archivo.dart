@@ -27,6 +27,7 @@ class ProcesarResultado {
     required this.estado,
     required this.segmentos,
     required this.duracionAudioSeg,
+    required this.caracteres,
   });
 
   /// Estado semántico del procesamiento.
@@ -37,6 +38,9 @@ class ProcesarResultado {
 
   /// Duración total del audio generado en segundos.
   final double duracionAudioSeg;
+
+  /// Cantidad de caracteres del texto plano procesado.
+  final int caracteres;
 }
 
 /// Orquesta la conversión de un archivo Markdown a audios.
@@ -124,12 +128,12 @@ class ProcesarArchivo {
       textoPlano = limpiarMarkdown(_archivos.leerArchivo(archivo.ruta));
     } catch (exc) {
       _logger.e("No se pudo leer '${archivo.ruta}': $exc");
-      return const ProcesarResultado(estado: ResultadoProceso.error, segmentos: 0, duracionAudioSeg: 0);
+      return const ProcesarResultado(estado: ResultadoProceso.error, segmentos: 0, duracionAudioSeg: 0, caracteres: 0);
     }
 
     if (textoPlano.trim().isEmpty) {
       _logger.i('El archivo está vacío después de limpiar. Se omite.');
-      return const ProcesarResultado(estado: ResultadoProceso.omitido, segmentos: 0, duracionAudioSeg: 0);
+      return const ProcesarResultado(estado: ResultadoProceso.omitido, segmentos: 0, duracionAudioSeg: 0, caracteres: 0);
     }
 
     // --- Segmentar ---
@@ -198,7 +202,7 @@ class ProcesarArchivo {
 
       if (fragmentos.isEmpty && !parcialEscrito) {
         _logger.i('No se generó ningún fragmento de audio.');
-        return const ProcesarResultado(estado: ResultadoProceso.omitido, segmentos: 0, duracionAudioSeg: 0);
+        return const ProcesarResultado(estado: ResultadoProceso.omitido, segmentos: 0, duracionAudioSeg: 0, caracteres: 0);
       }
 
       // --- Exportar ---
@@ -263,6 +267,7 @@ class ProcesarArchivo {
       estado: ResultadoProceso.ok,
       segmentos: segmentos.length,
       duracionAudioSeg: duracionTotal,
+      caracteres: textoPlano.length,
     );
   }
 

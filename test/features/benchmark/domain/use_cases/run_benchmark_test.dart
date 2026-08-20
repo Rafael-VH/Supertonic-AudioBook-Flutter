@@ -61,9 +61,9 @@ void main() {
         onProgreso: (_, __, ___) {},
       );
 
-      // 6 sizes: 1500, 3000, 5000, 7500, 10000, 15000
+      // 6 default sizes: 1500, 3000, 6000, 9000, 12000, 15000
       expect(result.tamanios.length, 6);
-      expect(result.tamanios.keys, containsAll([1500, 3000, 5000, 7500, 10000, 15000]));
+      expect(result.tamanios.keys, containsAll([1500, 3000, 6000, 9000, 12000, 15000]));
       expect(result.voiceConfig, voice);
       expect(result.fecha, isA<DateTime>());
 
@@ -161,6 +161,22 @@ void main() {
       );
 
       expect(result.tamanios.length, 6);
+    });
+
+    test('tamanios personalizados solo procesa esos tamaños', () async {
+      final motor = FakeMotorTts();
+      final logger = FakeLogger();
+      final useCase = RunBenchmark(motor: motor, logger: logger);
+      final customSizes = [500, 1000, 2000];
+
+      final result = await useCase.ejecutar(
+        voiceConfig: voice,
+        onProgreso: (_, __, ___) {},
+        tamanios: customSizes,
+      );
+
+      expect(result.tamanios.length, 3);
+      expect(result.tamanios.keys, containsAll([500, 1000, 2000]));
     });
   });
 }
