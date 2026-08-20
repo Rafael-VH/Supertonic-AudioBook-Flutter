@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:supertonic_audiobook/features/benchmark/domain/entities/conversion_entry.dart';
 import 'package:supertonic_audiobook/features/benchmark/presentation/controllers/benchmark_controller.dart';
 import 'package:supertonic_audiobook/features/modelo/presentation/controllers/modelo_controller.dart';
+import 'package:supertonic_audiobook/presentation/controllers/providers.dart';
 import 'package:supertonic_audiobook/presentation/l10n/app_localizations.dart';
 import 'package:supertonic_audiobook/presentation/routing/app_router.dart';
 
