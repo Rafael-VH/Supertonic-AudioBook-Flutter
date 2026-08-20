@@ -47,11 +47,11 @@ Chain strategy: pending
 
 ## Phase 3: UI + Integration (PR 3)
 
-- [ ] 3.1 RED: Widget test `AudioManagerScreen` — list renders, metadata visible, menu actions
-- [ ] 3.2 GREEN: Create `lib/features/audio_manager/presentation/screens/audio_manager_screen.dart` — tiles + PopupMenuButton + "Save All" bottom bar
-- [ ] 3.3 Create `MemoryWarningDialog` — shows estimated/available RAM, Proceed/Cancel; wire into task 2.4
+- [x] 3.1 RED: Widget test `AudioManagerScreen` — list renders, metadata visible, menu actions
+- [x] 3.2 GREEN: Create `lib/features/audio_manager/presentation/screens/audio_manager_screen.dart` — tiles + PopupMenuButton + "Save All" bottom bar
+- [x] 3.3 Create `MemoryWarningDialog` — shows estimated/available RAM, Proceed/Cancel; wire into task 2.4
 - [ ] 3.4 Integration test: process → AudioManagerScreen → save → verify temp deleted + file at destination
-- [ ] 3.5 Run `flutter test` + `flutter analyze` — all pass, no warnings
+- [x] 3.5 Run `flutter test` + `flutter analyze` — all pass, no warnings
 
 ## Phase 4: Cleanup
 
