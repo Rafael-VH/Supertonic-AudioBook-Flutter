@@ -57,6 +57,7 @@ class RunBenchmark {
 
       final stopwatch = Stopwatch()..start();
       for (final seg in segmentos) {
+        if (debeDetenerse != null && debeDetenerse()) break;
         await _motor.sintetizar(
           seg,
           steps: voiceConfig.steps,
@@ -65,6 +66,11 @@ class RunBenchmark {
         );
       }
       stopwatch.stop();
+
+      if (debeDetenerse != null && debeDetenerse()) {
+        _logger.i('Benchmark cancelado durante sintetización del paso ${i + 1}/$total.');
+        break;
+      }
 
       resultados[tamanio] = stopwatch.elapsedMilliseconds;
       _logger.i('Paso ${i + 1}/$total: $tamanio chars → ${stopwatch.elapsedMilliseconds} ms');
