@@ -199,7 +199,7 @@ class _AudioTileState extends ConsumerState<_AudioTile> {
           ),
         ],
       ),
-    );
+    ).whenComplete(() => controller.dispose());
   }
 }
 
