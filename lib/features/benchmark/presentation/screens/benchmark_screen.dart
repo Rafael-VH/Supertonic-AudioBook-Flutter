@@ -56,6 +56,46 @@ class _BenchmarkBody extends ConsumerWidget {
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
+        // --- Info columnas ---
+        Card(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  t.benchmark_tab_tamano,
+                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                ),
+                const SizedBox(height: 2),
+                Text(t.benchmark_info_tamano),
+                const SizedBox(height: 12),
+                Text(
+                  t.benchmark_tab_tiempo,
+                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                ),
+                const SizedBox(height: 2),
+                Text(t.benchmark_info_tiempo),
+                const SizedBox(height: 12),
+                Text(
+                  t.benchmark_tab_chars_seg,
+                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                ),
+                const SizedBox(height: 2),
+                Text(t.benchmark_info_chars_seg),
+              ],
+            ),
+          ),
+        ),
+
+        const SizedBox(height: 12),
+
         // --- Tabla fija de benchmark ---
         _BenchmarkTable(estado: estado),
 
@@ -207,7 +247,11 @@ class _FilaBenchmark extends ConsumerWidget {
             flex: 3,
             child: Center(
               child: ejecutando
-                  ? const SizedBox.shrink()
+                  ? const SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
                   : Text(
                       resultado != null
                           ? resultado!.charsSeg.toStringAsFixed(1)

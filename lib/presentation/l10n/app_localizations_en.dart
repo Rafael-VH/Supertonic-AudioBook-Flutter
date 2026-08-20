@@ -681,6 +681,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get benchmark_tab_chars_seg => 'Chars/s';
 
   @override
+  String get benchmark_info_tamano => 'Number of characters in the test text';
+
+  @override
+  String get benchmark_info_tiempo => 'Time it took to generate the audio';
+
+  @override
+  String get benchmark_info_chars_seg =>
+      'Processing speed: characters generated per second';
+
+  @override
   String get benchmark_estimacion_label => 'Estimated time for your text:';
 
   @override

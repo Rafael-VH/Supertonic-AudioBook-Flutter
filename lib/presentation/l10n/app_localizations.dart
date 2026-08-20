@@ -1250,6 +1250,24 @@ abstract class AppLocalizations {
   /// **'Chars/s'**
   String get benchmark_tab_chars_seg;
 
+  /// No description provided for @benchmark_info_tamano.
+  ///
+  /// In en, this message translates to:
+  /// **'Number of characters in the test text'**
+  String get benchmark_info_tamano;
+
+  /// No description provided for @benchmark_info_tiempo.
+  ///
+  /// In en, this message translates to:
+  /// **'Time it took to generate the audio'**
+  String get benchmark_info_tiempo;
+
+  /// No description provided for @benchmark_info_chars_seg.
+  ///
+  /// In en, this message translates to:
+  /// **'Processing speed: characters generated per second'**
+  String get benchmark_info_chars_seg;
+
   /// No description provided for @benchmark_estimacion_label.
   ///
   /// In en, this message translates to:

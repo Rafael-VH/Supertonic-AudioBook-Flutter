@@ -400,6 +400,9 @@
   "benchmark_tab_tamano": "Size",
   "benchmark_tab_tiempo": "Time",
   "benchmark_tab_chars_seg": "Chars/s",
+  "benchmark_info_tamano": "Number of characters in the test text",
+  "benchmark_info_tiempo": "Time it took to generate the audio",
+  "benchmark_info_chars_seg": "Processing speed: characters generated per second",
   "benchmark_estimacion_label": "Estimated time for your text:",
   "benchmark_estimacion_valor": "~{tiempo}",
   "@benchmark_estimacion_valor": {
