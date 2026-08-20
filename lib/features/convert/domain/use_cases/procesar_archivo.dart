@@ -118,9 +118,9 @@ class ProcesarArchivo {
     void Function(int procesados, int total)? onProgreso,
     bool Function()? debeDetenerse,
   }) async {
-    _logger.i('=' * 50);
+    _logger.i('=' * 40);
     _logger.i('  Procesando: ${archivo.nombre}');
-    _logger.i('=' * 50);
+    _logger.i('=' * 40);
 
     // --- Leer y limpiar ---
     String textoPlano;

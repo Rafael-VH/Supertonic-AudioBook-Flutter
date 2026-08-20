@@ -139,7 +139,7 @@ class HomeController extends Notifier<HomeEstado> {
         .clamp(0.7, 2.0);
     final langVoz = prefs['lang_voz'] as String? ?? defaultLang;
     final formatos =
-        ((prefs['formatos'] as List?)?.cast<String>() ?? ['wav', 'mp3'])
+        ((prefs['formatos'] as List?)?.cast<String>() ?? ['mp3'])
             .toSet();
 
     final archivos =
@@ -422,14 +422,14 @@ class HomeController extends Notifier<HomeEstado> {
       await ref.read(motorTtsProvider).cambiarVoz(voz);
       ref.read(repositorioArchivosProvider).crearCarpetasSiNoExisten([salida]);
 
-      _appendLog('=' * 60);
+      _appendLog('=' * 40);
       _appendLog(t.log_config_titulo);
       _appendLog(t.log_config_voz(voz, steps, '${speed.toStringAsFixed(2)}x'));
       _appendLog(t.log_config_lang(lang));
       _appendLog(t.log_config_formatos(
           formatos.map((f) => f.toUpperCase()).join(', ')));
       _appendLog(t.log_config_salida(salida));
-      _appendLog('=' * 60);
+      _appendLog('=' * 40);
 
       final useCase = ref.read(procesarArchivoProvider);
       final totalArchivos = seleccion.length;
@@ -492,10 +492,10 @@ class HomeController extends Notifier<HomeEstado> {
           estado: t.estado_listo_n(exitos, textoElapsed),
           snackbar: MensajeSnackbar(t.snackbar_procesado(exitos, textoElapsed)),
         );
-        _appendLog('=' * 60);
+        _appendLog('=' * 40);
         _appendLog(t.log_completado(exitos, textoElapsed));
         _mostrarEstimacion(t, seleccion);
-        _appendLog('=' * 60);
+        _appendLog('=' * 40);
       } else if (finalizadoOk && errores > 0) {
         state = state.copyWith(
           estado: t.estado_con_errores(exitos, totalArchivos, errores),
