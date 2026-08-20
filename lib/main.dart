@@ -8,6 +8,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fdb_helper/fdb_helper.dart';
 import 'package:supertonic_audiobook/app.dart';
 import 'package:supertonic_audiobook/shared/data/config.dart';
+import 'package:supertonic_audiobook/features/audio_manager/domain/use_cases/limpiar_temporales.dart';
 import 'package:supertonic_audiobook/features/modelo/data/repositories/modelo_manager.dart';
 import 'package:supertonic_audiobook/features/convert/data/repositories/exportador_audio_ffmpeg.dart';
 import 'package:supertonic_audiobook/features/convert/data/repositories/file_system_local.dart';
@@ -37,12 +38,15 @@ Future<void> main() async {
   final docsBase = '${docs.path}$separador';
   final modeloDir = '${soporte.path}${separador}modelo';
 
+  // Clean orphaned WAVs from previous runs before starting.
+  final archivos = RepositorioArchivosLocal();
+  final tempDir = '${docsBase}audio${separador}_temp';
+  LimpiarTemporales(archivos: archivos).ejecutar(carpetaTemp: tempDir);
+
   runApp(
     ProviderScope(
       overrides: [
-        repositorioArchivosProvider.overrideWithValue(
-          RepositorioArchivosLocal(),
-        ),
+        repositorioArchivosProvider.overrideWithValue(archivos),
         repositorioPreferenciasProvider.overrideWithValue(
           PreferenciasJsonLocal(ruta: '${docsBase}preferencias.json'),
         ),

@@ -699,4 +699,71 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get historial_col_duracion => 'Duration';
+
+  @override
+  String get audio_manager_title => 'Generated Audio';
+
+  @override
+  String get audio_manager_save_all => 'Save All';
+
+  @override
+  String get audio_manager_save => 'Save';
+
+  @override
+  String get audio_manager_cancel => 'Cancel';
+
+  @override
+  String get audio_manager_rename => 'Rename';
+
+  @override
+  String get audio_manager_choose_folder => 'Choose folder';
+
+  @override
+  String get audio_manager_saved => 'Audio saved';
+
+  @override
+  String get audio_manager_saved_all => 'Audio files saved';
+
+  @override
+  String get audio_manager_empty => 'No pending audio';
+
+  @override
+  String get audio_manager_delete => 'Delete';
+
+  @override
+  String get audio_manager_name => 'Name';
+
+  @override
+  String get audio_manager_format => 'Format';
+
+  @override
+  String get audio_manager_duration => 'Duration';
+
+  @override
+  String get audio_manager_size => 'Size';
+
+  @override
+  String get audio_manager_enter_name => 'Enter the audio name';
+
+  @override
+  String get audio_manager_rename_title => 'Rename audio';
+
+  @override
+  String get memory_warning_title => 'Memory warning';
+
+  @override
+  String memory_warning_estimated(String estimated) {
+    return 'Estimated RAM: $estimated';
+  }
+
+  @override
+  String memory_warning_available(String available) {
+    return 'Available RAM: $available';
+  }
+
+  @override
+  String get memory_warning_proceed => 'Process anyway';
+
+  @override
+  String get memory_warning_cancel => 'Cancel';
 }

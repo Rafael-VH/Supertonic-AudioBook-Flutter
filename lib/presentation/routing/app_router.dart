@@ -11,6 +11,7 @@ import 'package:supertonic_audiobook/features/modelo/presentation/screens/modelo
 import 'package:supertonic_audiobook/features/onboarding/presentation/screens/onboarding_screen.dart';
 import 'package:supertonic_audiobook/features/settings/presentation/screens/settings_screen.dart';
 import 'package:supertonic_audiobook/features/editor_metadata/presentation/screens/metadata_editor_screen.dart';
+import 'package:supertonic_audiobook/features/audio_manager/domain/entities/audio_pendiente.dart';
 import 'package:supertonic_audiobook/features/splash/presentation/screens/splash_screen.dart';
 
 /// Nombres de ruta centralizados para que ninguna screen importe otra.
@@ -24,6 +25,7 @@ abstract final class Rutas {
   static const biblioteca = '/biblioteca';
   static const editorMetadata = '/editor-metadata';
   static const benchmark = '/benchmark';
+  static const audioManager = '/audio-manager';
 }
 
 /// Orígenes admitidos para el redirect del gate del modelo (D5): el modelo se
@@ -88,6 +90,15 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: Rutas.benchmark,
         builder: (_, __) => const BenchmarkScreen(),
+      ),
+      GoRoute(
+        path: Rutas.audioManager,
+        builder: (_, state) {
+          final audios = state.extra as List<AudioPendiente>? ?? const [];
+          return Scaffold(
+            body: Center(child: Text('Audio Manager (${audios.length})')),
+          );
+        },
       ),
     ],
   );

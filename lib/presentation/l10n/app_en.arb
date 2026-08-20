@@ -403,5 +403,36 @@
   "historial_vacio": "No conversions recorded",
   "historial_col_palabras": "Words",
   "historial_col_segmentos": "Segments",
-  "historial_col_duracion": "Duration"
+  "historial_col_duracion": "Duration",
+  "audio_manager_title": "Generated Audio",
+  "audio_manager_save_all": "Save All",
+  "audio_manager_save": "Save",
+  "audio_manager_cancel": "Cancel",
+  "audio_manager_rename": "Rename",
+  "audio_manager_choose_folder": "Choose folder",
+  "audio_manager_saved": "Audio saved",
+  "audio_manager_saved_all": "Audio files saved",
+  "audio_manager_empty": "No pending audio",
+  "audio_manager_delete": "Delete",
+  "audio_manager_name": "Name",
+  "audio_manager_format": "Format",
+  "audio_manager_duration": "Duration",
+  "audio_manager_size": "Size",
+  "audio_manager_enter_name": "Enter the audio name",
+  "audio_manager_rename_title": "Rename audio",
+  "memory_warning_title": "Memory warning",
+  "memory_warning_estimated": "Estimated RAM: {estimated}",
+  "@memory_warning_estimated": {
+    "placeholders": {
+      "estimated": {"type": "String"}
+    }
+  },
+  "memory_warning_available": "Available RAM: {available}",
+  "@memory_warning_available": {
+    "placeholders": {
+      "available": {"type": "String"}
+    }
+  },
+  "memory_warning_proceed": "Process anyway",
+  "memory_warning_cancel": "Cancel"
 }

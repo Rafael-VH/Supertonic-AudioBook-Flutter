@@ -403,5 +403,36 @@
   "historial_vacio": "Sin conversiones registradas",
   "historial_col_palabras": "Palabras",
   "historial_col_segmentos": "Segmentos",
-  "historial_col_duracion": "Duración"
+  "historial_col_duracion": "Duración",
+  "audio_manager_title": "Audios Generados",
+  "audio_manager_save_all": "Guardar Todos",
+  "audio_manager_save": "Guardar",
+  "audio_manager_cancel": "Cancelar",
+  "audio_manager_rename": "Renombrar",
+  "audio_manager_choose_folder": "Elegir carpeta",
+  "audio_manager_saved": "Audio guardado",
+  "audio_manager_saved_all": "Audios guardados",
+  "audio_manager_empty": "No hay audios pendientes",
+  "audio_manager_delete": "Eliminar",
+  "audio_manager_name": "Nombre",
+  "audio_manager_format": "Formato",
+  "audio_manager_duration": "Duración",
+  "audio_manager_size": "Tamaño",
+  "audio_manager_enter_name": "Ingresá el nombre del audio",
+  "audio_manager_rename_title": "Renombrar audio",
+  "memory_warning_title": "Advertencia de memoria",
+  "memory_warning_estimated": "RAM estimada: {estimated}",
+  "@memory_warning_estimated": {
+    "placeholders": {
+      "estimated": {"type": "String"}
+    }
+  },
+  "memory_warning_available": "RAM disponible: {available}",
+  "@memory_warning_available": {
+    "placeholders": {
+      "available": {"type": "String"}
+    }
+  },
+  "memory_warning_proceed": "Procesar de todos modos",
+  "memory_warning_cancel": "Cancelar"
 }

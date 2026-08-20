@@ -1291,6 +1291,132 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Duration'**
   String get historial_col_duracion;
+
+  /// No description provided for @audio_manager_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Generated Audio'**
+  String get audio_manager_title;
+
+  /// No description provided for @audio_manager_save_all.
+  ///
+  /// In en, this message translates to:
+  /// **'Save All'**
+  String get audio_manager_save_all;
+
+  /// No description provided for @audio_manager_save.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get audio_manager_save;
+
+  /// No description provided for @audio_manager_cancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get audio_manager_cancel;
+
+  /// No description provided for @audio_manager_rename.
+  ///
+  /// In en, this message translates to:
+  /// **'Rename'**
+  String get audio_manager_rename;
+
+  /// No description provided for @audio_manager_choose_folder.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose folder'**
+  String get audio_manager_choose_folder;
+
+  /// No description provided for @audio_manager_saved.
+  ///
+  /// In en, this message translates to:
+  /// **'Audio saved'**
+  String get audio_manager_saved;
+
+  /// No description provided for @audio_manager_saved_all.
+  ///
+  /// In en, this message translates to:
+  /// **'Audio files saved'**
+  String get audio_manager_saved_all;
+
+  /// No description provided for @audio_manager_empty.
+  ///
+  /// In en, this message translates to:
+  /// **'No pending audio'**
+  String get audio_manager_empty;
+
+  /// No description provided for @audio_manager_delete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get audio_manager_delete;
+
+  /// No description provided for @audio_manager_name.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get audio_manager_name;
+
+  /// No description provided for @audio_manager_format.
+  ///
+  /// In en, this message translates to:
+  /// **'Format'**
+  String get audio_manager_format;
+
+  /// No description provided for @audio_manager_duration.
+  ///
+  /// In en, this message translates to:
+  /// **'Duration'**
+  String get audio_manager_duration;
+
+  /// No description provided for @audio_manager_size.
+  ///
+  /// In en, this message translates to:
+  /// **'Size'**
+  String get audio_manager_size;
+
+  /// No description provided for @audio_manager_enter_name.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the audio name'**
+  String get audio_manager_enter_name;
+
+  /// No description provided for @audio_manager_rename_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Rename audio'**
+  String get audio_manager_rename_title;
+
+  /// No description provided for @memory_warning_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Memory warning'**
+  String get memory_warning_title;
+
+  /// No description provided for @memory_warning_estimated.
+  ///
+  /// In en, this message translates to:
+  /// **'Estimated RAM: {estimated}'**
+  String memory_warning_estimated(String estimated);
+
+  /// No description provided for @memory_warning_available.
+  ///
+  /// In en, this message translates to:
+  /// **'Available RAM: {available}'**
+  String memory_warning_available(String available);
+
+  /// No description provided for @memory_warning_proceed.
+  ///
+  /// In en, this message translates to:
+  /// **'Process anyway'**
+  String get memory_warning_proceed;
+
+  /// No description provided for @memory_warning_cancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get memory_warning_cancel;
 }
 
 class _AppLocalizationsDelegate
