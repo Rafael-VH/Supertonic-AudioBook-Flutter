@@ -262,7 +262,7 @@ class _ResultsTable extends StatelessWidget {
         for (final entrada in entradas)
           DataRow(cells: [
             DataCell(Text('${entrada.key} chars')),
-            DataCell(Text('${(entrada.value / 1000).toStringAsFixed(1)}s')),
+            DataCell(Text(_formatearDuracion(entrada.value / 1000))),
             DataCell(Text(
               (entrada.key / (entrada.value / 1000)).toStringAsFixed(1),
             )),
