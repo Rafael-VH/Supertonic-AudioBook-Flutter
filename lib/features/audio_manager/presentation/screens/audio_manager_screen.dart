@@ -144,24 +144,23 @@ class _AudioTileState extends ConsumerState<_AudioTile> {
   void _onSelected(String value) async {
     final t = AppLocalizations.of(context)!;
     final controller = ref.read(audioManagerControllerProvider.notifier);
+    final router = GoRouter.of(context);
 
     switch (value) {
       case 'folder':
         final messenger = ScaffoldMessenger.of(context);
         final carpeta = await FilePicker.getDirectoryPath();
-        if (carpeta != null && mounted) {
+        if (carpeta != null) {
           await controller.guardarUno(
             widget.pendiente,
             carpetaDestino: carpeta,
             nombreArchivo:
                 '${widget.pendiente.displayName}.${widget.pendiente.format}',
           );
-          if (mounted) {
-            messenger.showSnackBar(
-              SnackBar(content: Text(t.audio_manager_saved)),
-            );
-            context.go(Rutas.home);
-          }
+          messenger.showSnackBar(
+            SnackBar(content: Text(t.audio_manager_saved)),
+          );
+          router.go(Rutas.home);
         }
       case 'rename':
         if (!mounted) return;
@@ -268,16 +267,15 @@ class _SaveAllBar extends ConsumerWidget {
 
   Future<void> _saveAll(BuildContext context, WidgetRef ref) async {
     final t = AppLocalizations.of(context)!;
+    final router = GoRouter.of(context);
     final carpeta = await FilePicker.getDirectoryPath();
-    if (carpeta == null || !context.mounted) return;
+    if (carpeta == null) return;
 
     final controller = ref.read(audioManagerControllerProvider.notifier);
     await controller.guardarTodos(carpeta);
-    if (context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(t.audio_manager_saved_all)),
-      );
-      context.go(Rutas.home);
-    }
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(t.audio_manager_saved_all)),
+    );
+    router.go(Rutas.home);
   }
 }
