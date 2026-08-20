@@ -87,10 +87,7 @@ class _BenchmarkBody extends ConsumerWidget {
           _HistorialTable(historial: estado.historial),
         ] else ...[
           const SizedBox(height: 24),
-          Text(
-            t.historial_vacio,
-            style: Theme.of(context).textTheme.bodySmall,
-          ),
+          Text(t.historial_vacio, style: Theme.of(context).textTheme.bodySmall),
         ],
       ],
     );
@@ -187,10 +184,7 @@ class _FilaBenchmark extends ConsumerWidget {
       child: Row(
         children: [
           // Tamaño
-          Expanded(
-            flex: 2,
-            child: Center(child: Text('$tamanio')),
-          ),
+          Expanded(flex: 2, child: Center(child: Text('$tamanio'))),
           // Tiempo
           Expanded(
             flex: 3,
@@ -201,9 +195,11 @@ class _FilaBenchmark extends ConsumerWidget {
                       height: 16,
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
-                  : Text(resultado != null
-                      ? _formatearDuracion(resultado!.tiempoMs / 1000)
-                      : '—'),
+                  : Text(
+                      resultado != null
+                          ? _formatearDuracion(resultado!.tiempoMs / 1000)
+                          : '—',
+                    ),
             ),
           ),
           // Chars/seg
@@ -212,9 +208,11 @@ class _FilaBenchmark extends ConsumerWidget {
             child: Center(
               child: ejecutando
                   ? const SizedBox.shrink()
-                  : Text(resultado != null
-                      ? '${resultado!.charsSeg.toStringAsFixed(1)}'
-                      : '—'),
+                  : Text(
+                      resultado != null
+                          ? resultado!.charsSeg.toStringAsFixed(1)
+                          : '—',
+                    ),
             ),
           ),
           // Botón
@@ -225,16 +223,17 @@ class _FilaBenchmark extends ConsumerWidget {
                 onPressed: (ejecutando || bloqueado)
                     ? null
                     : () => ref
-                        .read(benchmarkControllerProvider.notifier)
-                        .ejecutarFila(tamanio),
+                          .read(benchmarkControllerProvider.notifier)
+                          .ejecutarFila(tamanio),
                 icon: ejecutando
-                  ? const SizedBox(
-                      width: 18,
-                      height: 18,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : const Icon(Icons.play_arrow),
-              tooltip: ejecutando ? 'Procesando...' : 'Benchmark $tamanio',
+                    ? const SizedBox(
+                        width: 18,
+                        height: 18,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Icon(Icons.play_arrow),
+                tooltip: ejecutando ? 'Procesando...' : 'Benchmark $tamanio',
+              ),
             ),
           ),
         ],
@@ -262,11 +261,13 @@ class _HistorialTable extends StatelessWidget {
         ],
         rows: [
           for (final entry in historial)
-            DataRow(cells: [
-              DataCell(Text('${entry.caracteres}')),
-              DataCell(Text('${entry.segmentos}')),
-              DataCell(Text(_formatearDuracion(entry.duracionAudioSeg))),
-            ]),
+            DataRow(
+              cells: [
+                DataCell(Text('${entry.caracteres}')),
+                DataCell(Text('${entry.segmentos}')),
+                DataCell(Text(_formatearDuracion(entry.duracionAudioSeg))),
+              ],
+            ),
         ],
       ),
     );
