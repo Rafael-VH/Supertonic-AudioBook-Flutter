@@ -28,6 +28,7 @@ class ProcesarResultado {
     required this.segmentos,
     required this.duracionAudioSeg,
     required this.caracteres,
+    this.tempPath,
   });
 
   /// Estado semántico del procesamiento.
@@ -41,6 +42,9 @@ class ProcesarResultado {
 
   /// Cantidad de caracteres del texto plano procesado.
   final int caracteres;
+
+  /// Ruta al WAV temporal en `_temp/`, null si el procesamiento no fue exitoso.
+  final String? tempPath;
 }
 
 /// Orquesta la conversión de un archivo Markdown a audios.
@@ -93,21 +97,16 @@ class ProcesarArchivo {
         : topeMovil;
   }
 
-  /// Convierte [archivo] en audios en los formatos pedidos.
+  /// Convierte [archivo] en un WAV temporal en `_temp/` bajo [rutaBase].
   ///
-  /// Devuelve [ResultadoProceso.ok] si se publicó al menos una salida;
+  /// Devuelve [ResultadoProceso.ok] con `tempPath` apuntando al WAV generado;
   /// [ResultadoProceso.error] si el archivo no se pudo leer (sin lanzar, el
-  /// resultado comunica el fallo) y [ResultadoProceso.omitido] si tras
-  /// limpiar no quedó contenido o el motor no generó audio. Las demás fallas
-  /// (motor, exportador, publicación) se lanzan y el caller las cuenta.
+  /// resultado comunica el fallo) y [ResultadoProceso.omitido] si tras limpiar
+  /// no quedó contenido o el motor no generó audio. Las demás fallas (motor,
+  /// exportador) se lanzan y el caller las cuenta.
   ///
-  /// Cada salida se publica por separado y de forma atómica (renombrado de
-  /// archivo temporal), solo después de generarla por completo. Si la corrida
-  /// se cancela o falla durante la síntesis, el output previo de cada formato
-  /// queda intacto: al cancelar solo se publican salidas cuyo destino no
-  /// existía previamente, para no pisar audio completo con audio truncado.
-  /// En la fase de publicación el WAV va último: si falla un formato no-WAV,
-  /// el WAV previo no se reemplaza.
+  /// El WAV resultante queda en `_temp/` y el caller es responsable de su
+  /// lifecycle (guardar, eliminar, limpiar).
   Future<ProcesarResultado> procesar(
     Archivo archivo,
     String rutaBase, {
@@ -141,19 +140,15 @@ class ProcesarArchivo {
     final total = segmentos.length;
     _logger.i('  → $total segmento(s) para procesar.');
 
-    // Formatos normalizados sin duplicados: un repetido haría fallar la
-    // publicación del mismo temporal dos veces.
-    final formatosUnicos = <String>[];
-    for (final f in formatos) {
-      if (!formatosUnicos.contains(f)) formatosUnicos.add(f);
-    }
-
     // El WAV de trabajo es SIEMPRE un temporal: nada se escribe sobre la
     // ruta final hasta que la corrida terminó con éxito.
     final dirSalida = _fileSystem.parentOf(rutaBase);
     _fileSystem.createDirectory(dirSalida);
+    // Subdirectorio _temp/ para WIPs: el caller gestiona su lifecycle.
+    final tempDir = '$dirSalida${_fileSystem.pathSeparator}_temp';
+    _fileSystem.createDirectory(tempDir);
     final temporales = <String>[];
-    final rutaWavTrabajo = _nuevoTemporal(dirSalida, 'wav', temporales);
+    final rutaWavTrabajo = _nuevoTemporal(tempDir, 'wav', temporales);
     temporales.add(rutaWavTrabajo);
 
     // --- Sintetizar incrementalmente ---
@@ -205,91 +200,50 @@ class ProcesarArchivo {
         return const ProcesarResultado(estado: ResultadoProceso.omitido, segmentos: 0, duracionAudioSeg: 0, caracteres: 0);
       }
 
+      // Formatos normalizados sin duplicados.
+      final formatosUnicos = <String>[];
+      for (final f in formatos) {
+        if (!formatosUnicos.contains(f)) formatosUnicos.add(f);
+      }
+
       // --- Exportar ---
       _logger.i('Exportando audio...');
-      // Fase 1: generar todo a archivos temporales. Un fallo de conversión
-      // en un formato no aborta los demás: se loguea y se continua. Solo los
-      // formatos que convirtieron exitosamente se publican.
-      final salidas = <(String, String)>[];
       if (parcialEscrito) {
         await _exportador.wavAppend(fragmentos, rutaWavTrabajo);
-        for (final formato in formatosUnicos) {
-          try {
-            if (formato == 'wav') {
-              salidas.add((rutaWavTrabajo, '$rutaBase.wav'));
-            } else {
-              final temporal = _nuevoTemporal(dirSalida, formato, temporales);
-              await _exportador.convertirDesdeWav(rutaWavTrabajo, temporal, formato);
-              salidas.add((temporal, '$rutaBase.$formato'));
-            }
-          } catch (exc) {
-            _logger.e("Fallo al exportar formato '$formato': $exc");
-          }
-        }
       } else {
-        for (final formato in formatosUnicos) {
-          try {
-            final temporal = _nuevoTemporal(dirSalida, formato, temporales);
-            await _exportador.escribirAudio(fragmentos, temporal, formato);
-            salidas.add((temporal, '$rutaBase.$formato'));
-          } catch (exc) {
-            _logger.e("Fallo al exportar formato '$formato': $exc");
-          }
-        }
+        await _exportador.escribirAudio(fragmentos, rutaWavTrabajo, 'wav');
       }
 
-      // Fase 2: publicar. El WAV se publica al final: si un formato falla,
-      // no queda un WAV nuevo con el resto de los formatos viejos. Al
-      // cancelar, un destino que ya existía (de una corrida anterior) se
-      // conserva: nunca se pisa audio completo con el truncado de la corrida
-      // cancelada (semántica prometida en el docstring).
-      for (final par in ordenPublicacion(salidas)) {
-        if (cancelado && _fileSystem.fileExists(par.$2)) {
-          _logger.i("Cancelado: se conserva el output previo '${par.$2}'.");
-          continue;
+      // Convertir WAV a formatos solicitados → guardados en _temp/.
+      for (final formato in formatosUnicos) {
+        if (formato == 'wav') continue; // WAV ya está en _temp/
+        try {
+          final stem = _fileSystem.fileName(rutaBase);
+          final ts = DateTime.now().microsecondsSinceEpoch;
+          final destPath =
+              '$tempDir${_fileSystem.pathSeparator}${stem}_$ts.$formato';
+          await _exportador.convertirDesdeWav(rutaWavTrabajo, destPath, formato);
+        } catch (exc) {
+          _logger.e("Fallo al exportar formato '$formato': $exc");
         }
-        _publicar(par.$1, par.$2, temporales);
       }
     } finally {
+      // No eliminar rutaWavTrabajo — el caller gestiona su lifecycle.
       for (final temporal in temporales) {
-        _fileSystem.deleteFile(temporal);
+        if (temporal != rutaWavTrabajo) {
+          _fileSystem.deleteFile(temporal);
+        }
       }
     }
 
-    var duracionTotal = 0.0;
-    for (final formato in formatosUnicos) {
-      final ruta = '$rutaBase.$formato';
-      final duracion = await _exportador.duracionAudio(ruta);
-      duracionTotal += duracion;
-      _logger.i('  + ${_fileSystem.fileName(ruta)} (${formato.toUpperCase()}): ${duracion.toStringAsFixed(1)} s');
-    }
+    final duracionTotal = await _exportador.duracionAudio(rutaWavTrabajo);
     return ProcesarResultado(
       estado: ResultadoProceso.ok,
       segmentos: segmentos.length,
       duracionAudioSeg: duracionTotal,
       caracteres: textoPlano.length,
+      tempPath: rutaWavTrabajo,
     );
-  }
-
-  /// Publica [origen] como [destino] solo en éxito.
-  void _publicar(String origen, String destino, List<String> temporales) {
-    final ok = _fileSystem.renameFile(origen, destino);
-    if (!ok) {
-      _logger.w("El archivo '$destino' está en uso por otra aplicación; no se actualizó.");
-    }
-    temporales.remove(origen);
-  }
-
-  /// Ordena las salidas para publicar: los no-WAV primero, el WAV al final.
-  static List<(String, String)> ordenPublicacion(List<(String, String)> salidas) {
-    final copia = [...salidas];
-    copia.sort((a, b) {
-      final aWav = a.$2.toLowerCase().endsWith('.wav');
-      final bWav = b.$2.toLowerCase().endsWith('.wav');
-      if (aWav == bWav) return 0;
-      return aWav ? 1 : -1;
-    });
-    return copia;
   }
 
   /// Crea un archivo temporal de salida y lo registra para limpieza.

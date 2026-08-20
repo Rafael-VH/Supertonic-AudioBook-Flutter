@@ -52,6 +52,21 @@ class _ArchivosVacios implements RepositorioArchivos {
 
   @override
   String leerArchivo(String ruta) => '';
+
+  @override
+  void eliminarSiExiste(String ruta) {}
+
+  @override
+  bool existe(String ruta) => false;
+
+  @override
+  void moverArchivo(String origen, String destino) {}
+
+  @override
+  DateTime? fechaModificacion(String ruta) => null;
+
+  @override
+  String get pathSeparator => '/';
 }
 
 /// Construye la app con dependencias falsas y preferencias opcionales.

@@ -60,6 +60,30 @@ class RepositorioArchivosLocal implements RepositorioArchivos {
       return latin1.decode(bytes);
     }
   }
+
+  @override
+  void eliminarSiExiste(String ruta) {
+    final file = File(ruta);
+    if (file.existsSync()) file.deleteSync();
+  }
+
+  @override
+  bool existe(String ruta) => File(ruta).existsSync();
+
+  @override
+  DateTime? fechaModificacion(String ruta) {
+    final file = File(ruta);
+    if (!file.existsSync()) return null;
+    return file.lastModifiedSync();
+  }
+
+  @override
+  void moverArchivo(String origen, String destino) {
+    File(origen).renameSync(destino);
+  }
+
+  @override
+  String get pathSeparator => Platform.pathSeparator;
 }
 
 /// Nombre del archivo sin la última extensión (port de `Path.stem`).

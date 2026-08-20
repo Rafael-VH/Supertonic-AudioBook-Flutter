@@ -27,6 +27,16 @@ abstract class FileSystemContract {
   /// Extrae el nombre del archivo (con extensión) de una ruta completa.
   String fileName(String ruta);
 
+  /// Devuelve la última fecha de modificación en milisegundos desde epoch.
+  ///
+  /// Si el archivo no existe, devuelve 0.
+  int fileLastModified(String ruta);
+
+  /// Lista los archivos (no directorios) en [ruta].
+  ///
+  /// Devuelve rutas completas. Si el directorio no existe, devuelve lista vacía.
+  List<String> listDirectory(String ruta);
+
   /// El separador de ruta de la plataforma (`/` o `\`).
   String get pathSeparator;
 }

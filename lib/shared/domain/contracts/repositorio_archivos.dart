@@ -14,4 +14,19 @@ abstract class RepositorioArchivos {
 
   /// Lee el contenido UTF-8 de un archivo.
   String leerArchivo(String ruta);
+
+  /// Elimina el archivo en [ruta] si existe. No-op si no existe.
+  void eliminarSiExiste(String ruta);
+
+  /// Devuelve `true` si [ruta] existe.
+  bool existe(String ruta);
+
+  /// Mueve (renombra) [origen] a [destino].
+  void moverArchivo(String origen, String destino);
+
+  /// Última fecha de modificación del archivo, o `null` si no existe.
+  DateTime? fechaModificacion(String ruta);
+
+  /// El separador de ruta de la plataforma (`/` o `\`).
+  String get pathSeparator;
 }

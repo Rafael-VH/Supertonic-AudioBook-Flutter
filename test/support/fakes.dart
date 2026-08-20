@@ -88,9 +88,22 @@ class RepositorioArchivosFake implements RepositorioArchivos {
 
   @override
   String leerArchivo(String ruta) => '';
-}
 
-/// Motor falso que registra las voces pedidas.
+  @override
+  void eliminarSiExiste(String ruta) {}
+
+  @override
+  bool existe(String ruta) => false;
+
+  @override
+  void moverArchivo(String origen, String destino) {}
+
+  @override
+  DateTime? fechaModificacion(String ruta) => null;
+
+  @override
+  String get pathSeparator => '/';
+}
 class MotorFake implements MotorTts {
   final List<String> vocesPedidas = [];
 
@@ -310,7 +323,7 @@ class ProcesarArchivoStub extends ProcesarArchivo {
   alProcesar;
 
   /// Resultado devuelto por `procesar` (por defecto `ok`).
-  ProcesarResultado resultado = const ProcesarResultado(estado: ResultadoProceso.ok, segmentos: 0, duracionAudioSeg: 0, caracteres: 0);
+  ProcesarResultado resultado = const ProcesarResultado(estado: ResultadoProceso.ok, segmentos: 0, duracionAudioSeg: 0, caracteres: 0, tempPath: '/fake/temp.wav');
 
   @override
   Future<ProcesarResultado> procesar(

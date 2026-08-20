@@ -49,9 +49,22 @@ class RepositorioArchivosFalso implements RepositorioArchivos {
 
   @override
   String leerArchivo(String ruta) => _contenidos[ruta]!;
-}
 
-class ExportadorFalso implements ExportadorAudio {
+  @override
+  void eliminarSiExiste(String ruta) {}
+
+  @override
+  bool existe(String ruta) => false;
+
+  @override
+  void moverArchivo(String origen, String destino) {}
+
+  @override
+  DateTime? fechaModificacion(String ruta) => null;
+
+  @override
+  String get pathSeparator => '/';
+} implements ExportadorAudio {
   final List<Float32List> escritos = [];
 
   @override
