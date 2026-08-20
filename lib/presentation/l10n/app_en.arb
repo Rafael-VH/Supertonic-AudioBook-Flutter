@@ -367,10 +367,11 @@
   "benchmark_sin_datos": "No data. Run a benchmark to see results.",
   "benchmark_btn_ejecutar": "Run benchmark",
   "benchmark_btn_cancelar": "Cancel",
-  "benchmark_progreso": "Step {paso}/6 — {tamanio} characters",
+  "benchmark_progreso": "Step {paso}/{total} — {tamanio} characters",
   "@benchmark_progreso": {
     "placeholders": {
       "paso": {"type": "int"},
+      "total": {"type": "int"},
       "tamanio": {"type": "int"}
     }
   },

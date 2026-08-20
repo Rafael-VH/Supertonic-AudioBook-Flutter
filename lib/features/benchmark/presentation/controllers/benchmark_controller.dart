@@ -136,6 +136,7 @@ class BenchmarkController extends Notifier<BenchmarkEstado> {
     if (state.tamaniosSeleccionados.isEmpty) return;
     state = BenchmarkEstado(
       ejecutando: true,
+      resultado: state.resultado,
       tamaniosDisponibles: state.tamaniosDisponibles,
       tamaniosSeleccionados: state.tamaniosSeleccionados,
       historial: state.historial,

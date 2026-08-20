@@ -647,8 +647,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get benchmark_btn_cancelar => 'Cancel';
 
   @override
-  String benchmark_progreso(int paso, int tamanio) {
-    return 'Step $paso/6 — $tamanio characters';
+  String benchmark_progreso(int paso, int total, int tamanio) {
+    return 'Step $paso/$total — $tamanio characters';
   }
 
   @override

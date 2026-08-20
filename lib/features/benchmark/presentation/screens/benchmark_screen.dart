@@ -99,7 +99,7 @@ class _BenchmarkBody extends ConsumerWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            t.benchmark_progreso(estado.pasoActual, estado.tamanioActual),
+            t.benchmark_progreso(estado.pasoActual, estado.tamaniosSeleccionados.length, estado.tamanioActual),
             style: Theme.of(context).textTheme.bodyMedium,
           ),
           const SizedBox(height: 8),

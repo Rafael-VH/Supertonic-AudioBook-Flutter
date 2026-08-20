@@ -1205,8 +1205,8 @@ abstract class AppLocalizations {
   /// No description provided for @benchmark_progreso.
   ///
   /// In en, this message translates to:
-  /// **'Step {paso}/6 — {tamanio} characters'**
-  String benchmark_progreso(int paso, int tamanio);
+  /// **'Step {paso}/{total} — {tamanio} characters'**
+  String benchmark_progreso(int paso, int total, int tamanio);
 
   /// No description provided for @benchmark_ultima_corrida.
   ///
