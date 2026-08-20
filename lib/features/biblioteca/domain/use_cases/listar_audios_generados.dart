@@ -14,14 +14,31 @@ class ListarAudiosGenerados {
   /// Devuelve un `LibroGenerado` por stem, en el orden de primer encuentro
   /// (el repo ya devuelve orden natural: la extensión solo desempata
   /// intra-stem, que acá se agrupa — D4).
-  List<LibroGenerado> ejecutar({required String carpeta}) {
+  ///
+  /// Si se pasa [extras], también escanea esas carpetas y mezcla los
+  /// resultados (sin duplicados por stem).
+  List<LibroGenerado> ejecutar({
+    required String carpeta,
+    List<String>? extras,
+  }) {
     final libros = <String, List<String>>{};
     final orden = <String>[];
-    for (final ruta in _archivos.listarAudios(carpeta)) {
-      final stem = stemDeRuta(ruta);
-      if (!libros.containsKey(stem)) orden.add(stem);
-      libros.putIfAbsent(stem, () => []).add(ruta);
+
+    void scanDir(String dir) {
+      for (final ruta in _archivos.listarAudios(dir)) {
+        final stem = stemDeRuta(ruta);
+        if (!libros.containsKey(stem)) orden.add(stem);
+        libros.putIfAbsent(stem, () => []).add(ruta);
+      }
     }
+
+    scanDir(carpeta);
+    if (extras != null) {
+      for (final dir in extras) {
+        scanDir(dir);
+      }
+    }
+
     return [
       for (final stem in orden)
         LibroGenerado(

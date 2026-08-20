@@ -30,7 +30,17 @@ class BenchmarkScreen extends ConsumerWidget {
     }
 
     return Scaffold(
-      appBar: AppBar(title: Text(t.benchmark_titulo)),
+      appBar: AppBar(
+        title: Text(t.benchmark_titulo),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            tooltip: 'Actualizar',
+            onPressed: () =>
+                ref.read(benchmarkControllerProvider.notifier).recargar(),
+          ),
+        ],
+      ),
       body: !listo
           ? Center(child: Text(t.benchmark_modelo_no_listo))
           : const _BenchmarkBody(),

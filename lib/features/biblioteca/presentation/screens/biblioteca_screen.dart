@@ -21,7 +21,17 @@ class BibliotecaScreen extends ConsumerWidget {
     final t = AppLocalizations.of(context)!;
 
     return Scaffold(
-      appBar: AppBar(title: Text(t.biblioteca_titulo)),
+      appBar: AppBar(
+        title: Text(t.biblioteca_titulo),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            tooltip: 'Actualizar',
+            onPressed: () =>
+                ref.read(bibliotecaControllerProvider.notifier).recargar(),
+          ),
+        ],
+      ),
       body: const BibliotecaBody(),
     );
   }

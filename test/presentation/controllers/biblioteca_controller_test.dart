@@ -9,16 +9,16 @@ import 'package:supertonic_audiobook/presentation/controllers/providers.dart';
 
 import '../../support/fakes.dart';
 
-/// Repositorio que registra la carpeta pedida a `listarAudios` (para
-/// verificar el fallback `<base>/audio` del build).
+/// Repositorio que registra las carpetas pedidas a `listarAudios` (para
+/// verificar el fallback `<base>/audio` del build y el scan de `_temp`).
 class _RepositorioAudios extends RepositorioArchivosFake {
   _RepositorioAudios([List<String>? audios]) : super(const [], audios: audios);
 
-  String? carpetaListada;
+  final List<String> carpetasListadas = [];
 
   @override
   List<String> listarAudios(String carpeta) {
-    carpetaListada = carpeta;
+    carpetasListadas.add(carpeta);
     return super.listarAudios(carpeta);
   }
 }
@@ -95,7 +95,7 @@ void main() {
       expect(estado.libros.last.formatoPrioritario, 'ogg');
       expect(estado.error, isNull);
       expect(estado.vacio, isFalse);
-      expect(repositorio.carpetaListada, 'C:/audio');
+      expect(repositorio.carpetasListadas.first, 'C:/audio');
       expect(reproductor.tieneOyentes, isTrue); // build suscribe al stream
     });
 
@@ -106,7 +106,7 @@ void main() {
       final estado = container.read(bibliotecaControllerProvider);
 
       expect(
-        repositorio.carpetaListada,
+        repositorio.carpetasListadas.first,
         'C:/base${Platform.pathSeparator}audio',
       );
       expect(estado.libros, hasLength(1));

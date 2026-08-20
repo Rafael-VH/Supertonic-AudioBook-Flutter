@@ -1,12 +1,10 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 
 import 'package:supertonic_audiobook/features/audio_manager/domain/entities/audio_pendiente.dart';
 import 'package:supertonic_audiobook/presentation/controllers/providers.dart';
 import 'package:supertonic_audiobook/presentation/l10n/app_localizations.dart';
-import 'package:supertonic_audiobook/presentation/routing/app_router.dart';
 
 /// Pantalla de audios pendientes: muestra los WAVs generados recién y permite
 /// renombrar, elegir carpeta destino y guardar (individual o todos).
@@ -100,23 +98,28 @@ class _EmptyState extends StatelessWidget {
 }
 
 /// Tile individual de un audio pendiente.
-class _AudioTile extends ConsumerWidget {
+class _AudioTile extends ConsumerStatefulWidget {
   const _AudioTile({required this.pendiente, required this.index});
 
   final AudioPendiente pendiente;
   final int index;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<_AudioTile> createState() => _AudioTileState();
+}
+
+class _AudioTileState extends ConsumerState<_AudioTile> {
+  @override
+  Widget build(BuildContext context) {
     final t = AppLocalizations.of(context)!;
 
     return Card(
       child: ListTile(
         leading: const Icon(Icons.audio_file_outlined),
-        title: Text(pendiente.displayName),
-        subtitle: _MetadataRow(pendiente: pendiente, t: t),
+        title: Text(widget.pendiente.displayName),
+        subtitle: _MetadataRow(pendiente: widget.pendiente, t: t),
         trailing: PopupMenuButton<String>(
-          onSelected: (value) => _onSelected(context, ref, value),
+          onSelected: _onSelected,
           itemBuilder: (_) => [
             PopupMenuItem(
               value: 'folder',
@@ -136,47 +139,35 @@ class _AudioTile extends ConsumerWidget {
     );
   }
 
-  void _onSelected(
-    BuildContext context,
-    WidgetRef ref,
-    String value,
-  ) async {
+  void _onSelected(String value) async {
     final t = AppLocalizations.of(context)!;
     final controller = ref.read(audioManagerControllerProvider.notifier);
 
     switch (value) {
       case 'folder':
+        final messenger = ScaffoldMessenger.of(context);
         final carpeta = await FilePicker.getDirectoryPath();
-        if (carpeta != null && context.mounted) {
-          await _saveWithFolder(context, ref, carpeta);
+        if (carpeta != null && mounted) {
+          await controller.guardarUno(
+            widget.pendiente,
+            carpetaDestino: carpeta,
+            nombreArchivo:
+                '${widget.pendiente.displayName}.${widget.pendiente.format}',
+          );
+          if (mounted) {
+            messenger.showSnackBar(
+              SnackBar(content: Text(t.audio_manager_saved)),
+            );
+          }
         }
       case 'rename':
-        if (!context.mounted) return;
+        if (!mounted) return;
         final nombre = await _showRenameDialog(context, t);
         if (nombre != null && nombre.isNotEmpty) {
-          controller.actualizarNombre(index, nombre);
+          controller.actualizarNombre(widget.index, nombre);
         }
       case 'delete':
-        controller.eliminar(index);
-    }
-  }
-
-  Future<void> _saveWithFolder(
-    BuildContext context,
-    WidgetRef ref,
-    String carpeta,
-  ) async {
-    final t = AppLocalizations.of(context)!;
-    final controller = ref.read(audioManagerControllerProvider.notifier);
-    await controller.guardarUno(
-      pendiente,
-      carpetaDestino: carpeta,
-      nombreArchivo: '${pendiente.displayName}.${pendiente.format}',
-    );
-    if (context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(t.audio_manager_saved)),
-      );
+        controller.eliminar(widget.index);
     }
   }
 
@@ -184,10 +175,10 @@ class _AudioTile extends ConsumerWidget {
     BuildContext context,
     AppLocalizations t,
   ) {
-    final controller = TextEditingController(text: pendiente.displayName);
+    final controller = TextEditingController(text: widget.pendiente.displayName);
     return showDialog<String>(
       context: context,
-      builder: (_) => AlertDialog(
+      builder: (dialogContext) => AlertDialog(
         title: Text(t.audio_manager_rename_title),
         content: TextField(
           controller: controller,
@@ -195,15 +186,15 @@ class _AudioTile extends ConsumerWidget {
           decoration: InputDecoration(
             labelText: t.audio_manager_name,
           ),
-          onSubmitted: (v) => Navigator.of(context).pop(v),
+          onSubmitted: (v) => Navigator.of(dialogContext).pop(v),
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.of(context).pop(),
+            onPressed: () => Navigator.of(dialogContext).pop(),
             child: Text(t.audio_manager_cancel),
           ),
           FilledButton(
-            onPressed: () => Navigator.of(context).pop(controller.text),
+            onPressed: () => Navigator.of(dialogContext).pop(controller.text),
             child: Text(t.audio_manager_save),
           ),
         ],
@@ -283,9 +274,6 @@ class _SaveAllBar extends ConsumerWidget {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(t.audio_manager_saved_all)),
       );
-      if (ref.read(audioManagerControllerProvider).vacio) {
-        context.go(Rutas.home);
-      }
     }
   }
 }

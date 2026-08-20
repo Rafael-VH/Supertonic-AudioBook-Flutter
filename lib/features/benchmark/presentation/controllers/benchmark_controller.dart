@@ -194,4 +194,13 @@ class BenchmarkController extends Notifier<BenchmarkEstado> {
   void cancelar() {
     state = state.copyWith(cancelado: true);
   }
+
+  void recargar() {
+    final resultado = _cargarResultado();
+    final historial = _cargarHistorial();
+    state = state.copyWith(
+      resultado: resultado,
+      historial: historial,
+    );
+  }
 }
