@@ -2,18 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import 'package:supertonic_audiobook/features/benchmark/domain/entities/benchmark_result.dart';
 import 'package:supertonic_audiobook/features/benchmark/domain/entities/conversion_entry.dart';
 import 'package:supertonic_audiobook/features/benchmark/presentation/controllers/benchmark_controller.dart';
 import 'package:supertonic_audiobook/features/modelo/presentation/controllers/modelo_controller.dart';
-import 'package:supertonic_audiobook/presentation/controllers/providers.dart';
 import 'package:supertonic_audiobook/presentation/l10n/app_localizations.dart';
 import 'package:supertonic_audiobook/presentation/routing/app_router.dart';
 
 /// Pantalla de benchmark del motor TTS.
 ///
-/// Muestra el último resultado, permite ejecutar un nuevo benchmark y
-/// visualizar los tiempos por tamaño de texto.
+/// Tabla fija de 6 filas (2500–15000) con botón individual por fila.
 class BenchmarkScreen extends ConsumerWidget {
   const BenchmarkScreen({super.key});
 
@@ -22,7 +19,6 @@ class BenchmarkScreen extends ConsumerWidget {
     final t = AppLocalizations.of(context)!;
     final listo = ref.watch(modeloControllerProvider).listo;
 
-    // Redirigir a /modelo si el modelo no está listo.
     if (!listo) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (context.mounted) context.go(Rutas.modelo);
@@ -55,99 +51,12 @@ class _BenchmarkBody extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final t = AppLocalizations.of(context)!;
     final estado = ref.watch(benchmarkControllerProvider);
-    final controller = ref.read(benchmarkControllerProvider.notifier);
 
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
-        // --- Status card ---
-        _StatusCard(estado: estado),
-
-        const SizedBox(height: 16),
-
-        // --- Size selection + Run button ---
-        Row(
-          children: [
-            Expanded(
-              child: FilledButton.icon(
-                onPressed: estado.ejecutando ||
-                        estado.tamaniosSeleccionados.isEmpty
-                    ? null
-                    : () => controller.ejecutar(),
-                icon: const Icon(Icons.speed),
-                label: Text(t.benchmark_btn_ejecutar),
-              ),
-            ),
-            const SizedBox(width: 8),
-            IconButton.filledTonal(
-              onPressed: estado.ejecutando
-                  ? null
-                  : () => _mostrarSelectorTamanios(context, ref),
-              icon: const Icon(Icons.tune),
-              tooltip: t.benchmark_seleccionar_tamanios,
-            ),
-          ],
-        ),
-
-        // --- Selected sizes summary ---
-        if (!estado.ejecutando)
-          Padding(
-            padding: const EdgeInsets.only(top: 8),
-            child: Text(
-              '${estado.tamaniosSeleccionados.length} tamaños seleccionados',
-              style: Theme.of(context).textTheme.bodySmall,
-            ),
-          ),
-
-        // --- Progress ---
-        if (estado.ejecutando) ...[
-          const SizedBox(height: 16),
-          LinearProgressIndicator(
-            value: estado.tamaniosSeleccionados.isEmpty
-                ? 0
-                : estado.pasoActual / estado.tamaniosSeleccionados.length,
-          ),
-          const SizedBox(height: 8),
-          Text(
-            t.benchmark_progreso(estado.pasoActual, estado.tamaniosSeleccionados.length, estado.tamanioActual),
-            style: Theme.of(context).textTheme.bodyMedium,
-          ),
-          const SizedBox(height: 8),
-          TextButton(
-            onPressed: () => controller.cancelar(),
-            child: Text(t.benchmark_btn_cancelar),
-          ),
-        ],
-
-        // --- Results table ---
-        if (estado.resultado != null) ...[
-          const SizedBox(height: 24),
-          _ResultsTable(resultado: estado.resultado!),
-          const SizedBox(height: 8),
-          Text(
-            t.benchmark_ultima_corrida(
-              _formatoFecha(estado.resultado!.fecha),
-            ),
-            style: Theme.of(context).textTheme.bodySmall,
-          ),
-        ],
-
-        // --- History ---
-        if (estado.historial.isNotEmpty) ...[
-          const SizedBox(height: 24),
-          Text(
-            t.historial_titulo,
-            style: Theme.of(context).textTheme.titleMedium,
-          ),
-          const SizedBox(height: 8),
-          _HistorialTable(historial: estado.historial),
-        ] else ...[
-          const SizedBox(height: 24),
-          Text(
-            t.historial_vacio,
-            style: Theme.of(context).textTheme.bodySmall,
-          ),
-        ],
+        // --- Tabla fija de benchmark ---
+        _BenchmarkTable(estado: estado),
 
         // --- Error ---
         if (estado.error != null) ...[
@@ -165,85 +74,85 @@ class _BenchmarkBody extends ConsumerWidget {
             ),
           ),
         ],
+
+        // --- Historial ---
+        if (estado.historial.isNotEmpty) ...[
+          const SizedBox(height: 24),
+          Text(
+            t.historial_titulo,
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
+          const SizedBox(height: 8),
+          _HistorialTable(historial: estado.historial),
+        ] else ...[
+          const SizedBox(height: 24),
+          Text(
+            t.historial_vacio,
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
+        ],
       ],
     );
   }
 }
 
-/// Bottom sheet for multi-selecting benchmark sizes.
-void _mostrarSelectorTamanios(BuildContext context, WidgetRef ref) {
-  final t = AppLocalizations.of(context)!;
-  final estado = ref.read(benchmarkControllerProvider);
-  final controller = ref.read(benchmarkControllerProvider.notifier);
-
-  showModalBottomSheet<void>(
-    context: context,
-    builder: (ctx) {
-      return Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              t.benchmark_seleccionar_tamanios,
-              style: Theme.of(ctx).textTheme.titleMedium,
-            ),
-            const SizedBox(height: 12),
-            Wrap(
-              spacing: 8,
-              runSpacing: 4,
-              children: [
-                for (final tam in estado.tamaniosDisponibles)
-                  FilterChip(
-                    label: Text('$tam'),
-                    selected:
-                        estado.tamaniosSeleccionados.contains(tam),
-                    onSelected: (_) => controller.toggleTamanio(tam),
-                  ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                TextButton(
-                  onPressed: () => Navigator.of(ctx).pop(),
-                  child: Text(t.cerrar),
-                ),
-              ],
-            ),
-          ],
-        ),
-      );
-    },
-  );
-}
-
-class _StatusCard extends StatelessWidget {
-  const _StatusCard({required this.estado});
+/// Tabla fija: 4 columnas × 6 filas.
+class _BenchmarkTable extends StatelessWidget {
+  const _BenchmarkTable({required this.estado});
 
   final BenchmarkEstado estado;
 
   @override
   Widget build(BuildContext context) {
     final t = AppLocalizations.of(context)!;
-    final resultado = estado.resultado;
 
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(8),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text(
-              resultado != null
-                  ? t.benchmark_avg_chars_sec(
-                      resultado.avgCharsPerSec.toStringAsFixed(1),
-                    )
-                  : t.benchmark_sin_datos,
-              style: Theme.of(context).textTheme.bodyLarge,
+            // Header
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              child: Row(
+                children: [
+                  Expanded(
+                    flex: 2,
+                    child: Text(
+                      t.benchmark_tab_tamano,
+                      style: Theme.of(context).textTheme.titleSmall,
+                    ),
+                  ),
+                  Expanded(
+                    flex: 3,
+                    child: Text(
+                      t.benchmark_tab_tiempo,
+                      style: Theme.of(context).textTheme.titleSmall,
+                    ),
+                  ),
+                  Expanded(
+                    flex: 3,
+                    child: Text(
+                      t.benchmark_tab_chars_seg,
+                      style: Theme.of(context).textTheme.titleSmall,
+                    ),
+                  ),
+                  const SizedBox(width: 56),
+                ],
+              ),
             ),
+            const Divider(height: 1),
+            // Rows
+            for (final tamanio in benchmarkTamanios) ...[
+              _FilaBenchmark(
+                tamanio: tamanio,
+                resultado: estado.resultados[tamanio],
+                ejecutando: estado.filaEjecutando == tamanio,
+                bloqueado: estado.ejecutando,
+              ),
+              if (tamanio != benchmarkTamanios.last) const Divider(height: 1),
+            ],
           ],
         ),
       ),
@@ -251,33 +160,73 @@ class _StatusCard extends StatelessWidget {
   }
 }
 
-class _ResultsTable extends StatelessWidget {
-  const _ResultsTable({required this.resultado});
+class _FilaBenchmark extends ConsumerWidget {
+  const _FilaBenchmark({
+    required this.tamanio,
+    required this.resultado,
+    required this.ejecutando,
+    required this.bloqueado,
+  });
 
-  final BenchmarkResult resultado;
+  final int tamanio;
+  final FilaBenchmark? resultado;
+  final bool ejecutando;
+  final bool bloqueado;
 
   @override
-  Widget build(BuildContext context) {
-    final t = AppLocalizations.of(context)!;
-    final entradas = resultado.tamanios.entries.toList()
-      ..sort((a, b) => a.key.compareTo(b.key));
-
-    return DataTable(
-      columns: [
-        DataColumn(label: Text(t.benchmark_tab_tamano)),
-        DataColumn(label: Text(t.benchmark_tab_tiempo)),
-        DataColumn(label: Text(t.benchmark_tab_chars_seg)),
-      ],
-      rows: [
-        for (final entrada in entradas)
-          DataRow(cells: [
-            DataCell(Text('${entrada.key} chars')),
-            DataCell(Text(_formatearDuracion(entrada.value / 1000))),
-            DataCell(Text(
-              (entrada.key / (entrada.value / 1000)).toStringAsFixed(1),
-            )),
-          ]),
-      ],
+  Widget build(BuildContext context, WidgetRef ref) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+      child: Row(
+        children: [
+          // Tamaño
+          Expanded(
+            flex: 2,
+            child: Text('$tamanio'),
+          ),
+          // Tiempo
+          Expanded(
+            flex: 3,
+            child: ejecutando
+                ? const SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : Text(resultado != null
+                    ? _formatearDuracion(resultado!.tiempoMs / 1000)
+                    : '—'),
+          ),
+          // Chars/seg
+          Expanded(
+            flex: 3,
+            child: ejecutando
+                ? const SizedBox.shrink()
+                : Text(resultado != null
+                    ? '${resultado!.charsSeg.toStringAsFixed(1)}'
+                    : '—'),
+          ),
+          // Botón
+          SizedBox(
+            width: 56,
+            child: IconButton(
+              onPressed: (ejecutando || bloqueado)
+                  ? null
+                  : () => ref
+                      .read(benchmarkControllerProvider.notifier)
+                      .ejecutarFila(tamanio),
+              icon: ejecutando
+                  ? const SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Icon(Icons.play_arrow),
+              tooltip: ejecutando ? 'Procesando...' : 'Benchmark $tamanio',
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -322,10 +271,4 @@ String _formatearDuracion(double segundos) {
   final horas = minutos ~/ 60;
   final min = minutos % 60;
   return '$horas h - $min min - $seg seg';
-}
-
-String _formatoFecha(DateTime fecha) {
-  return '${fecha.day}/${fecha.month}/${fecha.year} '
-      '${fecha.hour.toString().padLeft(2, '0')}:'
-      '${fecha.minute.toString().padLeft(2, '0')}';
 }

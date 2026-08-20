@@ -2,6 +2,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:supertonic_audiobook/features/benchmark/presentation/controllers/benchmark_controller.dart';
 import 'package:supertonic_audiobook/features/settings/presentation/controllers/settings_controller.dart';
 import 'package:supertonic_audiobook/presentation/controllers/providers.dart';
 import 'package:supertonic_audiobook/presentation/l10n/app_localizations.dart';
@@ -171,7 +172,15 @@ class _BenchmarkSectionCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final t = AppLocalizations.of(context)!;
     final estado = ref.watch(benchmarkControllerProvider);
-    final resultado = estado.resultado;
+    final resultados = estado.resultados;
+    final tieneDatos = resultados.values.any((f) => f != null);
+    final avgCharsSeg = tieneDatos
+        ? resultados.values
+            .whereType<FilaBenchmark>()
+            .map((f) => f.charsSeg)
+            .reduce((a, b) => a + b) /
+            resultados.values.whereType<FilaBenchmark>().length
+        : 0.0;
 
     return _SeccionCard(
       titulo: t.benchmark_titulo,
@@ -179,10 +188,8 @@ class _BenchmarkSectionCard extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            resultado != null
-                ? t.benchmark_avg_chars_sec(
-                    resultado.avgCharsPerSec.toStringAsFixed(1),
-                  )
+            tieneDatos
+                ? t.benchmark_avg_chars_sec(avgCharsSeg.toStringAsFixed(1))
                 : t.benchmark_sin_datos,
             style: Theme.of(context).textTheme.bodyMedium,
           ),

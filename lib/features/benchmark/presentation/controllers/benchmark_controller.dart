@@ -5,108 +5,76 @@ import 'package:supertonic_audiobook/features/benchmark/domain/entities/conversi
 import 'package:supertonic_audiobook/features/benchmark/domain/use_cases/run_benchmark.dart';
 import 'package:supertonic_audiobook/presentation/controllers/providers.dart';
 
-const _defaultTamanios = [1500, 3000, 6000, 9000, 12000, 15000];
+/// Fijo: los 6 tamaños de la tabla de benchmark.
+const benchmarkTamanios = [2500, 5000, 7500, 10000, 12500, 15000];
+
+/// Resultado de una fila individual de benchmark.
+class FilaBenchmark {
+  const FilaBenchmark({required this.tiempoMs, required this.charsSeg});
+  final int tiempoMs;
+  final double charsSeg;
+}
 
 /// Estado de la pantalla Benchmark.
-///
-/// Modela las transiciones: idle → ejecutando → resultado / error / cancelado.
 class BenchmarkEstado {
   const BenchmarkEstado({
-    this.ejecutando = false,
-    this.pasoActual = 0,
-    this.tamanioActual = 0,
-    this.resultado,
+    this.resultados = const {},
+    this.filaEjecutando,
     this.cancelado = false,
     this.error,
-    this.tamaniosDisponibles = _allSizes,
-    this.tamaniosSeleccionados = _defaultTamanios,
     this.historial = const [],
   });
 
-  static const _allSizes = [
-    1500, 3000, 6000, 9000, 12000, 15000, 18000, 21000, 24000, 27000,
-    30000,
-  ];
+  /// Resultados por tamaño: clave = chars, valor = FilaBenchmark o null.
+  final Map<int, FilaBenchmark?> resultados;
 
-  /// True mientras se ejecuta el benchmark.
-  final bool ejecutando;
+  /// Tamaño que se está ejecutando ahora (null = idle).
+  final int? filaEjecutando;
 
-  /// Paso actual (1..N).
-  final int pasoActual;
-
-  /// Tamaño de texto actualmente en procesamiento (chars).
-  final int tamanioActual;
-
-  /// Último resultado persistido.
-  final BenchmarkResult? resultado;
-
-  /// True si el usuario canceló la ejecución.
+  /// True si se solicitó cancelación.
   final bool cancelado;
 
   /// Mensaje de error, si lo hubo.
   final String? error;
 
-  /// Todos los tamaños disponibles para selección.
-  final List<int> tamaniosDisponibles;
-
-  /// Tamaños seleccionados para la ejecución del benchmark.
-  final List<int> tamaniosSeleccionados;
-
   /// Historial de conversiones exitosas.
   final List<ConversionEntry> historial;
 
+  bool get ejecutando => filaEjecutando != null;
+
   BenchmarkEstado copyWith({
-    bool? ejecutando,
-    int? pasoActual,
-    int? tamanioActual,
-    BenchmarkResult? resultado,
+    Map<int, FilaBenchmark?>? resultados,
+    int? filaEjecutando,
+    bool clearFilaEjecutando = false,
     bool? cancelado,
     String? error,
-    List<int>? tamaniosDisponibles,
-    List<int>? tamaniosSeleccionados,
+    bool clearError = false,
     List<ConversionEntry>? historial,
   }) {
     return BenchmarkEstado(
-      ejecutando: ejecutando ?? this.ejecutando,
-      pasoActual: pasoActual ?? this.pasoActual,
-      tamanioActual: tamanioActual ?? this.tamanioActual,
-      resultado: resultado ?? this.resultado,
+      resultados: resultados ?? this.resultados,
+      filaEjecutando:
+          clearFilaEjecutando ? null : (filaEjecutando ?? this.filaEjecutando),
       cancelado: cancelado ?? this.cancelado,
-      error: error ?? this.error,
-      tamaniosDisponibles: tamaniosDisponibles ?? this.tamaniosDisponibles,
-      tamaniosSeleccionados:
-          tamaniosSeleccionados ?? this.tamaniosSeleccionados,
+      error: clearError ? null : (error ?? this.error),
       historial: historial ?? this.historial,
     );
   }
 }
 
-/// Orquesta el ciclo de vida del benchmark: idle → ejecutando → resultado.
+/// Orquesta el ciclo de vida del benchmark por fila individual.
 ///
-/// Traduce eventos de UI a llamadas al caso de uso [RunBenchmark] y persiste
-/// el resultado via [RepositorioPreferencias].
+/// Cada fila (2500, 5000, ...) se ejecuta de forma independiente.
+/// Los resultados se persisten en benchmark.json.
 class BenchmarkController extends Notifier<BenchmarkEstado> {
   @override
   BenchmarkEstado build() {
-    final resultado = _cargarResultado();
     final historial = _cargarHistorial();
+    final resultados = _cargarResultados();
     return BenchmarkEstado(
-      resultado: resultado,
+      resultados: resultados,
       historial: historial,
     );
-  }
-
-  BenchmarkResult? _cargarResultado() {
-    final prefs = ref.read(repositorioBenchmarkProvider).cargar();
-    final raw = prefs['benchmark_results'];
-    if (raw is Map<String, Object?>) {
-      return BenchmarkResult.fromMap(raw);
-    }
-    final history = prefs['benchmark_history'];
-    if (history is List && history.isNotEmpty) {
-      return BenchmarkResult.fromMap(history.last as Map<String, Object?>);
-    }
-    return null;
   }
 
   List<ConversionEntry> _cargarHistorial() {
@@ -121,25 +89,29 @@ class BenchmarkController extends Notifier<BenchmarkEstado> {
     return [];
   }
 
-  void toggleTamanio(int tamanio) {
-    final actual = state.tamaniosSeleccionados.toList();
-    if (actual.contains(tamanio)) {
-      actual.remove(tamanio);
-    } else {
-      actual.add(tamanio);
+  Map<int, FilaBenchmark?> _cargarResultados() {
+    final prefs = ref.read(repositorioBenchmarkProvider).cargar();
+    final raw = prefs['benchmark_results'];
+    if (raw is Map<String, Object?>) {
+      final result = BenchmarkResult.fromMap(raw);
+      return {
+        for (final e in result.tamanios.entries)
+          e.key: FilaBenchmark(
+            tiempoMs: e.value,
+            charsSeg: e.key / (e.value / 1000),
+          ),
+      };
     }
-    state = state.copyWith(tamaniosSeleccionados: actual);
+    return {};
   }
 
-  Future<void> ejecutar() async {
+  /// Ejecuta el benchmark para un solo tamaño (fila).
+  Future<void> ejecutarFila(int tamanio) async {
     if (state.ejecutando) return;
-    if (state.tamaniosSeleccionados.isEmpty) return;
-    state = BenchmarkEstado(
-      ejecutando: true,
-      resultado: state.resultado,
-      tamaniosDisponibles: state.tamaniosDisponibles,
-      tamaniosSeleccionados: state.tamaniosSeleccionados,
-      historial: state.historial,
+    state = state.copyWith(
+      filaEjecutando: tamanio,
+      cancelado: false,
+      clearError: true,
     );
 
     final motor = ref.read(motorTtsProvider);
@@ -153,42 +125,63 @@ class BenchmarkController extends Notifier<BenchmarkEstado> {
     try {
       final resultado = await useCase.ejecutar(
         voiceConfig: voiceConfig,
-        onProgreso: (paso, total, tamanio) {
-          state = state.copyWith(pasoActual: paso, tamanioActual: tamanio);
-        },
+        onProgreso: (_, __, ___) {},
         debeDetenerse: () => state.cancelado,
-        tamanios: state.tamaniosSeleccionados,
+        tamanios: [tamanio],
       );
 
-      if (state.cancelado) {
-        state = const BenchmarkEstado(cancelado: true);
+      if (state.cancelado || resultado.tamanios.isEmpty) {
+        state = state.copyWith(clearFilaEjecutando: true, cancelado: false);
         return;
       }
 
-      // Persist to benchmark.json
-      final prefsRepo = ref.read(repositorioBenchmarkProvider);
-      final datos = prefsRepo.cargar();
-      final history = (datos['benchmark_history'] as List?)
-              ?.map((e) => (e as Map).cast<String, Object?>())
-              .toList() ??
-          [];
-      history.add(resultado.toMap());
-      if (history.length > 20) {
-        history.removeRange(0, history.length - 20);
-      }
-      datos['benchmark_history'] = history;
-      datos['benchmark_results'] = resultado.toMap();
-      prefsRepo.guardar(datos);
-
-      state = BenchmarkEstado(
-        resultado: resultado,
-        historial: state.historial,
-        tamaniosDisponibles: state.tamaniosDisponibles,
-        tamaniosSeleccionados: state.tamaniosSeleccionados,
+      final ms = resultado.tamanios.values.first;
+      final fila = FilaBenchmark(
+        tiempoMs: ms,
+        charsSeg: tamanio / (ms / 1000),
       );
+
+      final nuevos = Map<int, FilaBenchmark?>.from(state.resultados);
+      nuevos[tamanio] = fila;
+      state = state.copyWith(
+        resultados: nuevos,
+        clearFilaEjecutando: true,
+      );
+
+      // Persistir resultado actualizado.
+      _persistirResultados(nuevos);
     } catch (e) {
-      state = BenchmarkEstado(error: e.toString());
+      state = state.copyWith(
+        error: e.toString(),
+        clearFilaEjecutando: true,
+      );
     }
+  }
+
+  void _persistirResultados(Map<int, FilaBenchmark?> resultados) {
+    final prefsRepo = ref.read(repositorioBenchmarkProvider);
+    final datos = prefsRepo.cargar();
+    final voiceConfig = ref
+        .read(repositorioPreferenciasProvider)
+        .cargarPreferenciasTyped()
+        .voiceConfig;
+    final tamanios = <String, int>{};
+    for (final e in resultados.entries) {
+      if (e.value != null) {
+        tamanios['${e.key}'] = e.value!.tiempoMs;
+      }
+    }
+    datos['benchmark_results'] = {
+      'tamanios': tamanios,
+      'voice_config': {
+        'voz': voiceConfig.voz,
+        'steps': voiceConfig.steps,
+        'speed': voiceConfig.speed,
+        'langVoz': voiceConfig.langVoz,
+      },
+      'fecha': DateTime.now().toIso8601String(),
+    };
+    prefsRepo.guardar(datos);
   }
 
   void cancelar() {
@@ -196,10 +189,10 @@ class BenchmarkController extends Notifier<BenchmarkEstado> {
   }
 
   void recargar() {
-    final resultado = _cargarResultado();
     final historial = _cargarHistorial();
+    final resultados = _cargarResultados();
     state = state.copyWith(
-      resultado: resultado,
+      resultados: resultados,
       historial: historial,
     );
   }
