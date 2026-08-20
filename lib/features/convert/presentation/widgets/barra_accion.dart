@@ -51,7 +51,7 @@ class BarraAccion extends StatelessWidget {
                       // la voz: el motor TTS no soporta síntesis concurrentes.
                       onPressed: (estado.ejecutando || estado.probandoVoz)
                           ? null
-                          : (onProcesar ?? () => controller.procesar(t)),
+                          : (onProcesar ?? () => controller.procesar(t, context: context)),
                       icon: const Icon(Icons.play_arrow),
                       label: Text(t.btn_procesar),
                     ),

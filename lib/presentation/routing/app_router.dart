@@ -11,6 +11,7 @@ import 'package:supertonic_audiobook/features/modelo/presentation/screens/modelo
 import 'package:supertonic_audiobook/features/onboarding/presentation/screens/onboarding_screen.dart';
 import 'package:supertonic_audiobook/features/settings/presentation/screens/settings_screen.dart';
 import 'package:supertonic_audiobook/features/editor_metadata/presentation/screens/metadata_editor_screen.dart';
+import 'package:supertonic_audiobook/features/audio_manager/presentation/screens/audio_manager_screen.dart';
 import 'package:supertonic_audiobook/features/audio_manager/domain/entities/audio_pendiente.dart';
 import 'package:supertonic_audiobook/features/splash/presentation/screens/splash_screen.dart';
 
@@ -95,9 +96,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: Rutas.audioManager,
         builder: (_, state) {
           final audios = state.extra as List<AudioPendiente>? ?? const [];
-          return Scaffold(
-            body: Center(child: Text('Audio Manager (${audios.length})')),
-          );
+          return AudioManagerScreen(pendientes: audios);
         },
       ),
     ],

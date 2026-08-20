@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:math' as math;
 
+import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:supertonic_audiobook/shared/domain/constants/producto.dart';
@@ -8,6 +9,9 @@ import 'package:supertonic_audiobook/features/convert/domain/entities/selection_
 import 'package:supertonic_audiobook/shared/domain/entities/archivo.dart';
 import 'package:supertonic_audiobook/shared/domain/entities/voice_config.dart';
 import 'package:supertonic_audiobook/features/convert/domain/use_cases/procesar_archivo.dart';
+import 'package:supertonic_audiobook/features/audio_manager/domain/entities/audio_pendiente.dart';
+import 'package:supertonic_audiobook/features/audio_manager/domain/use_cases/estimar_memoria.dart';
+import 'package:supertonic_audiobook/features/audio_manager/presentation/screens/memory_warning_dialog.dart';
 import 'package:supertonic_audiobook/features/benchmark/domain/entities/benchmark_result.dart';
 import 'package:supertonic_audiobook/features/benchmark/domain/entities/conversion_entry.dart';
 import 'package:supertonic_audiobook/features/benchmark/domain/use_cases/estimar_tiempo.dart';
@@ -17,6 +21,7 @@ import 'package:supertonic_audiobook/features/convert/presentation/controllers/p
 import 'package:supertonic_audiobook/features/convert/presentation/controllers/voice_preview_service.dart';
 import 'package:supertonic_audiobook/presentation/controllers/providers.dart';
 import 'package:supertonic_audiobook/presentation/l10n/app_localizations.dart';
+import 'package:supertonic_audiobook/presentation/routing/app_router.dart';
 
 /// Mensaje de snackbar emitido por el controlador para que la pantalla lo
 /// muestre (y lo limpie con `ref.listen`).
@@ -45,6 +50,7 @@ class HomeEstado {
     required this.lineasLog,
     required this.snackbar,
     this.modoSeleccion = SelectionMode.carpeta,
+    this.pendientes = const [],
   });
 
   final String carpetaIn;
@@ -75,6 +81,9 @@ class HomeEstado {
   /// Modo de selección de entrada: carpeta o archivos individuales.
   final SelectionMode modoSeleccion;
 
+  /// Audios pendientes generados tras procesar.
+  final List<AudioPendiente> pendientes;
+
   HomeEstado copyWith({
     String? carpetaIn,
     String? carpetaOut,
@@ -92,6 +101,7 @@ class HomeEstado {
     MensajeSnackbar? snackbar,
     bool clearSnackbar = false,
     SelectionMode? modoSeleccion,
+    List<AudioPendiente>? pendientes,
   }) {
     return HomeEstado(
       carpetaIn: carpetaIn ?? this.carpetaIn,
@@ -109,6 +119,7 @@ class HomeEstado {
       lineasLog: lineasLog ?? this.lineasLog,
       snackbar: clearSnackbar ? null : (snackbar ?? this.snackbar),
       modoSeleccion: modoSeleccion ?? this.modoSeleccion,
+      pendientes: pendientes ?? this.pendientes,
     );
   }
 }
@@ -367,7 +378,7 @@ class HomeController extends Notifier<HomeEstado> {
   /// hay marcas), persistiendo antes las claves de §6.3. Se bloquea mientras
   /// hay una corrida en curso o una muestra de voz reproduciéndose: el motor
   /// TTS no soporta síntesis concurrentes.
-  Future<void> procesar(AppLocalizations t) async {
+  Future<void> procesar(AppLocalizations t, {BuildContext? context}) async {
     if (state.ejecutando || state.probandoVoz) return;
 
     _persistence.guardarPreferencias(
@@ -417,6 +428,41 @@ class HomeController extends Notifier<HomeEstado> {
     );
     _appendLog(t.log_inicio(seleccion.length, archivos.length));
 
+    // Memory pre-check before processing loop.
+    final pendientesEstimados = [
+      for (final a in seleccion)
+        AudioPendiente(
+          tempPath: '',
+          originalName: a.nombre,
+          displayName: a.titulo,
+          format: '',
+          durationSec: 0,
+          fileSizeBytes: 0,
+          chars: a.nombre.length * 50,
+          segments: 0,
+          fecha: DateTime.now(),
+        ),
+    ];
+    final estimatedBytes = estimarBytesLote(pendientesEstimados);
+    final availableBytes = ProcessInfo.currentRss;
+    final fraccion = fraccionMemoriaRequerida(estimatedBytes, availableBytes);
+    if (fraccion > 0.7 && context != null && context.mounted) {
+      final proceder = await showMemoryWarningDialog(
+        context: context,
+        estimatedBytes: estimatedBytes,
+        availableBytes: availableBytes,
+      );
+      if (!proceder) {
+        state = state.copyWith(
+          ejecutando: false,
+          estado: t.estado_cancelado,
+          snackbar: MensajeSnackbar(t.snackbar_exportado),
+        );
+        _appendLog(t.log_cancelado('0 s'));
+        return;
+      }
+    }
+
     final inicio = DateTime.now();
     try {
       await ref.read(motorTtsProvider).cambiarVoz(voz);
@@ -435,6 +481,7 @@ class HomeController extends Notifier<HomeEstado> {
       final totalArchivos = seleccion.length;
       var exitos = 0;
       var errores = 0;
+      final acumulados = <AudioPendiente>[];
       for (var i = 0; i < totalArchivos; i++) {
         final archivo = seleccion[i];
         if (state.cancelar) break;
@@ -466,6 +513,21 @@ class HomeController extends Notifier<HomeEstado> {
                 segmentos: resultado.segmentos,
                 duracionAudioSeg: resultado.duracionAudioSeg,
               );
+              if (resultado.tempPath != null) {
+                final tempFile = File(resultado.tempPath!);
+                final fileSize = tempFile.existsSync() ? tempFile.lengthSync() : 0;
+                acumulados.add(AudioPendiente(
+                  tempPath: resultado.tempPath!,
+                  originalName: archivo.nombre,
+                  displayName: archivo.titulo,
+                  format: formatos.first,
+                  durationSec: resultado.duracionAudioSeg,
+                  fileSizeBytes: fileSize,
+                  chars: resultado.caracteres,
+                  segments: resultado.segmentos,
+                  fecha: DateTime.now(),
+                ));
+              }
             case ResultadoProceso.omitido:
               _appendLog(
                   t.log_archivo_omitido(i + 1, totalArchivos, archivo.nombre));
@@ -483,7 +545,10 @@ class HomeController extends Notifier<HomeEstado> {
       final elapsed = DateTime.now().difference(inicio).inSeconds.toDouble();
       final textoElapsed = _formatearTiempo(t, elapsed);
       final finalizadoOk = !state.cancelar;
-      state = state.copyWith(ejecutando: false);
+      state = state.copyWith(
+        ejecutando: false,
+        pendientes: acumulados,
+      );
 
       if (finalizadoOk && errores == 0) {
         state = state.copyWith(
@@ -496,6 +561,13 @@ class HomeController extends Notifier<HomeEstado> {
         _appendLog(t.log_completado(exitos, textoElapsed));
         _mostrarEstimacion(t, seleccion);
         _appendLog('=' * 40);
+        // Navigate to AudioManagerScreen with accumulated pending audios.
+        if (acumulados.isNotEmpty && context != null) {
+          ref.read(appRouterProvider).push(
+                Rutas.audioManager,
+                extra: acumulados,
+              );
+        }
       } else if (finalizadoOk && errores > 0) {
         state = state.copyWith(
           estado: t.estado_con_errores(exitos, totalArchivos, errores),
