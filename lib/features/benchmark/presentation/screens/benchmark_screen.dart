@@ -120,23 +120,29 @@ class _BenchmarkTable extends StatelessWidget {
                 children: [
                   Expanded(
                     flex: 2,
-                    child: Text(
-                      t.benchmark_tab_tamano,
-                      style: Theme.of(context).textTheme.titleSmall,
+                    child: Center(
+                      child: Text(
+                        t.benchmark_tab_tamano,
+                        style: Theme.of(context).textTheme.titleSmall,
+                      ),
                     ),
                   ),
                   Expanded(
                     flex: 3,
-                    child: Text(
-                      t.benchmark_tab_tiempo,
-                      style: Theme.of(context).textTheme.titleSmall,
+                    child: Center(
+                      child: Text(
+                        t.benchmark_tab_tiempo,
+                        style: Theme.of(context).textTheme.titleSmall,
+                      ),
                     ),
                   ),
                   Expanded(
                     flex: 3,
-                    child: Text(
-                      t.benchmark_tab_chars_seg,
-                      style: Theme.of(context).textTheme.titleSmall,
+                    child: Center(
+                      child: Text(
+                        t.benchmark_tab_chars_seg,
+                        style: Theme.of(context).textTheme.titleSmall,
+                      ),
                     ),
                   ),
                   const SizedBox(width: 56),
@@ -183,40 +189,45 @@ class _FilaBenchmark extends ConsumerWidget {
           // Tamaño
           Expanded(
             flex: 2,
-            child: Text('$tamanio'),
+            child: Center(child: Text('$tamanio')),
           ),
           // Tiempo
           Expanded(
             flex: 3,
-            child: ejecutando
-                ? const SizedBox(
-                    width: 16,
-                    height: 16,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : Text(resultado != null
-                    ? _formatearDuracion(resultado!.tiempoMs / 1000)
-                    : '—'),
+            child: Center(
+              child: ejecutando
+                  ? const SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : Text(resultado != null
+                      ? _formatearDuracion(resultado!.tiempoMs / 1000)
+                      : '—'),
+            ),
           ),
           // Chars/seg
           Expanded(
             flex: 3,
-            child: ejecutando
-                ? const SizedBox.shrink()
-                : Text(resultado != null
-                    ? '${resultado!.charsSeg.toStringAsFixed(1)}'
-                    : '—'),
+            child: Center(
+              child: ejecutando
+                  ? const SizedBox.shrink()
+                  : Text(resultado != null
+                      ? '${resultado!.charsSeg.toStringAsFixed(1)}'
+                      : '—'),
+            ),
           ),
           // Botón
           SizedBox(
             width: 56,
-            child: IconButton(
-              onPressed: (ejecutando || bloqueado)
-                  ? null
-                  : () => ref
-                      .read(benchmarkControllerProvider.notifier)
-                      .ejecutarFila(tamanio),
-              icon: ejecutando
+            child: Center(
+              child: IconButton(
+                onPressed: (ejecutando || bloqueado)
+                    ? null
+                    : () => ref
+                        .read(benchmarkControllerProvider.notifier)
+                        .ejecutarFila(tamanio),
+                icon: ejecutando
                   ? const SizedBox(
                       width: 18,
                       height: 18,
