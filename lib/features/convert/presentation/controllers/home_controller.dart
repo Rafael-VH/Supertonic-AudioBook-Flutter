@@ -482,6 +482,9 @@ class HomeController extends Notifier<HomeEstado> {
       var exitos = 0;
       var errores = 0;
       final acumulados = <AudioPendiente>[];
+      // Se acumulan entradas de historial y se persisten SOLO si el lote
+      // completa sin cancelación (ver más abajo).
+      final historialPendiente = <Map<String, Object?>>[];
       for (var i = 0; i < totalArchivos; i++) {
         final archivo = seleccion[i];
         if (state.cancelar) break;
@@ -507,12 +510,15 @@ class HomeController extends Notifier<HomeEstado> {
               _appendLog(t.log_archivo_fin(i + 1, totalArchivos));
               _appendLog('  Segmentos: ${resultado.segmentos}, Audio: ${resultado.duracionAudioSeg.toStringAsFixed(1)}s');
               exitos++;
-              _guardarConversionEnHistorial(
+              // Se acumula en memoria; se escribe al historial solo si el
+              // lote completo sin cancelación.
+              historialPendiente.add(ConversionEntry(
                 nombreArchivo: archivo.nombre,
                 caracteres: resultado.caracteres,
                 segmentos: resultado.segmentos,
                 duracionAudioSeg: resultado.duracionAudioSeg,
-              );
+                fecha: DateTime.now(),
+              ).toMap());
               if (resultado.tempPath != null) {
                 final tempFile = File(resultado.tempPath!);
                 final fileSize = tempFile.existsSync() ? tempFile.lengthSync() : 0;
@@ -545,9 +551,25 @@ class HomeController extends Notifier<HomeEstado> {
       final elapsed = DateTime.now().difference(inicio).inSeconds.toDouble();
       final textoElapsed = _formatearTiempo(t, elapsed);
       final finalizadoOk = !state.cancelar;
+
+      // Solo persistir historial si el lote completó sin cancelación.
+      if (finalizadoOk && historialPendiente.isNotEmpty) {
+        _persistirHistorial(historialPendiente);
+      }
+
+      // Si se canceló, limpiar WAVs temporales que se hayan generado.
+      if (!finalizadoOk) {
+        for (final p in acumulados) {
+          try {
+            final f = File(p.tempPath);
+            if (f.existsSync()) f.deleteSync();
+          } catch (_) {}
+        }
+      }
+
       state = state.copyWith(
         ejecutando: false,
-        pendientes: acumulados,
+        pendientes: finalizadoOk ? acumulados : [],
       );
 
       if (finalizadoOk && errores == 0) {
@@ -651,15 +673,10 @@ class HomeController extends Notifier<HomeEstado> {
     }
   }
 
-  /// Guarda una entrada en el historial de conversiones (prefs).
+  /// Guarda entradas acumuladas en el historial de conversiones (prefs).
   ///
-  /// Prepende la entrada más reciente y mantiene un máximo de 100 entradas.
-  void _guardarConversionEnHistorial({
-    required String nombreArchivo,
-    required int caracteres,
-    required int segmentos,
-    required double duracionAudioSeg,
-  }) {
+  /// Prepende las entradas y mantiene un máximo de 100.
+  void _persistirHistorial(List<Map<String, Object?>> entradas) {
     final prefsRepo = ref.read(repositorioHistorialProvider);
     final datos = prefsRepo.cargar();
     final raw = datos['conversion_history'];
@@ -667,13 +684,7 @@ class HomeController extends Notifier<HomeEstado> {
     if (raw is List) {
       historial.addAll(raw.whereType<Map>().cast<Map<String, Object?>>());
     }
-    historial.insert(0, ConversionEntry(
-      nombreArchivo: nombreArchivo,
-      caracteres: caracteres,
-      segmentos: segmentos,
-      duracionAudioSeg: duracionAudioSeg,
-      fecha: DateTime.now(),
-    ).toMap());
+    historial.insertAll(0, entradas);
     // Cap at 100 entries.
     if (historial.length > 100) {
       historial.removeRange(100, historial.length);
