@@ -688,4 +688,22 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get benchmark_modelo_no_listo =>
       'El modelo de voz no está descargado. Descargalo primero desde Ajustes.';
+
+  @override
+  String get benchmark_seleccionar_tamanios => 'Seleccionar tamaños de prueba';
+
+  @override
+  String get historial_titulo => 'Historial de conversiones';
+
+  @override
+  String get historial_vacio => 'Sin conversiones registradas';
+
+  @override
+  String get historial_col_palabras => 'Palabras';
+
+  @override
+  String get historial_col_segmentos => 'Segmentos';
+
+  @override
+  String get historial_col_duracion => 'Duración';
 }

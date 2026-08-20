@@ -396,5 +396,11 @@
       "tiempo": {"type": "String"}
     }
   },
-  "benchmark_modelo_no_listo": "The voice model is not downloaded. Download it first from Settings."
+  "benchmark_modelo_no_listo": "The voice model is not downloaded. Download it first from Settings.",
+  "benchmark_seleccionar_tamanios": "Select test sizes",
+  "historial_titulo": "Conversion history",
+  "historial_vacio": "No conversions recorded",
+  "historial_col_palabras": "Words",
+  "historial_col_segmentos": "Segments",
+  "historial_col_duracion": "Duration"
 }

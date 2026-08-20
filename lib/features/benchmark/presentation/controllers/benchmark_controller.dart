@@ -1,8 +1,11 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:supertonic_audiobook/features/benchmark/domain/entities/benchmark_result.dart';
+import 'package:supertonic_audiobook/features/benchmark/domain/entities/conversion_entry.dart';
 import 'package:supertonic_audiobook/features/benchmark/domain/use_cases/run_benchmark.dart';
 import 'package:supertonic_audiobook/presentation/controllers/providers.dart';
+
+const _defaultTamanios = [1500, 3000, 6000, 9000, 12000, 15000];
 
 /// Estado de la pantalla Benchmark.
 ///
@@ -15,12 +18,20 @@ class BenchmarkEstado {
     this.resultado,
     this.cancelado = false,
     this.error,
+    this.tamaniosDisponibles = _allSizes,
+    this.tamaniosSeleccionados = _defaultTamanios,
+    this.historial = const [],
   });
+
+  static const _allSizes = [
+    1500, 3000, 6000, 9000, 12000, 15000, 18000, 21000, 24000, 27000,
+    30000,
+  ];
 
   /// True mientras se ejecuta el benchmark.
   final bool ejecutando;
 
-  /// Paso actual (1..6).
+  /// Paso actual (1..N).
   final int pasoActual;
 
   /// Tamaño de texto actualmente en procesamiento (chars).
@@ -35,6 +46,15 @@ class BenchmarkEstado {
   /// Mensaje de error, si lo hubo.
   final String? error;
 
+  /// Todos los tamaños disponibles para selección.
+  final List<int> tamaniosDisponibles;
+
+  /// Tamaños seleccionados para la ejecución del benchmark.
+  final List<int> tamaniosSeleccionados;
+
+  /// Historial de conversiones exitosas.
+  final List<ConversionEntry> historial;
+
   BenchmarkEstado copyWith({
     bool? ejecutando,
     int? pasoActual,
@@ -42,6 +62,9 @@ class BenchmarkEstado {
     BenchmarkResult? resultado,
     bool? cancelado,
     String? error,
+    List<int>? tamaniosDisponibles,
+    List<int>? tamaniosSeleccionados,
+    List<ConversionEntry>? historial,
   }) {
     return BenchmarkEstado(
       ejecutando: ejecutando ?? this.ejecutando,
@@ -50,6 +73,10 @@ class BenchmarkEstado {
       resultado: resultado ?? this.resultado,
       cancelado: cancelado ?? this.cancelado,
       error: error ?? this.error,
+      tamaniosDisponibles: tamaniosDisponibles ?? this.tamaniosDisponibles,
+      tamaniosSeleccionados:
+          tamaniosSeleccionados ?? this.tamaniosSeleccionados,
+      historial: historial ?? this.historial,
     );
   }
 }
@@ -62,7 +89,11 @@ class BenchmarkController extends Notifier<BenchmarkEstado> {
   @override
   BenchmarkEstado build() {
     final resultado = _cargarResultado();
-    return BenchmarkEstado(resultado: resultado);
+    final historial = _cargarHistorial();
+    return BenchmarkEstado(
+      resultado: resultado,
+      historial: historial,
+    );
   }
 
   BenchmarkResult? _cargarResultado() {
@@ -74,9 +105,37 @@ class BenchmarkController extends Notifier<BenchmarkEstado> {
     return null;
   }
 
+  List<ConversionEntry> _cargarHistorial() {
+    final prefs = ref.read(repositorioPreferenciasProvider).cargar();
+    final raw = prefs['conversion_history'];
+    if (raw is List) {
+      return raw
+          .whereType<Map>()
+          .map((m) => ConversionEntry.fromMap(m.cast<String, Object?>()))
+          .toList();
+    }
+    return [];
+  }
+
+  void toggleTamanio(int tamanio) {
+    final actual = state.tamaniosSeleccionados.toList();
+    if (actual.contains(tamanio)) {
+      actual.remove(tamanio);
+    } else {
+      actual.add(tamanio);
+    }
+    state = state.copyWith(tamaniosSeleccionados: actual);
+  }
+
   Future<void> ejecutar() async {
     if (state.ejecutando) return;
-    state = BenchmarkEstado(ejecutando: true);
+    if (state.tamaniosSeleccionados.isEmpty) return;
+    state = BenchmarkEstado(
+      ejecutando: true,
+      tamaniosDisponibles: state.tamaniosDisponibles,
+      tamaniosSeleccionados: state.tamaniosSeleccionados,
+      historial: state.historial,
+    );
 
     final motor = ref.read(motorTtsProvider);
     final voiceConfig = ref
@@ -93,6 +152,7 @@ class BenchmarkController extends Notifier<BenchmarkEstado> {
           state = state.copyWith(pasoActual: paso, tamanioActual: tamanio);
         },
         debeDetenerse: () => state.cancelado,
+        tamanios: state.tamaniosSeleccionados,
       );
 
       if (state.cancelado) {
@@ -106,7 +166,12 @@ class BenchmarkController extends Notifier<BenchmarkEstado> {
       datos['benchmark_results'] = resultado.toMap();
       prefsRepo.guardar(datos);
 
-      state = BenchmarkEstado(resultado: resultado);
+      state = BenchmarkEstado(
+        resultado: resultado,
+        historial: state.historial,
+        tamaniosDisponibles: state.tamaniosDisponibles,
+        tamaniosSeleccionados: state.tamaniosSeleccionados,
+      );
     } catch (e) {
       state = BenchmarkEstado(error: e.toString());
     }

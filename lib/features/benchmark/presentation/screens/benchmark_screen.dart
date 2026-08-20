@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:supertonic_audiobook/features/benchmark/domain/entities/benchmark_result.dart';
+import 'package:supertonic_audiobook/features/benchmark/domain/entities/conversion_entry.dart';
 import 'package:supertonic_audiobook/features/benchmark/presentation/controllers/benchmark_controller.dart';
 import 'package:supertonic_audiobook/features/modelo/presentation/controllers/modelo_controller.dart';
 import 'package:supertonic_audiobook/presentation/controllers/providers.dart';
@@ -54,18 +55,47 @@ class _BenchmarkBody extends ConsumerWidget {
 
         const SizedBox(height: 16),
 
-        // --- Run button ---
-        FilledButton.icon(
-          onPressed: estado.ejecutando ? null : () => controller.ejecutar(),
-          icon: const Icon(Icons.speed),
-          label: Text(t.benchmark_btn_ejecutar),
+        // --- Size selection + Run button ---
+        Row(
+          children: [
+            Expanded(
+              child: FilledButton.icon(
+                onPressed: estado.ejecutando ||
+                        estado.tamaniosSeleccionados.isEmpty
+                    ? null
+                    : () => controller.ejecutar(),
+                icon: const Icon(Icons.speed),
+                label: Text(t.benchmark_btn_ejecutar),
+              ),
+            ),
+            const SizedBox(width: 8),
+            IconButton.filledTonal(
+              onPressed: estado.ejecutando
+                  ? null
+                  : () => _mostrarSelectorTamanios(context, ref),
+              icon: const Icon(Icons.tune),
+              tooltip: t.benchmark_seleccionar_tamanios,
+            ),
+          ],
         ),
+
+        // --- Selected sizes summary ---
+        if (!estado.ejecutando)
+          Padding(
+            padding: const EdgeInsets.only(top: 8),
+            child: Text(
+              '${estado.tamaniosSeleccionados.length} tamaños seleccionados',
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+          ),
 
         // --- Progress ---
         if (estado.ejecutando) ...[
           const SizedBox(height: 16),
           LinearProgressIndicator(
-            value: estado.pasoActual / 6,
+            value: estado.tamaniosSeleccionados.isEmpty
+                ? 0
+                : estado.pasoActual / estado.tamaniosSeleccionados.length,
           ),
           const SizedBox(height: 8),
           Text(
@@ -92,6 +122,23 @@ class _BenchmarkBody extends ConsumerWidget {
           ),
         ],
 
+        // --- History ---
+        if (estado.historial.isNotEmpty) ...[
+          const SizedBox(height: 24),
+          Text(
+            t.historial_titulo,
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
+          const SizedBox(height: 8),
+          _HistorialTable(historial: estado.historial),
+        ] else ...[
+          const SizedBox(height: 24),
+          Text(
+            t.historial_vacio,
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
+        ],
+
         // --- Error ---
         if (estado.error != null) ...[
           const SizedBox(height: 16),
@@ -111,6 +158,56 @@ class _BenchmarkBody extends ConsumerWidget {
       ],
     );
   }
+}
+
+/// Bottom sheet for multi-selecting benchmark sizes.
+void _mostrarSelectorTamanios(BuildContext context, WidgetRef ref) {
+  final t = AppLocalizations.of(context)!;
+  final estado = ref.read(benchmarkControllerProvider);
+  final controller = ref.read(benchmarkControllerProvider.notifier);
+
+  showModalBottomSheet<void>(
+    context: context,
+    builder: (ctx) {
+      return Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              t.benchmark_seleccionar_tamanios,
+              style: Theme.of(ctx).textTheme.titleMedium,
+            ),
+            const SizedBox(height: 12),
+            Wrap(
+              spacing: 8,
+              runSpacing: 4,
+              children: [
+                for (final tam in estado.tamaniosDisponibles)
+                  FilterChip(
+                    label: Text('$tam'),
+                    selected:
+                        estado.tamaniosSeleccionados.contains(tam),
+                    onSelected: (_) => controller.toggleTamanio(tam),
+                  ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                TextButton(
+                  onPressed: () => Navigator.of(ctx).pop(),
+                  child: Text(t.cerrar),
+                ),
+              ],
+            ),
+          ],
+        ),
+      );
+    },
+  );
 }
 
 class _StatusCard extends StatelessWidget {
@@ -173,6 +270,48 @@ class _ResultsTable extends StatelessWidget {
       ],
     );
   }
+}
+
+class _HistorialTable extends StatelessWidget {
+  const _HistorialTable({required this.historial});
+
+  final List<ConversionEntry> historial;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context)!;
+
+    return SizedBox(
+      height: 240,
+      child: DataTable(
+        columns: [
+          DataColumn(label: Text(t.historial_col_palabras)),
+          DataColumn(label: Text(t.historial_col_segmentos)),
+          DataColumn(label: Text(t.historial_col_duracion)),
+        ],
+        rows: [
+          for (final entry in historial)
+            DataRow(cells: [
+              DataCell(Text('${entry.caracteres}')),
+              DataCell(Text('${entry.segmentos}')),
+              DataCell(Text(_formatearDuracion(entry.duracionAudioSeg))),
+            ]),
+        ],
+      ),
+    );
+  }
+}
+
+/// Formats duration as "Xh - Y min - Z seg" / "Y min - Z seg" / "Z seg".
+String _formatearDuracion(double segundos) {
+  final total = segundos.floor();
+  if (total < 60) return '$total seg';
+  final minutos = total ~/ 60;
+  final seg = total % 60;
+  if (minutos < 60) return '$minutos min - $seg seg';
+  final horas = minutos ~/ 60;
+  final min = minutos % 60;
+  return '$horas h - $min min - $seg seg';
 }
 
 String _formatoFecha(DateTime fecha) {

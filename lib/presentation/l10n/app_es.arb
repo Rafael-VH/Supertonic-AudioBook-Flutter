@@ -396,5 +396,11 @@
       "tiempo": {"type": "String"}
     }
   },
-  "benchmark_modelo_no_listo": "El modelo de voz no está descargado. Descargalo primero desde Ajustes."
+  "benchmark_modelo_no_listo": "El modelo de voz no está descargado. Descargalo primero desde Ajustes.",
+  "benchmark_seleccionar_tamanios": "Seleccionar tamaños de prueba",
+  "historial_titulo": "Historial de conversiones",
+  "historial_vacio": "Sin conversiones registradas",
+  "historial_col_palabras": "Palabras",
+  "historial_col_segmentos": "Segmentos",
+  "historial_col_duracion": "Duración"
 }

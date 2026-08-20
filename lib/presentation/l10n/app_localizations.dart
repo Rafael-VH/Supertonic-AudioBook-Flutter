@@ -1255,6 +1255,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'The voice model is not downloaded. Download it first from Settings.'**
   String get benchmark_modelo_no_listo;
+
+  /// No description provided for @benchmark_seleccionar_tamanios.
+  ///
+  /// In en, this message translates to:
+  /// **'Select test sizes'**
+  String get benchmark_seleccionar_tamanios;
+
+  /// No description provided for @historial_titulo.
+  ///
+  /// In en, this message translates to:
+  /// **'Conversion history'**
+  String get historial_titulo;
+
+  /// No description provided for @historial_vacio.
+  ///
+  /// In en, this message translates to:
+  /// **'No conversions recorded'**
+  String get historial_vacio;
+
+  /// No description provided for @historial_col_palabras.
+  ///
+  /// In en, this message translates to:
+  /// **'Words'**
+  String get historial_col_palabras;
+
+  /// No description provided for @historial_col_segmentos.
+  ///
+  /// In en, this message translates to:
+  /// **'Segments'**
+  String get historial_col_segmentos;
+
+  /// No description provided for @historial_col_duracion.
+  ///
+  /// In en, this message translates to:
+  /// **'Duration'**
+  String get historial_col_duracion;
 }
 
 class _AppLocalizationsDelegate

@@ -9,6 +9,7 @@ import 'package:supertonic_audiobook/shared/domain/entities/archivo.dart';
 import 'package:supertonic_audiobook/shared/domain/entities/voice_config.dart';
 import 'package:supertonic_audiobook/features/convert/domain/use_cases/procesar_archivo.dart';
 import 'package:supertonic_audiobook/features/benchmark/domain/entities/benchmark_result.dart';
+import 'package:supertonic_audiobook/features/benchmark/domain/entities/conversion_entry.dart';
 import 'package:supertonic_audiobook/features/benchmark/domain/use_cases/estimar_tiempo.dart';
 import 'package:supertonic_audiobook/features/convert/presentation/constants/muestra_voz.dart';
 import 'package:supertonic_audiobook/features/convert/presentation/controllers/selection_manager.dart';
@@ -459,6 +460,12 @@ class HomeController extends Notifier<HomeEstado> {
               _appendLog(t.log_archivo_fin(i + 1, totalArchivos));
               _appendLog('  Segmentos: ${resultado.segmentos}, Audio: ${resultado.duracionAudioSeg.toStringAsFixed(1)}s');
               exitos++;
+              _guardarConversionEnHistorial(
+                nombreArchivo: archivo.nombre,
+                caracteres: resultado.caracteres,
+                segmentos: resultado.segmentos,
+                duracionAudioSeg: resultado.duracionAudioSeg,
+              );
             case ResultadoProceso.omitido:
               _appendLog(
                   t.log_archivo_omitido(i + 1, totalArchivos, archivo.nombre));
@@ -570,6 +577,37 @@ class HomeController extends Notifier<HomeEstado> {
     if (estimated != null) {
       _appendLog('  Estimado (benchmark): ${_formatearTiempo(t, estimated)}');
     }
+  }
+
+  /// Guarda una entrada en el historial de conversiones (prefs).
+  ///
+  /// Prepende la entrada más reciente y mantiene un máximo de 100 entradas.
+  void _guardarConversionEnHistorial({
+    required String nombreArchivo,
+    required int caracteres,
+    required int segmentos,
+    required double duracionAudioSeg,
+  }) {
+    final prefsRepo = ref.read(repositorioPreferenciasProvider);
+    final datos = prefsRepo.cargar();
+    final raw = datos['conversion_history'];
+    final historial = <Map<String, Object?>>[];
+    if (raw is List) {
+      historial.addAll(raw.whereType<Map>().cast<Map<String, Object?>>());
+    }
+    historial.insert(0, ConversionEntry(
+      nombreArchivo: nombreArchivo,
+      caracteres: caracteres,
+      segmentos: segmentos,
+      duracionAudioSeg: duracionAudioSeg,
+      fecha: DateTime.now(),
+    ).toMap());
+    // Cap at 100 entries.
+    if (historial.length > 100) {
+      historial.removeRange(100, historial.length);
+    }
+    datos['conversion_history'] = historial;
+    prefsRepo.guardar(datos);
   }
 }
 

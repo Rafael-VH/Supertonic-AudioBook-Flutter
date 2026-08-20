@@ -5,6 +5,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:supertonic_audiobook/features/benchmark/domain/entities/benchmark_result.dart';
+import 'package:supertonic_audiobook/features/benchmark/domain/entities/conversion_entry.dart';
+import 'package:supertonic_audiobook/features/benchmark/presentation/controllers/benchmark_controller.dart';
 import 'package:supertonic_audiobook/features/convert/domain/contracts/motor_tts.dart';
 import 'package:supertonic_audiobook/presentation/controllers/providers.dart';
 import 'package:supertonic_audiobook/shared/domain/entities/voice_config.dart';
@@ -141,7 +143,7 @@ void main() {
       expect(estado.resultado, isNull);
     });
 
-    test('resultado contiene los 6 tamaños de prueba', () async {
+    test('resultado contiene los 6 tamaños por defecto', () async {
       final container = crearContenedor();
       final controller = container.read(benchmarkControllerProvider.notifier);
 
@@ -149,8 +151,128 @@ void main() {
 
       final estado = container.read(benchmarkControllerProvider);
       expect(estado.resultado!.tamanios.keys, containsAll([
-        1500, 3000, 5000, 7500, 10000, 15000,
+        1500, 3000, 6000, 9000, 12000, 15000,
       ]));
+    });
+
+    // --- Phase 4 tests: BenchmarkEstado new fields ---
+
+    group('BenchmarkEstado new fields', () {
+      test('tamaniosDisponibles tiene 11 tamaños', () {
+        final container = crearContenedor();
+        final estado = container.read(benchmarkControllerProvider);
+        expect(estado.tamaniosDisponibles.length, 11);
+        expect(estado.tamaniosDisponibles, [
+          1500, 3000, 6000, 9000, 12000, 15000, 18000, 21000, 24000, 27000,
+          30000,
+        ]);
+      });
+
+      test('tamaniosSeleccionados default es los 6 primeros', () {
+        final container = crearContenedor();
+        final estado = container.read(benchmarkControllerProvider);
+        expect(estado.tamaniosSeleccionados, [1500, 3000, 6000, 9000, 12000, 15000]);
+      });
+
+      test('historial vacío cuando no hay prefs', () {
+        final container = crearContenedor();
+        final estado = container.read(benchmarkControllerProvider);
+        expect(estado.historial, isEmpty);
+      });
+
+      test('build carga historial desde preferencias', () {
+        final entry = ConversionEntry(
+          nombreArchivo: 'test.md',
+          caracteres: 1000,
+          segmentos: 5,
+          duracionAudioSeg: 10.0,
+          fecha: DateTime(2026, 8, 19),
+        );
+        final container = crearContenedor(prefs: {
+          'conversion_history': [entry.toMap()],
+        });
+        final estado = container.read(benchmarkControllerProvider);
+        expect(estado.historial.length, 1);
+        expect(estado.historial.first.nombreArchivo, 'test.md');
+        expect(estado.historial.first.caracteres, 1000);
+      });
+
+      test('copyWith preserva y actualiza campos nuevos', () {
+        final entry = ConversionEntry(
+          nombreArchivo: 'a.md',
+          caracteres: 500,
+          segmentos: 2,
+          duracionAudioSeg: 5.0,
+          fecha: DateTime(2026, 1, 1),
+        );
+        const original = BenchmarkEstado();
+        final modified = original.copyWith(
+          tamaniosSeleccionados: const [1500, 3000],
+          historial: [entry],
+        );
+        expect(modified.tamaniosSeleccionados, [1500, 3000]);
+        expect(modified.historial.length, 1);
+        // Other fields preserved
+        expect(modified.ejecutando, isFalse);
+        expect(modified.pasoActual, 0);
+      });
+    });
+
+    group('toggleTamanio', () {
+      test('agrega tamaño si no estaba seleccionado', () {
+        final container = crearContenedor();
+        final controller = container.read(benchmarkControllerProvider.notifier);
+
+        controller.toggleTamanio(18000);
+
+        final estado = container.read(benchmarkControllerProvider);
+        expect(estado.tamaniosSeleccionados, contains(18000));
+      });
+
+      test('quita tamaño si estaba seleccionado', () {
+        final container = crearContenedor();
+        final controller = container.read(benchmarkControllerProvider.notifier);
+
+        controller.toggleTamanio(1500);
+
+        final estado = container.read(benchmarkControllerProvider);
+        expect(estado.tamaniosSeleccionados, isNot(contains(1500)));
+      });
+    });
+
+    group('ejecutar with selected sizes', () {
+      test('usa tamaniosSeleccionados al ejecutar', () async {
+        final container = crearContenedor();
+        final controller = container.read(benchmarkControllerProvider.notifier);
+
+        // Deselect most sizes, keep only 1500 and 3000
+        controller.toggleTamanio(6000);
+        controller.toggleTamanio(9000);
+        controller.toggleTamanio(12000);
+        controller.toggleTamanio(15000);
+
+        await controller.ejecutar();
+
+        final estado = container.read(benchmarkControllerProvider);
+        expect(estado.resultado, isNotNull);
+        expect(estado.resultado!.tamanios.keys, containsAll([1500, 3000]));
+        expect(estado.resultado!.tamanios.length, 2);
+      });
+
+      test('ejecutar con todos los tamaños seleccionados', () async {
+        final container = crearContenedor();
+        final controller = container.read(benchmarkControllerProvider.notifier);
+
+        // Select all 11
+        for (final t in [18000, 21000, 24000, 27000, 30000]) {
+          controller.toggleTamanio(t);
+        }
+
+        await controller.ejecutar();
+
+        final estado = container.read(benchmarkControllerProvider);
+        expect(estado.resultado!.tamanios.length, 11);
+      });
     });
   });
 }
