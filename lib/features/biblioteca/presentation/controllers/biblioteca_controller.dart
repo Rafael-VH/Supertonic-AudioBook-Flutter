@@ -79,12 +79,8 @@ class BibliotecaController extends Notifier<BibliotecaEstado> {
     });
 
     try {
-      final tempDir = '$_carpeta${Platform.pathSeparator}_temp';
       return BibliotecaEstado(
-        libros: ref.read(listarAudiosProvider).ejecutar(
-              carpeta: _carpeta,
-              extras: [tempDir],
-            ),
+        libros: ref.read(listarAudiosProvider).ejecutar(carpeta: _carpeta),
       );
     } catch (e) {
       // Defensivo: un fallo del listado no debe crashear la pantalla
@@ -98,12 +94,8 @@ class BibliotecaController extends Notifier<BibliotecaEstado> {
   /// síncrono); un nuevo fallo vuelve a publicar el error.
   void recargar() {
     try {
-      final tempDir = '$_carpeta${Platform.pathSeparator}_temp';
       state = state.copyWith(
-        libros: ref.read(listarAudiosProvider).ejecutar(
-              carpeta: _carpeta,
-              extras: [tempDir],
-            ),
+        libros: ref.read(listarAudiosProvider).ejecutar(carpeta: _carpeta),
         clearError: true,
       );
     } catch (e) {
