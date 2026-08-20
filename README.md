@@ -7,7 +7,7 @@
 [![Flutter](https://img.shields.io/badge/Flutter-3.5%2B-02569B?logo=flutter)](https://flutter.dev)
 [![Dart](https://img.shields.io/badge/Dart-3.12%2B-0175C2?logo=dart)](https://dart.dev)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
-[![Tests](https://img.shields.io/badge/tests-228%20passed-brightgreen)](#testing)
+[![Tests](https://img.shields.io/badge/tests-369%20passed-brightgreen)](#testing)
 [![Docs](https://img.shields.io/badge/docs-ES%20%7C%20EN-blue)](#documentación)
 
 Sin nube. Sin API. Sin GPU. Todo ocurre en tu dispositivo.
@@ -22,13 +22,14 @@ Sin nube. Sin API. Sin GPU. Todo ocurre en tu dispositivo.
 
 | | Función | Descripción |
 |---|---------|-------------|
-| 🎙️ | **Conversión MD → Audio** | Lee archivos `.md`, limpia Markdown, segmenta texto y sintetiza voz |
-| 🎵 | **Multi-formato** | Exporta a WAV, MP3, FLAC y OGG (vía FFmpeg) |
-| 🌍 | **31 idiomas** | Voces sintéticas en español, inglés, francés, alemán, japonés y más |
-| 📱 | **Responsive** | Layout adaptado para móvil (acordeones) y tablet (cards) |
-| 📚 | **Biblioteca** | Reproduce los audiolibros generados con play/pause |
-| ⚡ | **On-device** | Motor Supertonic 3 vía ONNX Runtime — nada sale de tu dispositivo |
-| 🔄 | **Descarga resumible** | Modelo de voz (~400 MB) con verificación de integridad |
+| 🎙️ | **Conversión MD → Audio** | Lee archivos `.md` (carpeta o sueltos), limpia Markdown, segmenta y sintetiza voz |
+| 🎧 | **Gestión de audios pendientes** | Revisá, renombrá y guardá cada audio recién generado antes de publicarlo |
+| 📚 | **Biblioteca** | Audiolibros agrupados por libro con play/pausa |
+| 🏷️ | **Editor de metadatos** | Tags ID3 de MP3: título, artista, álbum, año, género, pista, carátula |
+| ⚡ | **Benchmark del motor** | Mide chars/seg de tu dispositivo en 6 tamaños y estima tiempos de conversión |
+| 🌍 | **31 idiomas + auto** | Voces sintéticas en español, inglés, francés, alemán, japonés y más |
+| 📱 | **Responsive** | Móvil: acordeones apilados · Tablet (≥ 900 px): paneles lado a lado |
+| 🔄 | **Descarga resumible** | Modelo Supertonic 3 (~400 MB) con verificación SHA-256 |
 
 ## Instalación
 
@@ -41,17 +42,11 @@ Sin nube. Sin API. Sin GPU. Todo ocurre en tu dispositivo.
 ### Pasos
 
 ```bash
-# Clonar el repositorio
 git clone https://github.com/Rafael-VH/Supertonic-AudioBook-Flutter.git
 cd Supertonic-AudioBook-Flutter
 
-# Instalar dependencias
 flutter pub get
-
-# Generar localizaciones
 flutter gen-l10n
-
-# Ejecutar
 flutter run
 ```
 
@@ -62,35 +57,30 @@ flutter run
 ### Flujo principal
 
 ```
-Dashboard
-  ├─ "Convertir archivos a audio" → Home (seleccionar carpeta .md)
-  ├─ "Procesar archivos sueltos"  → Selección (elegir archivos individuales)
-  ├─ "Biblioteca"                 → Escuchar audiolibros generados
-  └─ "Modelos"                    → Descargar / verificar modelo de voz
+Splash → Onboarding (1ª vez) → Dashboard
+                                  │
+        ┌─────────────────────────┼─────────────────────────┐
+        ▼                         ▼                         ▼
+     Home (hub)             Biblioteca                 Settings
+        │
+        ├─ "Procesar" → Convert (carpeta o archivos .md)
+        └─ "Editor de metadatos" → Editor ID3
 ```
 
-### Home — Procesamiento por lotes
+El **Dashboard** es un shell con `NavigationBar` de 3 pestañas: **Home** (hub de funciones), **Biblioteca** y **Settings**.
 
-1. Selecciona la carpeta con tus archivos `.md`
-2. Configura voz, velocidad, pasos y formatos de salida
-3. Toca **Procesar** — cada archivo se convierte secuencialmente
-4. El registro muestra progreso detallado en tiempo real
+### Convertir archivos
 
-### Selección — Archivos sueltos
+1. Tocá **Procesar** en el hub → elegí carpeta o archivos `.md` sueltos
+2. Configurá voz, velocidad, pasos e idioma en **Opciones**
+3. Tocá **Procesar** en la barra inferior — los archivos se convierten secuencialmente con registro en vivo
+4. Al terminar se abre la pantalla de **audios pendientes**: renombrá, elegí carpeta y guardá (o cancelá para descartar)
 
-1. Toca **Elegir archivos** para abrir el buscador del sistema
-2. Selecciona uno o más archivos `.md` de cualquier ubicación
-3. Procesa con las mismas opciones de síntesis
+Si el lote supera el presupuesto de memoria estimado, la app avisa antes de empezar.
 
-### Onboarding
+### Benchmark
 
-Guía interactiva de 5 pasos al iniciar la app por primera vez:
-
-1. Descargar el modelo de voz
-2. Seleccionar archivos
-3. Elegir voz
-4. Procesar audio
-5. **Seleccionar carpeta de salida** (nuevo)
+En **Settings → Benchmark** podés medir el rendimiento del motor en tu dispositivo (6 tamaños, 2500–15000 caracteres). El resultado se usa para estimar cuánto tardará una conversión real.
 
 ## Arquitectura
 
@@ -105,29 +95,32 @@ lib/
 ├── shared/                      # Infraestructura compartida entre features
 │   ├── data/
 │   │   ├── config.dart              # Constantes técnicas del pipeline
-│   │   └── repositories/            # Archivos, preferencias, reproductor
+│   │   └── repositories/            # Archivos, preferencias JSON, reproductor, logger
 │   └── domain/
 │       ├── constants/producto.dart  # Valores por defecto del producto
-│       └── contracts/               # Interfaces compartidas
+│       ├── contracts/               # Interfaces compartidas
+│       └── entities/                # Archivo, VoiceConfig, AppPreferences
 │
 ├── features/                    # Módulos por feature (cada uno autocontenido)
-│   ├── biblioteca/             # Escuchar audiolibros generados
-│   ├── convert/                # Conversión MD → Audio (core de la app)
-│   ├── dashboard/              # Centro principal
-│   ├── editor_metadata/        # Edición de metadatos ID3
-│   ├── home/                   # Pantalla de inicio
-│   ├── modelo/                 # Descarga del modelo TTS
-│   ├── onboarding/             # Guía de primera ejecución
-│   ├── settings/               # Preferencias de la app
-│   └── splash/                 # Pantalla de carga
+│   ├── audio_manager/           # Audios pendientes: guardar/cancelar/limpiar temps
+│   ├── benchmark/               # Benchmark del motor + historial de conversiones
+│   ├── biblioteca/              # Escuchar audiolibros generados
+│   ├── convert/                 # Conversión MD → Audio (core de la app)
+│   ├── dashboard/               # Shell con NavigationBar (3 pestañas)
+│   ├── editor_metadata/         # Edición de metadatos ID3
+│   ├── home/                    # Hub de funciones (FunctionCards)
+│   ├── modelo/                  # Descarga y verificación del modelo TTS
+│   ├── onboarding/              # Guía de primera ejecución
+│   ├── settings/                # Preferencias de la app
+│   └── splash/                  # Pantalla de carga
 │
 ├── presentation/                # Capa compartida de presentación
-│   ├── controllers/providers.dart  # Inyección de dependencias (Riverpod)
+│   ├── controllers/providers.dart  # Contratos + DI (Riverpod)
 │   ├── l10n/                        # Internacionalización (ES/EN)
 │   ├── routing/app_router.dart      # Navegación centralizada (go_router)
 │   └── theme/                       # Tema y paleta de colores
 │
-├── app.dart                     # Widget raíz
+├── app.dart                     # Widget raíz (MaterialApp.router)
 └── main.dart                    # Composition root
 ```
 
@@ -166,65 +159,54 @@ features/X/presentation → features/X/domain ← features/X/data
 
 | Capa | Tecnología | Versión |
 |------|-----------|---------|
-| State | Riverpod | 3.4.2 |
+| State | flutter_riverpod | 3.4.2 |
 | Routing | go_router | 17.5 |
 | TTS | flutter_onnxruntime | 1.8.3 |
 | Export | ffmpeg_kit_flutter_new | 4.6.2 |
 | Playback | just_audio | 0.10.5 |
-| Prefs | shared_preferences | 2.5.5 |
+| Prefs | JSON local (`PreferenciasJsonLocal`) | — |
 | Files | file_picker | 11.0.3 |
-| Permissions | permission_handler | 13.0.1 |
+| ID3 tags | id3_codec | 1.0.3 |
+| Download | dio + crypto (SHA-256) | 5.11 / 3.0 |
 
 ## Testing
 
 ```bash
-# Ejecutar todos los tests
-flutter test
-
-# Análisis estático
-flutter analyze lib
-
-# Coverage (requiere tool adicional)
-flutter test --coverage
+flutter test              # Todos los tests
+flutter analyze lib       # Análisis estático
+flutter test --coverage   # Cobertura
 ```
 
-### Estructura de tests
-
-| Directorio | Cubre |
-|------------|-------|
-| `test/core/` | WAV I/O, natural sort |
-| `test/data/` | Repositorios compartidos |
-| `test/domain/` | Casos de uso compartidos (procesar, segmentar, listar) |
-| `test/features/editor_metadata/` | Editor de metadatos (domain, data, presentation) |
-| `test/presentation/controllers/` | Controllers (home, biblioteca, modelo, providers) |
-| `test/presentation/screens/` | Widgets de pantalla (convert, settings, dashboard, etc.) |
-| `test/presentation/routing/` | Navegación y redirects |
-| `test/presentation/theme/` | Paleta y estilos visuales |
+Los tests espejan la estructura de `lib/`: `test/features/<feature>/...`, `test/presentation/...`, `test/core/`, `test/shared/`.
 
 ### Métricas
 
-- **228 tests** · 4 skips (requieren FFmpeg real)
-- **Cobertura ≥94%** en archivos del change activo
+- **369 tests** en 45 archivos · algunos skips requieren FFmpeg nativo
 - **0 análisis warnings** (`flutter analyze lib` limpio)
+
+Ver [testing.md](docs/es/testing.md) para convenciones completas.
 
 ## Configuración técnica
 
 | Constante | Valor | Descripción |
 |-----------|-------|-------------|
-| `silenceSamples` | 26,460 | Muestras de silencio entre fragmentos (0.6s @ 44100 Hz) |
-| `memoriaSafeMarginBytes` | 500 MB | Umbral de RAM para desktop |
-| `memoriaSafeMarginBytesMovil` | 64 MB | Umbral de RAM para móvil (evita OOM) |
-| `defaultTtsSteps` | 8 | Pasos de síntesis por defecto |
-| `defaultSpeed` | 1.0 | Velocidad de voz por defecto |
+| `silenceSamples` | 26,460 | Silencio entre fragmentos (0.6 s @ 44100 Hz) |
+| `memoriaSafeMarginBytes` | 500 MB | Presupuesto de RAM desktop |
+| `memoriaSafeMarginBytesMovil` | 64 MB | Presupuesto de RAM móvil (evita OOM) |
+| `defaultTtsSteps` | 5 | Pasos de síntesis por defecto (rango 5–12) |
+| `defaultSpeed` | 1.1 | Velocidad de voz por defecto (rango 0.7–2.0) |
+| `defaultVoice` | `'M1'` | Voz por defecto (M1–M5, F1–F5) |
 
 ## Formatos de audio
 
 | Formato | Método | Notas |
 |---------|--------|-------|
-| WAV | `escribirWav()` (Dart puro) | PCM16, sin dependencias |
-| MP3 | WAV temporal → FFmpeg | Requiere ffmpeg_kit |
+| MP3 | WAV temporal → FFmpeg | **Formato por defecto** |
+| WAV | `wav_io.dart` (Dart puro) | PCM16, sin dependencias |
 | FLAC | WAV temporal → FFmpeg | Lossless |
 | OGG | WAV temporal → FFmpeg | Vorbis |
+
+La síntesis siempre produce un WAV temporal en `<carpeta_salida>/_temp/`; los formatos adicionales se convierten desde ese WAV.
 
 ## Contribuir
 
@@ -245,23 +227,23 @@ flutter test --coverage
 
 Documentación completa del proyecto disponible en español e inglés.
 
-### Guías Rápidas
-
 | Tema | Español | English |
 |------|---------|---------|
 | Arquitectura | [architecture.md](docs/es/architecture.md) | [architecture.md](docs/en/architecture.md) |
 | Pantallas | [screens.md](docs/es/screens.md) | [screens.md](docs/en/screens.md) |
+| Navegación | [routing.md](docs/es/routing.md) | [routing.md](docs/en/routing.md) |
 | Pipeline de Audio | [pipeline.md](docs/es/pipeline.md) | [pipeline.md](docs/en/pipeline.md) |
 | Configuración | [configuration.md](docs/es/configuration.md) | [configuration.md](docs/en/configuration.md) |
 | Testing | [testing.md](docs/es/testing.md) | [testing.md](docs/en/testing.md) |
-| Navegación | [routing.md](docs/es/routing.md) | [routing.md](docs/en/routing.md) |
 | Internacionalización | [i18n.md](docs/es/i18n.md) | [i18n.md](docs/en/i18n.md) |
 | ONNX Runtime | [onnx-runtime.md](docs/es/onnx-runtime.md) | [onnx-runtime.md](docs/en/onnx-runtime.md) |
 | Modelo Supertonic 3 | [supertonic-3-model.md](docs/es/supertonic-3-model.md) | [supertonic-3-model.md](docs/en/supertonic-3-model.md) |
 
-### Planes Anteriores
+### Roadmap
 
-Documentación de fases anteriores del proyecto en [docs/plan/](docs/plan/).
+Funcionalidades recomendadas y su estado: [funcionalidades-recomendadas.md](docs/funcionalidades-recomendadas.md).
+
+Planes históricos de fases anteriores: [docs/plan/](docs/plan/) (referencia — las rutas de código que citan corresponden a la estructura previa a la refactorización).
 
 ## Licencia
 

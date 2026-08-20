@@ -1,8 +1,31 @@
-# Routing
+# Navigation (Routing)
 
-Declarative routing with go_router, including model gate and redirect logic.
+Application navigation flow with go_router.
+
+## Overview
+
+```
+┌─────────┐     ┌─────────────┐     ┌──────────────────────────────────┐
+│ Splash  │ ──→ │ Onboarding  │ ──→ │           Dashboard              │
+│ (1.2s)  │     │ (5 steps,   │     │   NavigationBar · IndexedStack   │
+└─────────┘     │  1st run)   │     │  ┌──────┬────────────┬─────────┐ │
+                └─────────────┘     │  │ Home │  Library   │ Settings│ │
+                                    │  └──────┴────────────┴─────────┘ │
+                                    └───────┬──────────────────────────┘
+                                            │ Home hub
+                     ┌──────────────────────┼──────────────────────┐
+                     ▼                      ▼                      ▼
+               /home (Convert)      /editor-metadata         /benchmark
+                     │
+                     ▼
+             /audio-manager (pending audios)
+
+  Model gate: /home without model → /modelo → back to origin
+```
 
 ## Route Definitions
+
+Centralized in `lib/presentation/routing/app_router.dart`:
 
 ```dart
 abstract final class Rutas {
@@ -14,201 +37,102 @@ abstract final class Rutas {
   static const settings = '/settings';
   static const biblioteca = '/biblioteca';
   static const editorMetadata = '/editor-metadata';
+  static const benchmark = '/benchmark';
+  static const audioManager = '/audio-manager';
 }
 ```
 
-## Navigation Flow
+| Route | Screen | Description |
+|------|----------|-------------|
+| `/splash` | SplashScreen | Initial loading (min. 1.2 s), decides destination |
+| `/onboarding` | OnboardingScreen | 5-step guide for new users |
+| `/dashboard` | DashboardScreen | Shell with NavigationBar (3 tabs) |
+| `/home` | ConvertScreen | Batch conversion of `.md` files |
+| `/modelo` | ModeloScreen | Model download/verification |
+| `/biblioteca` | BibliotecaScreen | Generated audiobooks |
+| `/settings` | SettingsScreen | App preferences |
+| `/editor-metadata` | MetadataEditorScreen | ID3 metadata editor |
+| `/benchmark` | BenchmarkScreen | TTS engine benchmark |
+| `/audio-manager` | AudioManagerScreen | Pending audios to save |
+
+## Initial Navigation Flow
+
+### First Run
 
 ```
-                    ┌─────────────┐
-                    │   Splash    │
-                    └──────┬──────┘
-                           │
-              ┌────────────┴────────────┐
-              │                         │
-              ▼                         ▼
-    ┌─────────────────┐       ┌─────────────────┐
-    │   Onboarding    │       │    Dashboard     │
-    │   (first run)   │       │    (main hub)    │
-    └────────┬────────┘       └────────┬────────┘
-             │                         │
-             └────────────┬────────────┘
-                          │
-          ┌───────────────┼───────────────┐
-          │               │               │
-          ▼               ▼               ▼
-    ┌──────────┐    ┌──────────┐    ┌──────────┐
-    │ Convert  │    │Biblioteca│    │ Metadata │
-    └────┬─────┘    └──────────┘    │ Editor   │
-         │                          └──────────┘
-         │
-         ▼
-    ┌─────────────────┐
-    │     Modelo      │ (if model not ready)
-    └────────┬────────┘
-             │
-             └────→ back to origin
+Splash → Onboarding → Dashboard → (model gate on /home)
 ```
+
+### Subsequent Runs
+
+```
+Splash → Dashboard
+```
+
+The `onboardingVisto` flag lives in `preferencias.json` (not `shared_preferences`). Completing or skipping onboarding marks it either way.
 
 ## Model Gate
 
-The central redirect logic that ensures the TTS model is available before processing.
-
-### Redirect Rules
+If the model is not ready, `/home` redirects to `/modelo`. Once ready, it returns to the origin that requested the model (`/home` normal gate or `/dashboard` card CTA); unknown origin → fallback `/home`.
 
 ```dart
 redirect: (context, state) {
   final destino = state.matchedLocation;
   final listo = ref.read(modeloControllerProvider).listo;
-
-  // Rule 1: Home requires model
   if (destino == Rutas.home && !listo) return Rutas.modelo;
-
-  // Rule 2: Model → back to origin when ready
   if (destino == Rutas.modelo && listo) {
     final origen = state.extra;
     if (origen is String && _origenesValidos.contains(origen)) {
-      return origen;
+      return origen;                       // /home or /dashboard
     }
-    return Rutas.home; // fallback
+    return Rutas.home;                     // fallback
   }
-
-  return null; // no redirect
+  return null;
 }
 ```
 
-### Valid Origins
-
-Only these routes can redirect to `/modelo`:
+Valid origins are centralized:
 
 ```dart
 const _origenesValidos = {Rutas.home, Rutas.dashboard};
 ```
 
-| Origin | Trigger |
-|--------|---------|
-| `/home` | Normal gate — user navigates to Convert |
-| `/dashboard` | CTA card — "Convert files" button |
+### Router Refresh
 
-### Model Ready Listener
+go_router only re-evaluates redirects when re-parsing the URI. The router uses two complementary mechanisms when the model becomes ready:
 
-When model becomes ready while on `/modelo`:
+1. **`refreshListenable`** (`_RefrescoModelo`): notifies the router to re-evaluate redirects.
+2. **`ref.listen`** on `modeloControllerProvider.select((s) => s.listo)`: if the top route is `/modelo` (reached via imperative push, which does not change the URI), it re-navigates to `/modelo` with its `extra` so the redirect resolves the destination.
+
+## Typed Extra Navigation
+
+`/audio-manager` receives the pending audios as `extra`:
 
 ```dart
-ref.listen(
-  modeloControllerProvider.select((s) => s.listo),
-  (previo, listo) {
-    if (!listo) return;
-    final estado = router.routerDelegate.state;
-    if (estado.matchedLocation == Rutas.modelo) {
-      // Re-navigate to trigger redirect
-      router.go(Rutas.modelo, extra: estado.extra);
-    } else {
-      // Just refresh redirects
-      refresco.refrescar();
-    }
+GoRoute(
+  path: Rutas.audioManager,
+  builder: (_, state) {
+    final audios = state.extra as List<AudioPendiente>? ?? const [];
+    return AudioManagerScreen(pendientes: audios);
   },
-);
+),
 ```
 
-**Why re-navigate?** go_router only re-evaluates redirects when re-parsing the URI. An imperative `push()` doesn't change the URI, so we must `go()` to trigger the redirect.
+Convert calls `push(Rutas.audioManager, extra: acumulados)` after completing a batch without errors.
 
-## Route Details
+## push() vs go() Convention
 
-### `/splash`
+- **`push()`**: navigation from the dashboard/hub — keeps history and the back button.
+- **`go()`**: splash, onboarding and redirects — replace the stack.
 
-- **Screen**: `SplashScreen`
-- **Purpose**: Initial loading, decides first-run vs normal
-- **Navigation**: Auto-navigates to onboarding or dashboard
+## Navigation Tests
 
-### `/onboarding`
+Routing tests verify:
 
-- **Screen**: `OnboardingScreen`
-- **Purpose**: 5-step guide for new users
-- **Navigation**: Completes → dashboard
+1. **Splash → Onboarding**: first run
+2. **Splash → Dashboard**: subsequent runs
+3. **Model Gate**: redirect to `/modelo` and return to the correct origin
+4. **Audio Manager**: receiving the pendings `extra`
+5. **Dashboard tabs**: Home/Library/Settings switching
 
-### `/dashboard`
-
-- **Screen**: `DashboardScreen`
-- **Purpose**: Main hub with function cards
-- **Actions**: Navigate to home, biblioteca, editorMetadata, settings
-
-### `/home`
-
-- **Screen**: `ConvertScreen`
-- **Purpose**: Batch file processing
-- **Gate**: Requires model (redirects to `/modelo` if not ready)
-
-### `/modelo`
-
-- **Screen**: `ModeloScreen`
-- **Purpose**: Model download and verification
-- **Exit**: Redirects to origin when model is ready
-
-### `/biblioteca`
-
-- **Screen**: `BibliotecaScreen`
-- **Purpose**: Listen to generated audiobooks
-- **Gate**: None — reads from output folder
-
-### `/editor-metadata`
-
-- **Screen**: `MetadataEditorScreen`
-- **Purpose**: Edit ID3 metadata of MP3 files
-- **Gate**: None
-
-### `/settings`
-
-- **Screen**: `SettingsScreen`
-- **Purpose**: App preferences
-- **Gate**: None
-
-## Imperative Navigation
-
-Used in screens via `context.go()` or `context.push()`:
-
-```dart
-// From Dashboard
-context.push(Rutas.home);
-context.push(Rutas.settings);
-context.push(Rutas.editorMetadata);
-
-// From Convert
-context.push(Rutas.settings);
-context.push(Rutas.modelo, extra: Rutas.home);
-
-// From Biblioteca
-context.push(Rutas.home);
-```
-
-## Refresh Mechanism
-
-`_RefrescoModelo` extends `ChangeNotifier` to force router re-evaluation:
-
-```dart
-class _RefrescoModelo extends ChangeNotifier {
-  void refrescar() => notifyListeners();
-}
-```
-
-Used when:
-1. Model becomes ready (listener calls `refrescar()`)
-2. Any state change that affects redirects
-
-## Testing Routes
-
-```dart
-testWidgets('redirects to /modelo when model not ready', (tester) async {
-  await tester.pumpWidget(
-    ProviderScope(
-      overrides: [
-        modeloControllerProvider.overrideWithValue(
-          MockModeloController(listo: false),
-        ),
-      ],
-      child: const MaterialApp.router.routerConfig(appRouter),
-    ),
-  );
-  expect(find.byType(ModeloScreen), findsOneWidget);
-});
-```
+See `test/presentation/routing/app_router_test.dart`.

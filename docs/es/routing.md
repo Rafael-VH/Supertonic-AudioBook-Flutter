@@ -5,21 +5,22 @@ Flujo de navegación de la aplicación con go_router.
 ## Resumen
 
 ```
-┌─────────┐     ┌─────────────┐     ┌─────────────┐
-│ Splash  │ ──→ │ Onboarding  │ ──→ │  Modelo     │
-│ (1s)    │     │ (5 pasos)   │     │ (descarga)  │
-└─────────┘     └─────────────┘     └──────┬──────┘
-                                           │
-                                           ▼
-┌─────────────────────────────────────────────────┐
-│                  Dashboard                       │
-│  ┌──────────┐  ┌───────────┐  ┌──────────────┐  │
-│  │ Convert  │  │Biblioteca │  │  Editor      │  │
-│  │ (lotes)  │  │(escuchar) │  │  Metadatos   │  │
-│  └────┬─────┘  └───────────┘  └──────────────┘  │
-│       │                                          │
-│       └──── Settings ◄───────────────────────    │
-└─────────────────────────────────────────────────┘
+┌─────────┐     ┌─────────────┐     ┌──────────────────────────────────┐
+│ Splash  │ ──→ │ Onboarding  │ ──→ │           Dashboard              │
+│ (1.2s)  │     │ (5 pasos,   │     │   NavigationBar · IndexedStack   │
+└─────────┘     │  1ª vez)    │     │  ┌──────┬────────────┬─────────┐ │
+                └─────────────┘     │  │ Home │ Biblioteca │ Settings│ │
+                                    │  └──────┴────────────┴─────────┘ │
+                                    └───────┬──────────────────────────┘
+                                            │ hub Home
+                     ┌──────────────────────┼──────────────────────┐
+                     ▼                      ▼                      ▼
+               /home (Convert)      /editor-metadata         /benchmark
+                     │
+                     ▼
+             /audio-manager (audios pendientes)
+
+  Gate del modelo: /home sin modelo → /modelo → vuelve al origen
 ```
 
 ## Definición de Rutas
@@ -36,42 +37,43 @@ abstract final class Rutas {
   static const settings = '/settings';
   static const biblioteca = '/biblioteca';
   static const editorMetadata = '/editor-metadata';
+  static const benchmark = '/benchmark';
+  static const audioManager = '/audio-manager';
 }
 ```
 
-## Configuración de rutas
-
-El router se construye con `GoRouter` y define:
-
 | Ruta | Pantalla | Descripción |
 |------|----------|-------------|
-| `/splash` | SplashScreen | Pantalla de carga inicial (1s) |
+| `/splash` | SplashScreen | Carga inicial (mín. 1.2 s), decide destino |
 | `/onboarding` | OnboardingScreen | Guía de 5 pasos para nuevos usuarios |
-| `/modelo` | ModeloScreen | Pantalla de descarga del modelo |
-| `/dashboard` | DashboardScreen | Centro principal de la app |
+| `/dashboard` | DashboardScreen | Shell con NavigationBar (3 tabs) |
 | `/home` | ConvertScreen | Conversión por lotes de archivos `.md` |
+| `/modelo` | ModeloScreen | Descarga/verificación del modelo |
+| `/biblioteca` | BibliotecaScreen | Audiolibros generados |
 | `/settings` | SettingsScreen | Preferencias de la aplicación |
-| `/biblioteca` | BibliotecaScreen | Escuchar audiolibros generados |
 | `/editor-metadata` | MetadataEditorScreen | Editor de metadatos ID3 |
+| `/benchmark` | BenchmarkScreen | Benchmark del motor TTS |
+| `/audio-manager` | AudioManagerScreen | Audios pendientes de guardar |
 
 ## Flujo de Navegación Inicial
 
 ### Primera Ejecución
 
 ```
-Splash → Onboarding → Modelo → Dashboard
+Splash → Onboarding → Dashboard → (gate del modelo en /home)
 ```
 
 ### Ejecuciones Posteriores
 
 ```
-Splash → Dashboard (si modelo descargado)
-Splash → Modelo → Dashboard (si modelo no descargado)
+Splash → Dashboard
 ```
+
+El flag `onboardingVisto` vive en `preferencias.json` (no en `shared_preferences`). Completar o saltar el onboarding lo marca en ambos casos.
 
 ## Model Gate
 
-El `ModelGate` verifica si el modelo está disponible. Si no lo está, redirige a `/modelo`:
+Si el modelo no está listo, `/home` redirige a `/modelo`. Al quedar listo, vuelve al origen que pidió el modelo (`/home` gate normal o `/dashboard` CTA de la card); origen desconocido → fallback `/home`.
 
 ```dart
 redirect: (context, state) {
@@ -81,97 +83,56 @@ redirect: (context, state) {
   if (destino == Rutas.modelo && listo) {
     final origen = state.extra;
     if (origen is String && _origenesValidos.contains(origen)) {
-      return origen;
+      return origen;                       // /home o /dashboard
     }
-    return Rutas.home;
+    return Rutas.home;                     // fallback
   }
   return null;
 }
 ```
 
-## Dashboard Links
-
-El Dashboard usa `GoRouter` para navegación con `push()`:
+Los orígenes válidos están centralizados:
 
 ```dart
-onTap: () => context.push(Rutas.home)             // Conversión por lotes
-onTap: () => context.push(Rutas.biblioteca)        // Biblioteca
-onTap: () => context.push(Rutas.editorMetadata)    // Editor de metadatos
+const _origenesValidos = {Rutas.home, Rutas.dashboard};
 ```
 
-## Configuración del Router
+### Refresco del Router
+
+go_router solo re-evalúa redirects al re-parsear la URI. El router usa dos mecanismos complementarios cuando el modelo queda listo:
+
+1. **`refreshListenable`** (`_RefrescoModelo`): notifica al router para re-evaluar redirects.
+2. **`ref.listen`** en `modeloControllerProvider.select((s) => s.listo)`: si la ruta tope es `/modelo` (llegada por push imperativo, que no cambia la URI), re-navega a `/modelo` con su `extra` para que el redirect resuelva el destino.
+
+## Navegación con Extra Tipado
+
+`/audio-manager` recibe los audios pendientes como `extra`:
 
 ```dart
-final router = GoRouter(
-  initialLocation: Rutas.splash,
-  routes: [
-    GoRoute(path: Rutas.splash, builder: (_, __) => const SplashScreen()),
-    GoRoute(path: Rutas.onboarding, builder: (_, __) => const OnboardingScreen()),
-    GoRoute(path: Rutas.modelo, builder: (_, __) => const ModeloScreen()),
-    GoRoute(path: Rutas.dashboard, builder: (_, __) => const DashboardScreen()),
-    GoRoute(path: Rutas.home, builder: (_, __) => const ConvertScreen()),
-    GoRoute(path: Rutas.biblioteca, builder: (_, __) => const BibliotecaScreen()),
-    GoRoute(path: Rutas.settings, builder: (_, __) => const SettingsScreen()),
-    GoRoute(path: Rutas.editorMetadata, builder: (_, __) => const MetadataEditorScreen()),
-  ],
-  redirect: (context, state) {
-    final destino = state.matchedLocation;
-    final listo = ref.read(modeloControllerProvider).listo;
-    if (destino == Rutas.home && !listo) return Rutas.modelo;
-    if (destino == Rutas.modelo && listo) {
-      final origen = state.extra;
-      if (origen is String && _origenesValidos.contains(origen)) {
-        return origen;
-      }
-      return Rutas.home;
-    }
-    return null;
+GoRoute(
+  path: Rutas.audioManager,
+  builder: (_, state) {
+    final audios = state.extra as List<AudioPendiente>? ?? const [];
+    return AudioManagerScreen(pendientes: audios);
   },
-);
+),
 ```
+
+Convert hace `push(Rutas.audioManager, extra: acumulados)` al completar un lote sin errores.
+
+## Convención push() vs go()
+
+- **`push()`**: navegación desde el dashboard/hub — mantiene historial y botón atrás.
+- **`go()`**: splash, onboarding y redirects — reemplazan la pila.
 
 ## Tests de Navegación
 
 Los tests de routing verifican:
 
-1. **Splash → Onboarding**: Primera ejecución
-2. **Splash → Dashboard**: Ejecuciones posteriores
-3. **Model Gate**: Redirección a modelo cuando no está disponible
-4. **Dashboard push**: Navegación correcta a Convert/Biblioteca/Editor
-5. **Settings push**: Navegación desde cualquier pantalla
+1. **Splash → Onboarding**: primera ejecución
+2. **Splash → Dashboard**: ejecuciones posteriores
+3. **Model Gate**: redirección a `/modelo` y regreso al origen correcto
+4. **Audio Manager**: recepción del `extra` con pendientes
+5. **Dashboard tabs**: alternancia Home/Biblioteca/Settings
 
-Ver `test/presentation/routing/app_router_test.dart` para tests completos.
-
-## Decisiones de Diseño
-
-### 1. `push()` vs `go()`
-
-Usamos `push()` para navegación desde Dashboard porque:
-- Mantiene el historial de navegación
-- El botón "atrás" funciona correctamente
-- Permite deep linking futuro
-
-Usamos `go()` en el `redirect` porque:
-- Redirección completa (reemplaza la pila)
-- Evita que el usuario regrese a rutas no válidas
-
-### 2. Splash Screen
-
-La pantalla splash usa un `Future.delayed` de 1 segundo para:
-- Mostrar el logo/branding de la app
-- Dar tiempo para que los providers se inicialicen
-- Crear una experiencia de carga más suave
-
-### 3. Onboarding Guard
-
-El onboarding solo se muestra en la primera ejecución:
-- Se persiste en `shared_preferences` (`onboarding_completado`)
-- Si el usuario ya completó el onboarding, se salta directamente a Dashboard
-- Si el usuario cierra el onboarding sin completar, se marca como completado de todos modos
-
-### 4. Settings como Ruta Separada
-
-Settings es una ruta separada (no un dialog o bottom sheet) porque:
-- Permite deep linking a settings
-- Mantiene el historial de navegación
-- Es consistente con el patrón de navegación del resto de la app
+Ver `test/presentation/routing/app_router_test.dart`.

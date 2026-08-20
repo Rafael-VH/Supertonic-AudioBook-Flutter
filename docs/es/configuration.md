@@ -9,19 +9,19 @@ Constantes técnicas, preferencias y configuración en tiempo de ejecución.
 | Constante | Valor | Descripción |
 |-----------|-------|-------------|
 | `silenceDurationSecs` | `0.6` | Segundos de silencio entre fragmentos |
-| `silenceSamples` | `26460` | Muestras a 44100 Hz × 0.6s |
-| `memoriaSafeMarginBytes` | `524288000` | Umbral de RAM para desktop (500 MB) |
-| `memoriaSafeMarginBytesMovil` | `67108864` | Umbral de RAM para móvil (64 MB) |
+| `silenceSamples` | `26460` | Muestras a 44100 Hz × 0.6 s |
+| `memoriaSafeMarginBytes` | `524288000` | Presupuesto de RAM desktop (500 MB) |
+| `memoriaSafeMarginBytesMovil` | `67108864` | Presupuesto de RAM móvil (64 MB) |
 | `subtiposAudio` | Map | Subtipos de audio por formato |
 
 ### Valores por Defecto del Producto (`shared/domain/constants/producto.dart`)
 
 | Constante | Valor | Descripción |
 |-----------|-------|-------------|
-| `defaultVoice` | `'M1'` | Modelo de voz por defecto |
+| `defaultVoice` | `'M1'` | Voz por defecto |
 | `defaultLang` | `'es'` | Idioma de síntesis por defecto |
-| `defaultTtsSteps` | `5` | Pasos de inferencia TTS por defecto (5–12) |
-| `defaultSpeed` | `1.1` | Velocidad de habla por defecto (0.7–2.0) |
+| `defaultTtsSteps` | `5` | Pasos de inferencia TTS (rango 5–12) |
+| `defaultSpeed` | `1.1` | Velocidad de habla (rango 0.7–2.0) |
 
 ### Configuración de Segmentos (`features/convert/domain/use_cases/segmentar_texto.dart`)
 
@@ -30,15 +30,19 @@ Constantes técnicas, preferencias y configuración en tiempo de ejecución.
 | `maxCharsPerSegment` | `1500` | Máximo de caracteres por fragmento TTS |
 | `mergeThreshold` | `200` | Párrafos más cortos que este se fusionan con el siguiente |
 
-### Formatos Soportados (`features/convert/domain/use_cases/formato.dart`)
+### Formatos de Salida
 
 ```dart
+// features/convert/domain/use_cases/formato.dart
 const formatosNativos = ['wav', 'flac', 'ogg', 'mp3'];
+
+// Default del HomeController:
+['mp3']
 ```
 
 ## Voces
 
-### Voces Disponibles
+### Voces Disponibles (`voces`)
 
 | Código | Tipo |
 |--------|------|
@@ -72,7 +76,7 @@ const formatosNativos = ['wav', 'flac', 'ogg', 'mp3'];
 
 - **Ubicación**: `<app_documents>/preferencias.json`
 - **Formato**: Pares clave-valor JSON
-- **Persistencia**: Paquete `shared_preferences`
+- **Implementación**: `PreferenciasJsonLocal` (repositorio propio sobre archivo JSON — no usa el paquete `shared_preferences`)
 
 ### Claves de Preferencia
 
@@ -81,21 +85,32 @@ const formatosNativos = ['wav', 'flac', 'ogg', 'mp3'];
 | `tema_oscuro` | `bool` | `false` | Modo oscuro habilitado |
 | `estilo` | `String` | `'default'` | Variante de estilo visual |
 | `idioma` | `String` | `'es'` | Idioma de la interfaz |
-| `carpeta_in` | `String` | `<base>/archivos` | Ruta de carpeta de entrada |
-| `carpeta_out` | `String` | `<base>/audio` | Ruta de carpeta de salida |
+| `onboarding_visto` | `bool` | `false` | Onboarding completado |
+| `carpeta_in` | `String` | `<base>/archivos` | Carpeta de entrada |
+| `carpeta_out` | `String` | `<base>/audio` | Carpeta de salida |
 | `voz` | `String` | `'M1'` | Voz seleccionada |
 | `steps` | `int` | `5` | Pasos TTS (5–12) |
 | `speed` | `double` | `1.1` | Velocidad de habla (0.7–2.0) |
 | `lang_voz` | `String` | `'es'` | Idioma de la voz |
-| `formatos` | `List<String>` | `['wav', 'mp3']` | Formatos de salida |
+| `formatos` | `List<String>` | `['mp3']` | Formatos de salida |
+
+### Los 3 Archivos JSON
+
+Cada repositorio es una instancia independiente de `PreferenciasJsonLocal`, inyectada en `main.dart`:
+
+| Archivo | Provider | Contenido |
+|---------|----------|-----------|
+| `preferencias.json` | `repositorioPreferenciasProvider` | Preferencias de usuario y ajustes |
+| `benchmark.json` | `repositorioBenchmarkProvider` | Resultados del benchmark por tamaño |
+| `historial_conversiones.json` | `repositorioHistorialProvider` | Historial de conversiones (cap 100 entradas, solo lotes completos) |
 
 ### Flujo de Persistencia
 
 ```
-1. App inicia → HomeController.build() carga desde prefs
-2. Usuario cambia ajuste → controller actualiza estado
-3. Antes de procesar → _guardarPreferencias() persiste todo
-4. Pantalla settings → SettingsController._persistir() en cada cambio
+1. App inicia → HomeController.build() carga desde preferencias.json
+2. Usuario cambia ajuste → controller actualiza estado (+ persiste en Settings)
+3. Antes de procesar → PreferencesPersistence guarda voz/formatos/carpetas
+4. Lote completo sin cancelar → historial se agrega a historial_conversiones.json
 ```
 
 ## Estructura de Directorios
@@ -104,27 +119,30 @@ const formatosNativos = ['wav', 'flac', 'ogg', 'mp3'];
 
 ```
 <app_documents>/
-├── preferencias.json          # Preferencias del usuario
-├── archivos/                  # Carpeta de entrada por defecto
-└── audio/                     # Carpeta de salida por defecto
+├── preferencias.json              # Preferencias del usuario
+├── benchmark.json                 # Resultados del benchmark
+├── historial_conversiones.json    # Historial de conversiones
+├── archivos/                      # Carpeta de entrada por defecto
+└── audio/                         # Carpeta de salida por defecto
+    └── _temp/                     # WAVs pendientes de guardar (> 24 h se limpian)
 
 <app_support>/
 └── modelo/
-    ├── onnx/                  # Archivos de modelo ONNX
-    └── voice_styles/          # JSONs de estilos de voz
+    ├── onnx/                      # 4 modelos ONNX + tts.json + unicode_indexer.json
+    └── voice_styles/              # F1–F5.json, M1–M5.json
 ```
 
 ### Detección de Plataforma
 
-Decidido en `main.dart` (composition root) via `providers.dart`:
+Decidida en `main.dart` (composition root) via `providers.dart`:
 
 ```dart
 esMovil: Platform.isAndroid || Platform.isIOS,
 ```
 
 Esto afecta:
-- Umbral de memoria (64 MB móvil vs 500 MB desktop)
-- Layout de UI (acordeón vs columnas)
+- Presupuesto de memoria (64 MB móvil vs 500 MB desktop)
+- Layout de UI (acordeón vs columnas, umbral 900 px de ancho)
 
 ## Configuración del Modelo
 
@@ -132,23 +150,12 @@ Esto afecta:
 
 | Propiedad | Valor |
 |-----------|-------|
-| Tamaño | ~400 MB |
+| Tamaño total | ~400 MB (15 archivos) |
 | Almacenamiento | `<app_support>/modelo/` |
-| Resumible | Soportado (Dio) |
-| Verificación | SHA-256 en Isolate |
+| Resumible | Sí (Dio, header Range) |
+| Verificación | SHA-256 (ONNX) · tamaño + parseo (JSONs) |
 
-### Archivos del Modelo
-
-```
-modelo/
-├── onnx/
-│   └── model.onnx             # Pesos del modelo TTS
-└── voice_styles/
-    ├── M1.json                # Voz masculina 1
-    ├── M2.json                # Voz masculina 2
-    ├── ...
-    └── F5.json                # Voz femenina 5
-```
+Ver [supertonic-3-model.md](supertonic-3-model.md) para el detalle de archivos.
 
 ## Configuración de Formatos de Audio
 
@@ -163,7 +170,7 @@ modelo/
 
 | Formato | Codec | Método |
 |---------|-------|--------|
-| MP3 | MPEG Layer III | `ffmpeg_kit` |
+| MP3 | MPEG Layer III | `ffmpeg_kit` (**default**) |
 | FLAC | FLAC lossless | `ffmpeg_kit` |
 | OGG | Vorbis | `ffmpeg_kit` |
 

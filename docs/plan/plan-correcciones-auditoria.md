@@ -1,5 +1,13 @@
 # Plan de correcciones — Auditoría Judgment Day Round 1
 
+> **📜 DOCUMENTO HISTÓRICO (2026-08).** Las correcciones de este plan fueron
+> aplicadas y el código se refactorizó después: las rutas que cita
+> (`lib/data/repositories/`, `lib/domain/use_cases/`,
+> `lib/presentation/controllers/home_controller.dart`) corresponden a la
+> estructura **pre-refactor**. Hoy viven en `lib/features/<feature>/...` y
+> `lib/shared/...`. Se conserva como registro de la auditoría; no usar como
+> referencia del estado actual: ver `README.md` y `docs/es|en/`.
+
 > Derivado de la auditoría adversarial completa de `lib/` (2 jueces ciegos en paralelo,
 > skill `judgment-day`, Round 1). Estado del juicio: `ESCALATED` — 1 CRITICAL confirmado,
 > 11 WARNING (real) suspect, 6 WARNING (theoretical), 3 SUGGESTION.

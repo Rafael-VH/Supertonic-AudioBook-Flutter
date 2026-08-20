@@ -1,5 +1,12 @@
 # Plan de mejora de interfaz
 
+> **📜 DOCUMENTO HISTÓRICO (2026-08).** Este plan fue implementado y el código
+> evolucionó después: las rutas que cita (`lib/presentation/screens/home_screen.dart`,
+> `settings_screen.dart`, etc.) corresponden a la estructura **pre-refactor**. Hoy
+> esas pantallas viven en `lib/features/<feature>/presentation/screens/` y el
+> dashboard es un shell con NavigationBar. No usar como referencia del estado actual:
+> ver `README.md` y `docs/es|en/` para la documentación vigente.
+
 > Consolidado de dos revisiones (UI Designer + UX Architect) validadas contra los
 > estándares mínimos de Flutter (`flutter-build-responsive-layout`, `flutter-fix-layout-issues`).
 > Solo plan — sin código.

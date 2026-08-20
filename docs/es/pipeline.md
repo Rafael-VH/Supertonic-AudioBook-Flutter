@@ -5,16 +5,18 @@ Cómo los archivos Markdown se convierten en audiolibros — el flujo completo d
 ## Resumen
 
 ```
-┌─────────────┐    ┌──────────────┐    ┌──────────────┐    ┌──────────────┐
-│  Leer .md   │ →  │   Limpiar    │ →  │  Segmentar   │ →  │  Sintetizar  │
-│  (dart:io)  │    │  (regex)     │    │  (puro)      │    │  (ONNX)      │
-└─────────────┘    └──────────────┘    └──────────────┘    └──────────────┘
-                                                                    │
-┌─────────────┐    ┌──────────────┐    ┌──────────────┐            │
-│  Publicar   │ ←  │  Convertir   │ ←  │  Exportar    │ ←──────────┘
-│  (rename)   │    │  (FFmpeg)    │    │  (WAV/MP3..) │
-└─────────────┘    └──────────────┘    └──────────────┘
+┌─────────────┐   ┌──────────┐   ┌───────────┐   ┌────────────┐
+│  Leer .md   │ → │  Limpiar │ → │ Segmentar │ → │ Sintetizar │
+│             │   │ (regex)  │   │  (puro)   │   │   (ONNX)   │
+└─────────────┘   └──────────┘   └───────────┘   └─────┬──────┘
+                                                       │
+┌──────────────────┐   ┌───────────────────┐   ┌──────▼───────┐
+│ Guardar (usuario)│ ← │ Audios pendientes │ ← │ Exportar WAV │
+│ rename atómico   │   │ (Audio Manager)   │   │ a _temp/     │
+└──────────────────┘   └───────────────────┘   └──────────────┘
 ```
+
+**Regla central**: la síntesis nunca escribe en la ruta final. Todo queda en `<carpeta_salida>/_temp/` hasta que el usuario guarda desde el Audio Manager.
 
 ## Etapas del Pipeline
 
@@ -23,8 +25,7 @@ Cómo los archivos Markdown se convierten en audiolibros — el flujo completo d
 **Caso de uso**: `RepositorioArchivos.leerArchivo()`
 
 - Lee el archivo como string UTF-8
-- Devuelve contenido Markdown crudo
-- Lanza excepción si no se encuentra archivo / error de permiso → `ResultadoProceso.error`
+- Error de lectura/permiso → `ResultadoProceso.error` (sin lanzar)
 
 ### 2. Limpiar Markdown
 
@@ -37,12 +38,7 @@ Elimina toda la sintaxis Markdown en orden:
 | 1 | `~~~.*?~~~` | Eliminar bloques de código |
 | 2 | `` ```.*?``` `` | Eliminar bloques de código con fence |
 | 3 | `^#{1,6}\s*` | Eliminar encabezados |
-| 4 | `\*{3}...\*{3}` | Eliminar negrita (`***`) |
-| 5 | `\*{2}...\*{2}` | Eliminar cursiva (`**`) |
-| 6 | `\*{1}...\*{1}` | Eliminar énfasis (`*`) |
-| 7 | `_{3}..._{3}` | Eliminar negrita (`___`) |
-| 8 | `_{2}..._{2}` | Eliminar cursiva (`__`) |
-| 9 | `_{1}..._{1}` | Eliminar énfasis (`_`) |
+| 4–9 | `\*{1-3}` / `_{1-3}` | Eliminar negrita/cursiva/énfasis |
 | 10 | `` `{1,3}...`{1,3} `` | Eliminar código inline |
 | 11 | `![alt](url)` | Eliminar imágenes (conservar texto alt) |
 | 12 | `[text](url)` | Eliminar links (conservar texto) |
@@ -70,9 +66,7 @@ Paso 3: Dividir oraciones oversized por palabras
 Paso 4: Dividir palabras oversized por caracteres (último recurso)
 ```
 
-**Constantes**:
-- `maxCharsPerSegment = 1500` — máximo de caracteres por fragmento de audio
-- `mergeThreshold = 200` — párrafos más cortos que este valor se fusionan con el siguiente
+**Constantes**: `maxCharsPerSegment = 1500` · `mergeThreshold = 200`
 
 **Manejo de abreviaturas**:
 ```
@@ -96,138 +90,88 @@ final wav = await motor.sintetizar(
 );
 ```
 
-**Tecnología**: Supertonic 3 via `flutter_onnxruntime`
-
 **Gestión de memoria**:
-- Fragmentos acumulados en memoria
+- Fragmentos acumulados en memoria (`List<Float32List>`)
 - Cuando `memoriaAcumulada > presupuesto` → volcar a disco via `wavAppend()`
-- Umbral móvil: 64 MB (previene OOM)
-- Umbral desktop: 500 MB
+- Presupuesto móvil: 64 MB · desktop: 500 MB (`presupuestoMemoria()`)
 
-**Entre fragmentos**: Se insertan `silenceSamples` (26460) ceros para pausas naturales.
+**Entre fragmentos**: se insertan `silenceSamples` (26460) ceros para pausas naturales.
 
-### 5. Exportar
+### 5. Exportar WAV Temporal
 
-**Caso de uso**: `ExportadorAudio` → `ExportadorAudioFfmpeg`
+**Destino**: `<carpeta_salida>/<stem>_libro/_temp/.tmp_<timestamp>_0_wav`
 
-Dos caminos según el estado de memoria:
+El caso de uso `ProcesarArchivo`:
 
-#### Camo A: Todo en memoria (archivos pequeños)
+1. Crea el subdirectorio `_temp/` junto a la ruta base destino
+2. Escribe el WAV de trabajo ahí (nunca en la ruta final)
+3. Convierte los formatos adicionales solicitados desde ese WAV (también a `_temp/`)
+4. Devuelve `ProcesarResultado` con `tempPath` apuntando al WAV generado
 
-```dart
-for (final formato in formatosUnicos) {
-  final temporal = _nuevoTemporal(dirSalida, formato, temporales);
-  await exportador.escribirAudio(fragmentos, temporal, formato);
-  salidas.add((temporal, '$rutaBase.$formato'));
-}
-```
+El caller (`HomeController`) es responsable del ciclo de vida del temp.
 
-#### Camino B: Volcado parcial (archivos grandes)
+### 6. Audios Pendientes (Audio Manager)
 
-```dart
-// Ya volcado a WAV, ahora convertir desde WAV
-await exportador.wavAppend(fragmentos, rutaWavTrabajo);
-for (final formato in formatosUnicos) {
-  if (formato == 'wav') {
-    salidas.add((rutaWavTrabajo, '$rutaBase.wav'));
-  } else {
-    final temporal = _nuevoTemporal(dirSalida, formato, temporales);
-    await exportador.convertirDesdeWav(rutaWavTrabajo, temporal, formato);
-    salidas.add((temporal, '$rutaBase.$formato'));
-  }
-}
-```
+Al completar un lote sin errores, `HomeController` acumula los `AudioPendiente` y navega a `/audio-manager`. Desde esa pantalla el usuario decide por cada audio:
 
-**Formatos soportados**:
+| Acción | Implementación |
+|--------|----------------|
+| **Guardar** | `GuardarAudio.ejecutar()`: mueve el temp al destino con `renameSync` (atómico). Si existe conflicto de nombre agrega sufijo `(N)` |
+| **Cancelar/descartar** | Elimina los WAVs temporales |
 
-| Formato | Método | Tecnología |
-|---------|--------|------------|
-| WAV | `escribirAudio()` | Dart nativo (`wav_io.dart`) |
-| MP3 | `convertirDesdeWav()` | FFmpeg |
-| FLAC | `convertirDesdeWav()` | FFmpeg |
-| OGG | `convertirDesdeWav()` | FFmpeg |
-
-### 6. Publicar
-
-**Acción**: Rename atómico de temporal → ruta final
-
-```dart
-File(origen).renameSync(destino);
-```
-
-**Orden** (WAV al final):
-1. Formatos no-WAV primero
-2. WAV al final — si falla un formato, el WAV previo se mantiene intacto
-
-**Semántica de cancelación**:
-- Al cancelar, solo se publica en destinos que no existían antes
-- Preserva audio completo de corridas anteriores
-- Nunca reemplaza un archivo completo con output truncado
-
-**Manejo de errores**:
-- `EACCES` (error 13) — archivo en uso, saltar
-- `ERROR_SHARING_VIOLATION` (error 32) — bloqueo de archivo Windows, saltar
-
-### 7. Limpieza
-
-Todos los archivos temporales se eliminan en el bloque `finally`:
-
-```dart
-finally {
-  for (final temporal in temporales) {
-    try { File(temporal).deleteSync(); } catch (_) {}
-  }
-}
-```
+**Limpieza de huérfanos**: al arrancar la app, `LimpiarTemporales` elimina WAVs de `_temp/` con más de 24 horas.
 
 ## Procesamiento por Lotes
 
-Al procesar múltiples archivos (pantalla Home):
+`HomeController.procesar()` orquesta el lote completo:
 
 ```
-for each archivo in seleccion:
-  1. ProcesarArchivo.procesar(archivo, ...)
-  2. Actualizar progreso (progresoActual / progresoTotal)
-  3. Registrar resultado (ok / omitido / error)
-  4. Continuar al siguiente archivo
+1. Persistir preferencias (voz, formatos, carpetas)
+2. Validar: formatos no vacío, hay archivos .md
+3. Pre-chequeo de memoria → MemoryWarningDialog si estima > 70 % de RAM
+4. Por cada archivo seleccionado:
+   - ProcesarArchivo.procesar(...) → WAV temporal
+   - Acumular AudioPendiente + entrada de historial (en memoria)
+5. Al terminar:
+   - Lote completo sin cancelación → persistir historial (cap 100 entradas)
+   - Cancelación → eliminar temps acumulados, NO persistir historial
+   - Éxito sin errores → push /audio-manager con los pendientes
 ```
 
-**Concurrencia**: De un solo hilo. El motor TTS no soporta síntesis concurrente.
+**Concurrencia**: de un solo hilo. El motor TTS no soporta síntesis concurrente.
 
-**Cancelación**:
-- Usuario toca "Cancelar" → establece `cancelar = true`
-- El segmento actual termina, luego el loop se rompe
-- Audio parcial se exporta via flujo normal de publicación
+**Cancelación**: el usuario toca "Cancelar" → `cancelar = true`; el segmento actual termina, el loop se rompe y los temps generados se eliminan.
 
 ## Vista Previa de Voz
 
-Síntesis rápida sin pipeline completo:
+Síntesis rápida sin pipeline completo, vía `VoicePreviewService` + `SintetizarMuestra`:
 
 ```dart
-final wav = await motor.sintetizar(
-  'Texto de muestra...',
-  steps: defaultTtsSteps,
-  speed: defaultSpeed,
+await service.reproducirMuestra(
+  voz: voz,
   lang: lang,
+  textoMuestra: textoMuestraIdiomas[lang] ?? t.muestra_texto,
 );
-await exportador.escribirAudio([wav], ruta, 'wav');
-await reproductor.reproducir(ruta);
 ```
+
+## Estimación con Benchmark
+
+Si hay un benchmark guardado (`benchmark.json`), al completar un lote se registra la estimación de tiempo calculada con `EstimarTiempo` a partir de los caracteres procesados.
 
 ## Resumen del Flujo de Datos
 
 ```
-Input:  Archivo .md (UTF-8)
-        ↓
-Clean:  Texto plano (sin sintaxis Markdown)
-        ↓
-Segment: List<String> (≤1500 chars cada uno)
-        ↓
+Input:      Archivo .md (UTF-8)
+            ↓
+Clean:      Texto plano (sin sintaxis Markdown)
+            ↓
+Segment:    List<String> (≤ 1500 chars cada uno)
+            ↓
 Synthesize: List<Float32List> (muestras de audio + silencio)
-        ↓
-Export: Archivos temporales (WAV, MP3, FLAC, OGG)
-        ↓
-Publish: Archivos finales (rename atómico)
-        ↓
-Cleanup: Eliminar todos los temporales
+            ↓
+Export:     WAV temporal en <salida>/_temp/
+            ↓
+Review:     Audio Manager (renombrar / elegir carpeta / guardar o descartar)
+            ↓
+Publish:    renameSync atómico → archivo final
 ```

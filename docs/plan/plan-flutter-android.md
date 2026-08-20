@@ -4,7 +4,7 @@
 > (Android, iOS, Windows, Linux). La app es **móvil-only** (Android + iOS):
 > se eliminaron las plataformas Windows/Linux y las dependencias desktop.
 > Se conserva como referencia histórica de la portabilidad del pipeline.
-> Ver `README.md` y `docs/plan-mejora-ui.md` para el estado actual.
+> Ver `README.md` y `docs/plan/plan-mejora-ui.md` para el estado actual.
 
 > **Documento de HANDOFF AUTOCONTENIDO.** Está diseñado para construir la app
 > **Flutter multiplataforma (Android, iOS, Windows, Linux)** **sin acceso al

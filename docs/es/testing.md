@@ -14,78 +14,56 @@ flutter analyze lib       # Análisis estático
 
 | Métrica | Valor |
 |---------|-------|
-| Tests totales | 228 |
-| Pasaron | 228 |
-| Omitidos | 4 (dependen de FFmpeg) |
-| Cobertura (change activo) | ≥ 94% |
+| Archivos de test | 45 |
+| Casos de test | 369 |
+| Skips | Tests de integración que requieren FFmpeg nativo |
 | Análisis | 0 warnings |
 
 ## Estructura de Tests
+
+Espeja `lib/` feature por feature:
 
 ```
 test/
 ├── core/
 │   ├── audio/
-│   │   └── wav_io_test.dart              # Escritura WAV PCM16
+│   │   └── wav_io_test.dart               # Escritura WAV PCM16
 │   └── utils/
 │       └── natural_sort_test.dart         # Ordenamiento natural
 │
-├── data/
-│   ├── modelo/
-│   │   └── modelo_manager_test.dart       # Descarga/verificación de modelo
-│   └── repositories/
-│       ├── exportador_audio_ffmpeg_test.dart  # Exportación FFmpeg
-│       ├── repositorio_archivos_test.dart     # Operaciones de archivos
-│       └── repositorio_preferencias_test.dart # Preferencias
-│
-├── domain/
-│   └── use_cases/
-│       ├── procesar_archivo_test.dart         # Procesar archivo (unitario)
-│       ├── procesar_archivo_integration_test.dart  # Procesar archivo (integración)
-│       ├── limpiar_markdown_test.dart         # Limpieza de Markdown
-│       ├── segmentar_texto_test.dart          # Segmentación de texto
-│       ├── sintetizar_muestra_test.dart       # Vista previa de voz
-│       ├── listar_audios_generados_test.dart  # Listado de audios
-│       └── formato_test.dart                  # Validación de formatos
+├── shared/
+│   ├── data/repositories/                 # Archivos, preferencias JSON
+│   └── domain/entities/                   # Entidades compartidas
 │
 ├── features/
-│   └── editor_metadata/
-│       ├── data/repositories/
-│       │   └── editor_metadata_id3_codec_test.dart  # Codec ID3
-│       ├── domain/
-│       │   ├── contracts/
-│       │   │   └── editor_metadata_test.dart         # Contrato EditorMetadata
-│       │   ├── entities/
-│       │   │   └── metadatos_mp3_test.dart           # Entidad MetadatosMp3
-│       │   └── use_cases/
-│       │       └── editar_metadata_mp3_test.dart     # Editar metadatos
-│       └── presentation/
-│           ├── controllers/
-│           │   └── metadata_editor_controller_test.dart  # Controller
-│           └── screens/
-│               └── metadata_editor_screen_test.dart      # UI
+│   ├── audio_manager/
+│   │   ├── domain/entities/               # AudioPendiente
+│   │   └── domain/use_cases/              # GuardarAudio, LimpiarTemporales
+│   ├── benchmark/
+│   │   ├── domain/{entities,use_cases}/   # BenchmarkResult, RunBenchmark, EstimarTiempo
+│   │   └── presentation/controllers/      # BenchmarkController
+│   ├── biblioteca/
+│   │   └── domain/use_cases/              # ListarAudiosGenerados
+│   ├── convert/
+│   │   ├── data/repositories/             # Exportador FFmpeg, motor TTS
+│   │   ├── domain/use_cases/              # ProcesarArchivo (unit + integración), etc.
+│   │   └── presentation/widgets/          # Registro, vista log
+│   ├── editor_metadata/
+│   │   ├── data/repositories/             # Codec ID3
+│   │   ├── domain/{contracts,entities,use_cases}/
+│   │   └── presentation/{controllers,screens}/
+│   └── modelo/
+│       └── data/repositories/             # ModeloManager (descarga/verificación)
 │
-└── presentation/
-    ├── controllers/
-    │   ├── home_controller_test.dart       # Estado de Home
-    │   ├── biblioteca_controller_test.dart # Estado de Biblioteca
-    │   ├── modelo_controller_test.dart     # Estado de pantalla Modelo
-    │   └── providers_test.dart             # Overrides de providers
-    │
-    ├── routing/
-    │   └── app_router_test.dart            # Navegación/redirects
-    │
-    ├── screens/
-    │   ├── convert_screen_test.dart        # UI de Convert
-    │   ├── home_movil_diag_test.dart       # Layout móvil de Convert
-    │   ├── settings_screen_test.dart       # UI de Settings
-    │   ├── dashboard_screen_test.dart      # UI de Dashboard
-    │   ├── modelo_screen_test.dart         # UI de pantalla Modelo
-    │   └── biblioteca/
-    │       └── biblioteca_screen_test.dart # UI de Biblioteca
-    │
-    └── theme/
-        └── paleta_test.dart                # Paleta de colores
+├── presentation/
+│   ├── controllers/                       # HomeController, BibliotecaController,
+│   │                                      # ModeloController, providers
+│   ├── routing/app_router_test.dart       # Navegación y redirects
+│   ├── screens/                           # Convert, Settings, Dashboard, Modelo,
+│   │   └── biblioteca/                    # Benchmark, AudioManager, Biblioteca
+│   └── theme/paleta_test.dart             # Paleta de colores
+│
+└── support/                               # Helpers de test
 ```
 
 ## Tipos de Tests
@@ -107,20 +85,13 @@ test('segmentarTexto respeta maxCharsPerSegment', () {
 
 ### Tests de Integración
 
-El test de integración de `ProcesarArchivo` verifica el pipeline completo:
+El test de integración de `ProcesarArchivo` verifica el pipeline completo hasta el WAV temporal:
 
 ```dart
-test('procesar genera WAV y MP3', () async {
-  final resultado = await useCase.procesar(
-    archivo,
-    rutaBase,
-    steps: 5,
-    speed: 1.0,
-    formatos: ['wav', 'mp3'],
-  );
-  expect(resultado, ResultadoProceso.ok);
-  expect(File('$rutaBase.wav').existsSync(), true);
-  expect(File('$rutaBase.mp3').existsSync(), true);
+test('procesar genera WAV temporal en _temp/', () async {
+  final resultado = await useCase.procesar(archivo, rutaBase, ...);
+  expect(resultado.estado, ResultadoProceso.ok);
+  expect(File(resultado.tempPath!).existsSync(), true);
 });
 ```
 
@@ -146,9 +117,8 @@ Verifican reglas de dependencia:
 
 ```dart
 test('domain no importa data', () {
-  // Verificar que no hay imports de data/ en archivos de domain/
-  // dentro de cada feature (features/X/domain/ no importa features/X/data/)
-  // ni shared/domain/ no importa shared/data/
+  // features/X/domain/ no importa features/X/data/
+  // shared/domain/ no importa shared/data/
 });
 ```
 
@@ -188,37 +158,27 @@ group('ProcesarArchivo', () {
 });
 ```
 
-### Objetivos de Cobertura
+## Tests con FFmpeg
 
-| Capa | Objetivo |
-|------|----------|
-| Casos de uso de dominio | ≥ 95% |
-| Controllers | ≥ 90% |
-| Pantallas | ≥ 85% |
-| General | ≥ 90% |
-
-## Tests Omitidos
-
-4 tests omitidos por dependencia de FFmpeg:
+Algunos tests de exportación requieren el binario nativo de `ffmpeg_kit` y se marcan con skip:
 
 ```dart
-// Estos tests requieren el binario nativo de ffmpeg_kit
 skip: 'Requiere binario nativo de FFmpeg',
 ```
 
-Son tests de nivel de integración que solo pueden ejecutarse en dispositivos reales con FFmpeg instalado.
+Son tests de nivel de integración que solo pueden ejecutarse en dispositivos reales.
 
 ## Ejecutar Tests Específicos
 
 ```bash
-# Ejecutar un solo archivo de test
-flutter test test/domain/use_cases/limpiar_markdown_test.dart
+# Un solo archivo
+flutter test test/features/convert/domain/use_cases/limpiar_markdown_test.dart
 
-# Ejecutar un test específico
+# Un test específico
 flutter test --name "limpiarMarkdown elimina encabezados"
 
-# Ejecutar con cobertura para archivos específicos
-flutter test --coverage test/domain/
+# Con cobertura
+flutter test --coverage test/features/
 ```
 
 ## Integración CI

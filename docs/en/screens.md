@@ -1,33 +1,33 @@
 # Screens
 
-All 8 screens in the application, with responsibilities, state, and navigation.
+The 11 screens of the application, with responsibilities, state and navigation.
 
 ## Navigation Flow
 
 ```
 Splash
   └─→ Onboarding (first run)
-       └─→ Modelo (download model)
-            └─→ Dashboard (main hub)
-                 ├─→ Convert (batch conversion)
-                 │    └─→ Settings
-                 ├─→ Biblioteca (listen to books)
-                 └─→ Settings
+       └─→ Dashboard (NavigationBar shell)
+            ├─ Home tab (function hub)
+            │    ├─→ Convert (/home) ─→ Audio Manager (pending audios)
+            │    └─→ Metadata editor
+            ├─ Library tab (audiobooks)
+            └─ Settings tab
+                 └─→ Benchmark
 ```
 
-## Screens
+---
 
 ### Splash (`/splash`)
 
 **File**: `lib/features/splash/presentation/screens/splash_screen.dart`
 
-Initial loading screen shown while the app initializes.
+Initial loading screen. Shows the brand for a minimum of 1.2 s and decides the destination:
 
-| State | Display |
-|-------|---------|
-| Default | Centered logo + app name |
-
-**Navigation**: Auto-navigates to onboarding or dashboard based on first-run detection.
+| Condition | Destination |
+|-----------|-------------|
+| First run (`onboardingVisto == false`) | `/onboarding` |
+| Subsequent runs | `/dashboard` |
 
 ---
 
@@ -35,7 +35,7 @@ Initial loading screen shown while the app initializes.
 
 **File**: `lib/features/onboarding/presentation/screens/onboarding_screen.dart`
 
-Interactive 5-step guide for first-time users.
+Interactive 5-step guide for new users.
 
 | Step | Content |
 |------|---------|
@@ -43,12 +43,12 @@ Interactive 5-step guide for first-time users.
 | 2 | Select Markdown files |
 | 3 | Choose voice |
 | 4 | Process audio |
-| 5 | **Select output folder** (new) |
+| 5 | Select output folder |
 
 **Key behaviors**:
-- Step 5 uses `FilePicker.getDirectoryPath()` to set output folder
-- Completing onboarding marks first-run as done
-- Skippable via "Skip" button (goes to dashboard)
+- Step 5 uses `FilePicker.getDirectoryPath()` and persists `carpetaSalida`
+- Finishing sets `onboardingVisto = true` in `preferencias.json` and navigates to the dashboard
+- Can be skipped (also marks it as seen)
 
 ---
 
@@ -56,23 +56,29 @@ Interactive 5-step guide for first-time users.
 
 **File**: `lib/features/dashboard/presentation/screens/dashboard_screen.dart`
 
-Main hub after onboarding. Shows welcome hero and function cards.
+Main shell with a 3-destination `NavigationBar`. Content switches via `IndexedStack` (preserves each tab's state):
 
-| Card | Action | Target |
-|------|--------|--------|
-| Convert files | Batch process `.md` folder | `/home` |
-| Library | Listen to generated audiobooks | `/biblioteca` |
-| Metadata editor | Edit ID3 metadata of MP3 files | `/editor-metadata` |
+| Tab | Content | Feature |
+|-----|---------|---------|
+| Home | `HomeScreen` — function hub | home |
+| Library | `BibliotecaBody` | biblioteca |
+| Settings | `SettingsBody` | settings |
 
-**Layout**:
-- **Mobile** (< 600px): Single column stack
-- **Tablet** (≥ 600px): 2-column grid
+---
 
-**Features**:
-- Hero section with app description (DASH-8)
-- Model status card (isolated, DASH-7)
-- Settings gear in AppBar
-- Cards use global `cardTheme` with `PaletaExt` accents (DASH-3)
+### Home — Hub (`dashboard tab 0`)
+
+**File**: `lib/features/home/presentation/screens/home_screen.dart`
+
+Welcome hub with function cards:
+
+| Card | Action | Destination |
+|------|--------|-------------|
+| Process files | Bottom sheet: choose **folder** or loose **`.md` files** | `/home` (Convert) |
+| Metadata editor | Open ID3 editor | `/editor-metadata` |
+| Voice editor | *Coming soon* (disabled) | — |
+
+When folder or files are chosen, the hub pre-configures the `HomeController` (`setCarpetaIn` / `setModo`) before navigating to Convert.
 
 ---
 
@@ -80,115 +86,107 @@ Main hub after onboarding. Shows welcome hero and function cards.
 
 **File**: `lib/features/convert/presentation/screens/convert_screen.dart`
 
-Batch processing screen — the core of the app.
+Batch processing screen — the heart of the app.
 
-**Controller**: `HomeController` → `HomeEstado` (in `lib/features/convert/presentation/controllers/`)
+**Controller**: `HomeController` → `HomeEstado`
 
 #### State (`HomeEstado`)
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `carpetaIn` | `String` | Input folder path |
-| `carpetaOut` | `String` | Output folder path |
-| `archivos` | `List<Archivo>` | Found `.md` files |
-| `seleccion` | `Set<String>` | Marked file paths (empty = all) |
-| `voz` | `String` | Selected voice |
-| `steps` | `int` | TTS steps (5–12) |
-| `speed` | `double` | Voice speed (0.7–2.0) |
-| `langVoz` | `String` | Voice language |
-| `formatos` | `Set<String>` | Output formats (wav/mp3/flac/ogg) |
-| `ejecutando` | `bool` | Processing in progress |
-| `progresoActual` | `int` | Current segment |
-| `progresoTotal` | `int` | Total segments |
-| `lineasLog` | `List<String>` | Processing log (max 2500 lines) |
+| `carpetaIn` / `carpetaOut` | `String` | Input/output folders |
+| `archivos` | `List<Archivo>` | Loaded `.md` files |
+| `seleccion` | `Set<String>` | Checked paths (empty = all) |
+| `modoSeleccion` | `SelectionMode` | `carpeta` or `archivos` |
+| `voiceConfig` | `VoiceConfig` | Voice, steps (5–12), speed (0.7–2.0), language |
+| `formatos` | `Set<String>` | Output formats (default `['mp3']`) |
+| `ejecutando` / `cancelar` | `bool` | Processing state |
+| `progresoActual/Total` | `int` | Per-segment progress |
+| `lineasLog` | `List<String>` | Log (truncated to 2500 lines) |
+| `pendientes` | `List<AudioPendiente>` | Temp WAVs generated after processing |
 
-#### Sections
+#### Responsive layout
 
-1. **Folder selection**: Input/output folder pickers
-2. **File list**: `.md` files with checkboxes, select all/none/refresh
-3. **Synthesis options**: Voice, steps, speed, language, output formats
-4. **Voice preview**: "Listen" button to test voice
-5. **Processing**: Progress bar, log, process/cancel buttons
+- **Mobile** (< 900 px): stacked accordion (`CuerpoApilado`) + persistent bottom action bar
+- **Tablet** (≥ 900 px): side-by-side panels (`CuerpoLadoAlado`)
 
-**Responsive layout**:
-- **Mobile** (< 900px): Stacked accordion (one section open at a time)
-  - Folder sections open by default
-  - Animated transitions (fade + slide, 250ms)
-- **Tablet** (≥ 900px): Two-column layout (`Row` 50/50)
+#### Mobile accordion
+
+| Folder mode | File mode |
+|--------------|---------------|
+| 1. Folders | 1. Selected files |
+| 2. Files found | 2. Synthesis options |
+| 3. Synthesis options | 3. Log |
+| 4. Log | |
+
+One section open at a time; Folders expanded by default; fade+slide transitions (250 ms).
 
 #### Key behaviors
 
-- Persists preferences before processing (`_guardarPreferencias`)
-- Throttles log updates: `paso = max(1, total ~/ 20)`
-- Cancels gracefully: exports partial audio, preserves existing files
-- Blocks concurrent runs (motor TTS is single-threaded)
+- Persists preferences before processing
+- Memory pre-check: if the batch estimates > 70 % of available RAM, shows `MemoryWarningDialog`
+- Log throttling: `paso = max(1, total ~/ 20)`
+- Cancellation: exports what was generated so far, deletes temps, does not persist history
+- Blocks concurrent runs (the TTS engine is single-threaded)
+- On success without errors, navigates to `/audio-manager` with the pending audios
 
 ---
 
-### Modelo (`/modelo`)
+### Model (`/modelo`)
 
 **File**: `lib/features/modelo/presentation/screens/modelo_screen.dart`
 
-Model download and verification screen.
+Download and verification of the Supertonic 3 model (~400 MB).
 
-**Controller**: `ModeloController` → `ModeloEstado` (in `lib/features/modelo/presentation/controllers/`)
+**Controller**: `ModeloController` → `ModeloEstado`
 
 | State | Display |
-|-------|---------|
+|--------|---------------|
 | Verifying | Spinner while checking disk |
-| Downloading | Progress bar + MB + current file + Cancel button |
-| Error | Message + Retry button |
-| Pending | Size notice + Download button |
+| Downloading | Progress bar + MB + current file + Cancel |
+| Error | Message + Retry |
+| Pending | Size notice + Download model button |
 
-**Key behaviors**:
-- Resumable downloads
-- SHA-256 verification in Isolate
-- Model stored in `<app_support>/modelo/`
+**Key behaviors**: resumable downloads, SHA-256 verification in an Isolate, storage in `<app_support>/modelo/`.
 
 ---
 
-### Settings (`/settings`)
-
-**File**: `lib/features/settings/presentation/screens/settings_screen.dart`
-
-App preferences screen.
-
-**Controller**: `SettingsController` → `SettingsEstado` (in `lib/features/settings/presentation/controllers/`)
-
-| Setting | Widget | Options |
-|---------|--------|---------|
-| Theme | `SegmentedButton` | Light / Dark |
-| Style | `SegmentedButton` | 3 visual variants |
-| Language | `SegmentedButton` | Español / English |
-| Output folder | Browse button | File picker |
-
-**Key behaviors**:
-- Changes persist immediately
-- Theme/style changes apply instantly via `AppTheme`
-- Output folder affects Convert default path
-
----
-
-### Biblioteca (`/biblioteca`)
+### Library (`/biblioteca`, tab 1)
 
 **File**: `lib/features/biblioteca/presentation/screens/biblioteca_screen.dart`
 
-Listen to generated audiobooks.
+Lists generated audiobooks from the output folder.
 
-**Controller**: `BibliotecaController` → `BibliotecaEstado` (in `lib/features/biblioteca/presentation/controllers/`)
+**Controller**: `BibliotecaController` → `BibliotecaEstado`
 
 | Feature | Description |
-|---------|-------------|
-| Book grouping | Audios grouped by stem (filename without extension) |
+|----------------|-------------|
+| Grouping | Audios grouped by stem (filename without extension) |
 | Format priority | `mp3 > ogg > flac > wav` (BIB-2) |
-| Play/pause | Per-tile controls via `ReproductorAudio` contract |
+| Play/pause | Per tile, via the `ReproductorAudio` contract (never `just_audio` directly, BIB-6) |
+| Refresh | AppBar button to re-scan the folder |
 | Empty state | Message + CTA to go to conversion |
-| Error state | Message + retry button (BIB-5) |
+| Error state | Message + retry (BIB-5) |
 
-**Key behaviors**:
-- Reproduces only via `ReproductorAudio` contract (never `just_audio` directly, BIB-6)
-- Cards inherit global `cardTheme` (DASH-3)
-- Error snackbar uses palette error color
+---
+
+### Settings (`/settings`, tab 2)
+
+**File**: `lib/features/settings/presentation/screens/settings_screen.dart`
+
+App preferences, organized in cards:
+
+| Section | Widget | Options |
+|---------|--------|----------|
+| Model status | `CardEstadoModelo` | Shows whether the model is ready + access to `/modelo` |
+| Theme | `SegmentedButton` | Light / Dark |
+| Style | `SegmentedButton` | Material / Neumorphism / Skeuomorphism |
+| Language | `SegmentedButton` | Español / English |
+| Output folder | Browse button | Folder picker |
+| Benchmark | Card with avg chars/sec | Button → `/benchmark` |
+| About | `AcercaDeSection` | Version, license, model credits |
+
+Changes are persisted and applied instantly.
 
 ---
 
@@ -196,36 +194,63 @@ Listen to generated audiobooks.
 
 **File**: `lib/features/editor_metadata/presentation/screens/metadata_editor_screen.dart`
 
-ID3 metadata editor for MP3 files.
+ID3 tag editor for MP3 files.
 
-**Controller**: `MetadataEditorController` (in `lib/features/editor_metadata/presentation/controllers/`)
+**Controller**: `MetadataEditorController`
 
 | Feature | Description |
-|---------|-------------|
-| File selection | Opens system file picker for MP3 selection |
-| Editable fields | Title, artist, album, year, genre, track number |
-| Preview | Shows current file metadata |
-| Save | Applies changes via `EditorMetadata` contract |
+|----------------|-------------|
+| File selection | System file picker (MP3) |
+| Editable fields | Title, artist, album, year, genre, track, disc, comment, cover art |
+| Genre | ID3v1 list (`id3v1_genres.dart`) |
+| Save | Via the `EditorMetadata` contract (`EditorMetadataId3Codec`) |
+
+---
+
+### Benchmark (`/benchmark`)
+
+**File**: `lib/features/benchmark/presentation/screens/benchmark_screen.dart`
+
+Measures TTS engine performance on the device.
+
+**Controller**: `BenchmarkController` → `BenchmarkEstado`
+
+| Component | Description |
+|------------|-------------|
+| Info card | Explains the columns: Size, Time, Chars/sec |
+| Fixed table | 4 columns × 6 rows (2500–15000 characters) |
+| Execution | Play button per row; spinner while running; rest locked |
+| Time format | `X h - Y min - Z seg` |
+| History | Real conversions: characters, segments, duration |
+
+Requires the model to be ready; otherwise redirects to `/modelo`.
+
+---
+
+### Audio Manager (`/audio-manager`)
+
+**File**: `lib/features/audio_manager/presentation/screens/audio_manager_screen.dart`
+
+Review of freshly generated audios before publishing them.
+
+**Controller**: `AudioManagerController` → `AudioManagerEstado`
+
+Receives the list of `AudioPendiente` as a go_router `extra` (pushed from Convert).
+
+| Action | Behavior |
+|--------|----------------|
+| Rename | Edit name before saving |
+| Choose folder | Per-audio destination picker |
+| Save (single or all) | Moves the temp WAV to the destination (`renameSync`); `(N)` suffix on name conflict |
+| Cancel/discard | Deletes the temp WAVs |
+
+WAVs live in `<output_folder>/_temp/`. At app startup, `LimpiarTemporales` deletes temps older than 24 h.
 
 ---
 
 ## Responsive Layout
 
-### Mobile (< 900px)
-
-- **Convert**: Stacked accordion (one section open at a time)
-  - Folder sections open by default
-  - Animated transitions (fade + slide, 250ms)
-- **Dashboard**: Single column cards
-
-### Tablet (≥ 900px)
-
-- **Convert**: Two-column layout (`Row` 50/50)
-- **Dashboard**: 2-column grid (≥ 600px)
-
-### Breakpoints
-
 | Screen | Mobile | Tablet |
-|--------|--------|--------|
-| Convert | `< 900px` | `≥ 900px` |
-| Dashboard | `< 600px` | `≥ 600px` |
+|----------|-------|--------|
+| Convert | `< 900 px`: accordion + bottom bar | `≥ 900 px`: side-by-side panels |
+| Dashboard | NavigationBar (all sizes) | — |

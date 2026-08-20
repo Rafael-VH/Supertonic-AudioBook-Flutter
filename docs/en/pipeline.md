@@ -1,20 +1,22 @@
 # Audio Processing Pipeline
 
-How Markdown files become audiobooks — the complete transformation flow.
+How Markdown files become audiobooks — the full transformation flow.
 
 ## Overview
 
 ```
-┌─────────────┐    ┌──────────────┐    ┌──────────────┐    ┌──────────────┐
-│  Read .md   │ →  │   Clean      │ →  │  Segment     │ →  │  Synthesize  │
-│  (dart:io)  │    │  (regex)     │    │  (pure)      │    │  (ONNX)      │
-└─────────────┘    └──────────────┘    └──────────────┘    └──────────────┘
-                                                                    │
-┌─────────────┐    ┌──────────────┐    ┌──────────────┐            │
-│  Publish    │ ←  │  Convert     │ ←  │  Export      │ ←──────────┘
-│  (rename)   │    │  (FFmpeg)    │    │  (WAV/MP3..) │
-└─────────────┘    └──────────────┘    └──────────────┘
+┌─────────────┐   ┌──────────┐   ┌───────────┐   ┌────────────┐
+│  Read .md   │ → │  Clean   │ → │ Segment   │ → │ Synthesize │
+│             │   │ (regex)  │   │  (pure)   │   │   (ONNX)   │
+└─────────────┘   └──────────┘   └───────────┘   └─────┬──────┘
+                                                       │
+┌──────────────────┐   ┌───────────────────┐   ┌──────▼───────┐
+│ Save (user)      │ ← │ Pending audios    │ ← │ Export WAV   │
+│ atomic rename    │   │ (Audio Manager)   │   │ to _temp/    │
+└──────────────────┘   └───────────────────┘   └──────────────┘
 ```
+
+**Core rule**: synthesis never writes to the final path. Everything stays in `<output_folder>/_temp/` until the user saves from the Audio Manager.
 
 ## Pipeline Stages
 
@@ -22,9 +24,8 @@ How Markdown files become audiobooks — the complete transformation flow.
 
 **Use case**: `RepositorioArchivos.leerArchivo()`
 
-- Reads file as UTF-8 string
-- Returns raw Markdown content
-- Throws on file not found / permission error → `ResultadoProceso.error`
+- Reads the file as a UTF-8 string
+- Read/permission error → `ResultadoProceso.error` (no throw)
 
 ### 2. Clean Markdown
 
@@ -33,16 +34,11 @@ How Markdown files become audiobooks — the complete transformation flow.
 Strips all Markdown syntax in order:
 
 | Step | Regex Pattern | Action |
-|------|--------------|--------|
+|------|-------------|--------|
 | 1 | `~~~.*?~~~` | Remove code blocks |
 | 2 | `` ```.*?``` `` | Remove fenced code blocks |
 | 3 | `^#{1,6}\s*` | Remove headings |
-| 4 | `\*{3}...\*{3}` | Remove bold (`***`) |
-| 5 | `\*{2}...\*{2}` | Remove italic (`**`) |
-| 6 | `\*{1}...\*{1}` | Remove emphasis (`*`) |
-| 7 | `_{3}..._{3}` | Remove bold (`___`) |
-| 8 | `_{2}..._{2}` | Remove italic (`__`) |
-| 9 | `_{1}..._{1}` | Remove emphasis (`_`) |
+| 4–9 | `\*{1-3}` / `_{1-3}` | Remove bold/italic/emphasis |
 | 10 | `` `{1,3}...`{1,3} `` | Remove inline code |
 | 11 | `![alt](url)` | Remove images (keep alt text) |
 | 12 | `[text](url)` | Remove links (keep text) |
@@ -50,18 +46,18 @@ Strips all Markdown syntax in order:
 | 14 | `^-{3,}$` | Remove horizontal rules |
 | 15 | `^[-*+]\s+` | Remove unordered list markers |
 | 16 | `^\d{1,3}[.)]\s+` | Remove ordered list markers |
-| 17 | `\n{3,}` | Collapse multiple newlines |
+| 17 | `\n{3,}` | Collapse multiple line breaks |
 
 **Key decisions**:
-- Abbreviations protected (Dr., Sr., etc.) — won't split on these
-- Anchored patterns prevent false positives (e.g. `2 * 3 * 4` stays as-is)
+- Protected abbreviations (Dr., Mr., etc.) — not split at these points
+- Anchored patterns prevent false positives (e.g. `2 * 3 * 4` is preserved)
 - Empty result after cleaning → `ResultadoProceso.omitido`
 
 ### 3. Segment Text
 
 **Use case**: `segmentarTexto()` (pure function)
 
-Splits clean text into TTS-ready chunks:
+Splits the clean text into TTS-ready chunks:
 
 ```
 Step 1: Merge short paragraphs (< 200 chars) into buffer
@@ -70,9 +66,7 @@ Step 3: Split oversized sentences by words
 Step 4: Split oversized words by characters (last resort)
 ```
 
-**Constants**:
-- `maxCharsPerSegment = 1500` — max characters per audio fragment
-- `mergeThreshold = 200` — paragraphs shorter than this merge with next
+**Constants**: `maxCharsPerSegment = 1500` · `mergeThreshold = 200`
 
 **Abbreviation handling**:
 ```
@@ -85,149 +79,99 @@ Dr. García                  (restore)
 
 **Use case**: `MotorTts.sintetizar()` → `MotorTtsSupertonic`
 
-Converts text segments to Float32 audio samples:
+Converts text segments into Float32 audio samples:
 
 ```dart
 final wav = await motor.sintetizar(
   texto,
-  steps: steps,      // 5–12, higher = better quality
+  steps: steps,      // 5–12, more = better quality
   speed: speed,      // 0.7–2.0
   lang: lang,        // 'es', 'en', etc.
 );
 ```
 
-**Technology**: Supertonic 3 via `flutter_onnxruntime`
-
 **Memory management**:
-- Fragments accumulated in memory
+- Fragments accumulated in memory (`List<Float32List>`)
 - When `memoriaAcumulada > presupuesto` → flush to disk via `wavAppend()`
-- Mobile threshold: 64 MB (prevents OOM)
-- Desktop threshold: 500 MB
+- Mobile budget: 64 MB · desktop: 500 MB (`presupuestoMemoria()`)
 
-**Between fragments**: Insert `silenceSamples` (26460) zeros for natural pauses.
+**Between fragments**: `silenceSamples` (26460) zeros are inserted for natural pauses.
 
-### 5. Export
+### 5. Export Temp WAV
 
-**Use case**: `ExportadorAudio` → `ExportadorAudioFfmpeg`
+**Destination**: `<output_folder>/<stem>_book/_temp/.tmp_<timestamp>_0_wav`
 
-Two paths depending on memory state:
+The `ProcesarArchivo` use case:
 
-#### Path A: All in memory (small files)
+1. Creates the `_temp/` subdirectory next to the destination base path
+2. Writes the working WAV there (never to the final path)
+3. Converts any additional requested formats from that WAV (also into `_temp/`)
+4. Returns `ProcesarResultado` with `tempPath` pointing to the generated WAV
 
-```dart
-for (final formato in formatosUnicos) {
-  final temporal = _nuevoTemporal(dirSalida, formato, temporales);
-  await exportador.escribirAudio(fragmentos, temporal, formato);
-  salidas.add((temporal, '$rutaBase.$formato'));
-}
-```
+The caller (`HomeController`) owns the temp file lifecycle.
 
-#### Path B: Partial flush (large files)
+### 6. Pending Audios (Audio Manager)
 
-```dart
-// Already flushed to WAV, now convert from WAV
-await exportador.wavAppend(fragmentos, rutaWavTrabajo);
-for (final formato in formatosUnicos) {
-  if (formato == 'wav') {
-    salidas.add((rutaWavTrabajo, '$rutaBase.wav'));
-  } else {
-    final temporal = _nuevoTemporal(dirSalida, formato, temporales);
-    await exportador.convertirDesdeWav(rutaWavTrabajo, temporal, formato);
-    salidas.add((temporal, '$rutaBase.$formato'));
-  }
-}
-```
+After a batch completes without errors, `HomeController` accumulates the `AudioPendiente` list and navigates to `/audio-manager`. From that screen the user decides per audio:
 
-**Format support**:
+| Action | Implementation |
+|--------|----------------|
+| **Save** | `GuardarAudio.ejecutar()`: moves the temp to the destination with `renameSync` (atomic). On name conflict adds a `(N)` suffix |
+| **Cancel/discard** | Deletes the temp WAVs |
 
-| Format | Method | Technology |
-|--------|--------|------------|
-| WAV | `escribirAudio()` | Dart native (`wav_io.dart`) |
-| MP3 | `convertirDesdeWav()` | FFmpeg |
-| FLAC | `convertirDesdeWav()` | FFmpeg |
-| OGG | `convertirDesdeWav()` | FFmpeg |
-
-### 6. Publish
-
-**Action**: Atomic rename from temp → final path
-
-```dart
-File(origen).renameSync(destino);
-```
-
-**Ordering** (WAV last):
-1. Non-WAV formats first
-2. WAV last — if a format fails, previous WAV stays intact
-
-**Cancel semantics**:
-- On cancel, only publish to destinations that didn't exist before
-- Preserves complete audio from previous runs
-- Never replaces a complete file with truncated output
-
-**Error handling**:
-- `EACCES` (error 13) — file in use, skip
-- `ERROR_SHARING_VIOLATION` (error 32) — Windows file lock, skip
-
-### 7. Cleanup
-
-All temporary files are deleted in `finally` block:
-
-```dart
-finally {
-  for (final temporal in temporales) {
-    try { File(temporal).deleteSync(); } catch (_) {}
-  }
-}
-```
+**Orphan cleanup**: at app startup, `LimpiarTemporales` deletes WAVs in `_temp/` older than 24 hours.
 
 ## Batch Processing
 
-When processing multiple files (Home screen):
+`HomeController.procesar()` orchestrates the whole batch:
 
 ```
-for each archivo in seleccion:
-  1. ProcesarArchivo.procesar(archivo, ...)
-  2. Update progress (progresoActual / progresoTotal)
-  3. Log result (ok / omitido / error)
-  4. Continue to next file
+1. Persist preferences (voice, formats, folders)
+2. Validate: non-empty formats, .md files present
+3. Memory pre-check → MemoryWarningDialog if estimated > 70 % RAM
+4. For each selected file:
+   - ProcesarArchivo.procesar(...) → temp WAV
+   - Accumulate AudioPendiente + history entry (in memory)
+5. At the end:
+   - Batch completed without cancellation → persist history (cap 100 entries)
+   - Cancellation → delete accumulated temps, do NOT persist history
+   - Success without errors → push /audio-manager with pendings
 ```
 
-**Concurrency**: Single-threaded. Motor TTS does not support concurrent synthesis.
+**Concurrency**: single-threaded. The TTS engine does not support concurrent synthesis.
 
-**Cancellation**:
-- User taps "Cancel" → sets `cancelar = true`
-- Current segment finishes, then loop breaks
-- Partial audio exported via normal publish flow
+**Cancellation**: user taps "Cancel" → `cancelar = true`; the current segment finishes, the loop breaks and generated temps are deleted.
 
 ## Voice Preview
 
-Quick synthesis without full pipeline:
+Fast synthesis without the full pipeline, via `VoicePreviewService` + `SintetizarMuestra`:
 
 ```dart
-final wav = await motor.sintetizar(
-  'Texto de muestra...',
-  steps: defaultTtsSteps,
-  speed: defaultSpeed,
+await service.reproducirMuestra(
+  voz: voz,
   lang: lang,
+  textoMuestra: textoMuestraIdiomas[lang] ?? t.muestra_texto,
 );
-await exportador.escribirAudio([wav], ruta, 'wav');
-await reproductor.reproducir(ruta);
 ```
+
+## Benchmark Estimation
+
+If benchmark data exists (`benchmark.json`), after completing a batch the estimated time — computed with `EstimarTiempo` from processed characters — is logged.
 
 ## Data Flow Summary
 
 ```
-Input:  .md file (UTF-8)
-        ↓
-Clean:  Plain text (no Markdown syntax)
-        ↓
-Segment: List<String> (≤1500 chars each)
-        ↓
+Input:      .md file (UTF-8)
+            ↓
+Clean:      Plain text (no Markdown syntax)
+            ↓
+Segment:    List<String> (≤ 1500 chars each)
+            ↓
 Synthesize: List<Float32List> (audio samples + silence)
-        ↓
-Export: Temp files (WAV, MP3, FLAC, OGG)
-        ↓
-Publish: Final files (atomic rename)
-        ↓
-Cleanup: Delete all temporaries
+            ↓
+Export:     Temp WAV in <output>/_temp/
+            ↓
+Review:     Audio Manager (rename / choose folder / save or discard)
+            ↓
+Publish:    Atomic renameSync → final file
 ```
