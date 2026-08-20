@@ -472,7 +472,9 @@ class HomeController extends Notifier<HomeEstado> {
 
       _appendLog('=' * 40);
       _appendLog(t.log_config_titulo);
-      _appendLog(t.log_config_voz(voz, steps, '${speed.toStringAsFixed(2)}x'));
+      _appendLog(t.log_config_voz(voz));
+      _appendLog(t.log_config_pasos(steps));
+      _appendLog(t.log_config_velocidad('${speed.toStringAsFixed(2)}x'));
       _appendLog(t.log_config_lang(lang));
       _appendLog(t.log_config_formatos(
           formatos.map((f) => f.toUpperCase()).join(', ')));

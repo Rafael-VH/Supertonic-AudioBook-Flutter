@@ -515,8 +515,20 @@ abstract class AppLocalizations {
   /// No description provided for @log_config_voz.
   ///
   /// In en, this message translates to:
-  /// **'    Voice: {voz}   Steps: {pasos}   Speed: {vel}'**
-  String log_config_voz(String voz, int pasos, String vel);
+  /// **'    Voice: {voz}'**
+  String log_config_voz(String voz);
+
+  /// No description provided for @log_config_pasos.
+  ///
+  /// In en, this message translates to:
+  /// **'    Steps: {pasos}'**
+  String log_config_pasos(int pasos);
+
+  /// No description provided for @log_config_velocidad.
+  ///
+  /// In en, this message translates to:
+  /// **'    Speed: {vel}'**
+  String log_config_velocidad(String vel);
 
   /// No description provided for @log_config_lang.
   ///

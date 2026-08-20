@@ -242,8 +242,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get log_config_titulo => '  CONFIGURATION';
 
   @override
-  String log_config_voz(String voz, int pasos, String vel) {
-    return '    Voice: $voz   Steps: $pasos   Speed: $vel';
+  String log_config_voz(String voz) {
+    return '    Voice: $voz';
+  }
+
+  @override
+  String log_config_pasos(int pasos) {
+    return '    Steps: $pasos';
+  }
+
+  @override
+  String log_config_velocidad(String vel) {
+    return '    Speed: $vel';
   }
 
   @override

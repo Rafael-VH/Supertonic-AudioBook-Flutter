@@ -131,11 +131,21 @@
   "log_sin_md": "Could not start: the input folder has no .md files.",
   "log_cancelar": "■ Cancellation requested: what was generated so far will be exported.",
   "log_config_titulo": "  CONFIGURATION",
-  "log_config_voz": "    Voice: {voz}   Steps: {pasos}   Speed: {vel}",
+  "log_config_voz": "    Voice: {voz}",
   "@log_config_voz": {
     "placeholders": {
-      "voz": {"type": "String"},
-      "pasos": {"type": "int"},
+      "voz": {"type": "String"}
+    }
+  },
+  "log_config_pasos": "    Steps: {pasos}",
+  "@log_config_pasos": {
+    "placeholders": {
+      "pasos": {"type": "int"}
+    }
+  },
+  "log_config_velocidad": "    Speed: {vel}",
+  "@log_config_velocidad": {
+    "placeholders": {
       "vel": {"type": "String"}
     }
   },

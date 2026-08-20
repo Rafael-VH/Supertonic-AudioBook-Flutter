@@ -131,11 +131,21 @@
   "log_sin_md": "No se pudo iniciar: la carpeta de entrada no tiene archivos .md.",
   "log_cancelar": "■ Cancelación solicitada: se exporta lo generado hasta el momento.",
   "log_config_titulo": "  CONFIGURACIÓN",
-  "log_config_voz": "    Voz: {voz}   Pasos: {pasos}   Velocidad: {vel}",
+  "log_config_voz": "    Voz: {voz}",
   "@log_config_voz": {
     "placeholders": {
-      "voz": {"type": "String"},
-      "pasos": {"type": "int"},
+      "voz": {"type": "String"}
+    }
+  },
+  "log_config_pasos": "    Pasos: {pasos}",
+  "@log_config_pasos": {
+    "placeholders": {
+      "pasos": {"type": "int"}
+    }
+  },
+  "log_config_velocidad": "    Velocidad: {vel}",
+  "@log_config_velocidad": {
+    "placeholders": {
       "vel": {"type": "String"}
     }
   },
