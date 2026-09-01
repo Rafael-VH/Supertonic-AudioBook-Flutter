@@ -3,13 +3,16 @@ import 'dart:io';
 import 'dart:math' as math;
 import 'dart:typed_data';
 
+import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter_onnxruntime/flutter_onnxruntime.dart';
 import 'package:logger/logger.dart';
 import 'package:supertonic_audiobook/features/convert/data/helpers/model_loader.dart';
 import 'package:supertonic_audiobook/features/convert/data/helpers/unicode_processor.dart';
 
+/// Info/debug solo en debug builds; errores y warnings siempre visibles.
 final logger = Logger(
+  level: kDebugMode ? Level.debug : Level.warning,
   printer: PrettyPrinter(methodCount: 0, errorMethodCount: 5, lineLength: 80),
 );
 
