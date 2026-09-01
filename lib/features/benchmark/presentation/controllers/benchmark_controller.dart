@@ -135,7 +135,10 @@ class BenchmarkController extends Notifier<BenchmarkEstado> {
         return;
       }
 
-      final ms = resultado.tamanios.values.first;
+      final bruto = resultado.tamanios.values.first;
+      // Clamp a 1 ms: un motor fake (o reloj sin resolución) puede medir 0 ms
+      // y charsSeg = tamanio / (0 / 1000) sería Infinity.
+      final ms = bruto > 0 ? bruto : 1;
       final fila = FilaBenchmark(
         tiempoMs: ms,
         charsSeg: tamanio / (ms / 1000),
