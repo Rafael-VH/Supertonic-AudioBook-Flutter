@@ -6,6 +6,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:supertonic_audiobook/features/convert/domain/use_cases/sintetizar_muestra.dart';
 import 'package:supertonic_audiobook/shared/domain/entities/archivo.dart';
 import 'package:supertonic_audiobook/presentation/controllers/providers.dart';
 import 'package:supertonic_audiobook/features/settings/presentation/controllers/settings_controller.dart';
@@ -16,16 +17,31 @@ import 'package:supertonic_audiobook/presentation/theme/app_theme.dart';
 import '../../support/fakes.dart';
 
 Widget _harness({RepositorioArchivosFake? repositorio, MotorFake? motor}) {
+  final motorEf = motor ?? MotorFake();
+  final exportador = ExportadorFake();
   return ProviderScope(
     overrides: [
       repositorioPreferenciasProvider
           .overrideWithValue(PreferenciasMemoria()),
       repositorioArchivosProvider.overrideWithValue(
           repositorio ?? RepositorioArchivosFake(const [])),
-      motorTtsProvider.overrideWithValue(motor ?? MotorFake()),
-      exportadorAudioProvider.overrideWithValue(ExportadorFake()),
+      motorTtsProvider.overrideWithValue(motorEf),
+      exportadorAudioProvider.overrideWithValue(exportador),
       reproductorAudioProvider.overrideWithValue(ReproductorFake()),
       carpetaBaseProvider.overrideWithValue('C:/base'),
+      // procesar al terminar lee el benchmark y persiste el historial.
+      repositorioBenchmarkProvider.overrideWithValue(PreferenciasMemoria()),
+      repositorioHistorialProvider.overrideWithValue(PreferenciasMemoria()),
+      // escuchar usa sintetizarMuestra + domainLogger; sin override cae al
+      // catch y probandoVoz vuelve a false (botón Procesar habilitado).
+      domainLoggerProvider.overrideWithValue(NoOpLogger()),
+      sintetizarMuestraProvider.overrideWithValue(
+        SintetizarMuestra(
+          motor: motorEf,
+          exportador: exportador,
+          logger: NoOpLogger(),
+        ),
+      ),
     ],
     child: Consumer(builder: (context, ref, _) {
       final ajustes = ref.watch(settingsControllerProvider);

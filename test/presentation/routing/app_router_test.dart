@@ -51,6 +51,9 @@ Future<ProviderContainer> _montar(
       modeloManagerProvider.overrideWithValue(
         ModeloGestorFake(disponible: modeloListo),
       ),
+      // El dashboard (DASH-4) embebe SettingsBody, que lee ambos providers.
+      repositorioBenchmarkProvider.overrideWithValue(PreferenciasMemoria()),
+      repositorioHistorialProvider.overrideWithValue(PreferenciasMemoria()),
     ],
   );
   addTearDown(container.dispose);

@@ -27,6 +27,9 @@ Widget _harness(Widget child) {
       modeloManagerProvider.overrideWithValue(
         ModeloGestorFake(disponible: true),
       ),
+      // _BenchmarkSectionCard en SettingsBody lee ambos providers.
+      repositorioBenchmarkProvider.overrideWithValue(_PreferenciasMemoria()),
+      repositorioHistorialProvider.overrideWithValue(_PreferenciasMemoria()),
     ],
     child: Consumer(builder: (context, ref, _) {
       final ajustes = ref.watch(settingsControllerProvider);
@@ -150,6 +153,9 @@ void main() {
           ),
           reproductorAudioProvider.overrideWithValue(ReproductorFake()),
           modeloManagerProvider.overrideWithValue(ModeloGestorFake()),
+          repositorioBenchmarkProvider
+              .overrideWithValue(_PreferenciasMemoria()),
+          repositorioHistorialProvider.overrideWithValue(_PreferenciasMemoria()),
         ],
         child: Consumer(builder: (context, ref, _) {
           final ajustes = ref.watch(settingsControllerProvider);

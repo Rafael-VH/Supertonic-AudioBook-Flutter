@@ -80,6 +80,9 @@ Widget _construirApp({Map<String, Object>? preferencias}) {
       carpetaBaseProvider.overrideWithValue('C:/base'),
       modeloManagerProvider
           .overrideWithValue(ModeloGestorFake(disponible: true)),
+      // El tab Ajustes (concatenado al dashboard) lee ambos providers.
+      repositorioBenchmarkProvider.overrideWithValue(_PreferenciasMemoria()),
+      repositorioHistorialProvider.overrideWithValue(_PreferenciasMemoria()),
     ],
     child: const App(),
   );

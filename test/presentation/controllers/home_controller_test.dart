@@ -44,6 +44,9 @@ void main() {
                 logger: NoOpLogger(),
               ),
             ),
+            // procesar persiste el historial y lee el benchmark al terminar.
+            repositorioBenchmarkProvider.overrideWithValue(preferencias),
+            repositorioHistorialProvider.overrideWithValue(preferencias),
           ],
         );
 
@@ -119,7 +122,7 @@ void main() {
       expect(estado.voiceConfig.steps, 5);
       expect(estado.voiceConfig.speed, 1.1);
       expect(estado.voiceConfig.langVoz, 'es');
-      expect(estado.formatos, {'wav', 'mp3'});
+      expect(estado.formatos, {'mp3'});
       expect(estado.ejecutando, isFalse);
     });
 
@@ -166,7 +169,7 @@ void main() {
       expect(estado.voiceConfig.steps, 10);
       expect(estado.voiceConfig.speed, 1.7);
       expect(estado.voiceConfig.langVoz, 'fr');
-      expect(estado.formatos, {'mp3', 'ogg'});
+      expect(estado.formatos, {'mp3', 'ogg', 'wav'});
     });
 
     test('procesar sin formato: snackbar y log, sin ejecutar', () async {
@@ -177,7 +180,7 @@ void main() {
 
       final container = crearContenedor();
       final controller = container.read(homeControllerProvider.notifier);
-      controller.alternarFormato('wav');
+      // Por defecto ya está activo 'mp3'; lo desactivamos para dejar vacío.
       controller.alternarFormato('mp3');
 
       final t = es();
@@ -238,7 +241,7 @@ void main() {
       expect(procesador.llamadas.first.steps, 8);
       expect(procesador.llamadas.first.speed, 1.3);
       expect(procesador.llamadas.first.formatos,
-          containsAll(['wav', 'mp3', 'ogg']));
+          containsAll(['mp3', 'ogg']));
       expect(procesador.llamadas.first.lang, 'en');
 
       final guardado = preferencias.datos;
@@ -246,7 +249,7 @@ void main() {
       expect(guardado['steps'], 8);
       expect(guardado['speed'], 1.3);
       expect(guardado['lang_voz'], 'en');
-      expect(guardado['formatos'], containsAll(['wav', 'mp3', 'ogg']));
+      expect(guardado['formatos'], containsAll(['mp3', 'ogg']));
       expect(guardado['carpeta_in'], 'C:/base${Platform.pathSeparator}archivos');
       expect(guardado['carpeta_out'], 'C:/base${Platform.pathSeparator}audio');
     });

@@ -54,6 +54,9 @@ Widget _harnessApp(ModeloGestorFake gestor) {
       reproductorAudioProvider.overrideWithValue(ReproductorFake()),
       carpetaBaseProvider.overrideWithValue('C:/base'),
       modeloManagerProvider.overrideWithValue(gestor),
+      // El dashboard embebe SettingsBody, que lee ambos providers.
+      repositorioBenchmarkProvider.overrideWithValue(PreferenciasMemoria()),
+      repositorioHistorialProvider.overrideWithValue(PreferenciasMemoria()),
     ],
     child: const App(),
   );

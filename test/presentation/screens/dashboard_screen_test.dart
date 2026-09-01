@@ -30,6 +30,9 @@ Widget _harness(
       ),
       carpetaBaseProvider.overrideWithValue('/tmp/test'),
       reproductorAudioProvider.overrideWithValue(ReproductorFake()),
+      // SettingsBody monta _BenchmarkSectionCard, que lee ambos providers.
+      repositorioBenchmarkProvider.overrideWithValue(PreferenciasMemoria()),
+      repositorioHistorialProvider.overrideWithValue(PreferenciasMemoria()),
     ],
     child: MaterialApp(
       locale: const Locale('es'),
