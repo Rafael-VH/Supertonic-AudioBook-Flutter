@@ -54,7 +54,7 @@ Este es el invariante central. Las violaciones se detectan con `flutter analyze`
 
 `main.dart` es el único archivo que importa implementaciones concretas de `data/`. Hace:
 
-1. Inicializar bindings (WidgetsFlutterBinding / FdbBinding según modo release)
+1. Inicializar WidgetsFlutterBinding
 2. Limpiar WAVs huérfanos de ejecuciones anteriores (`LimpiarTemporales`, > 24 h)
 3. Resolver rutas de plataforma (documents, support, modelo)
 4. Crear implementaciones concretas

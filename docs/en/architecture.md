@@ -54,7 +54,7 @@ This is the central invariant. Violations are caught by `flutter analyze` and ar
 
 `main.dart` is the only file that imports concrete `data/` implementations. It:
 
-1. Initializes bindings (WidgetsFlutterBinding / FdbBinding depending on release mode)
+1. Initializes WidgetsFlutterBinding
 2. Cleans orphaned WAVs from previous runs (`LimpiarTemporales`, > 24 h)
 3. Resolves platform paths (documents, support, model)
 4. Creates concrete implementations

@@ -1,11 +1,9 @@
 import 'dart:io';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'package:fdb_helper/fdb_helper.dart';
 import 'package:supertonic_audiobook/app.dart';
 import 'package:supertonic_audiobook/shared/data/config.dart';
 import 'package:supertonic_audiobook/features/audio_manager/domain/use_cases/limpiar_temporales.dart';
@@ -25,13 +23,7 @@ import 'package:supertonic_audiobook/presentation/controllers/providers.dart';
 /// Construye el grafo de dependencias y lo inyecta como overrides en el
 /// `ProviderScope`; los widgets y controllers solo ven contratos de `domain/`.
 Future<void> main() async {
-  // FdbBinding extiende WidgetsFlutterBinding; inicializarlo cubre ambos.
-  // En release no usamos fdb_helper y va el binding estándar.
-  if (kReleaseMode) {
-    WidgetsFlutterBinding.ensureInitialized();
-  } else {
-    FdbBinding.ensureInitialized();
-  }
+  WidgetsFlutterBinding.ensureInitialized();
   final docs = await getApplicationDocumentsDirectory();
   final soporte = await getApplicationSupportDirectory();
   final separador = Platform.pathSeparator;
