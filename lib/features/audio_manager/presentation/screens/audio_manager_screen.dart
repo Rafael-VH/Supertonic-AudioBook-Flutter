@@ -177,31 +177,62 @@ class _AudioTileState extends ConsumerState<_AudioTile> {
     BuildContext context,
     AppLocalizations t,
   ) {
-    final controller = TextEditingController(text: widget.pendiente.displayName);
     return showDialog<String>(
       context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: Text(t.audio_manager_rename_title),
-        content: TextField(
-          controller: controller,
-          autofocus: true,
-          decoration: InputDecoration(
-            labelText: t.audio_manager_name,
-          ),
-          onSubmitted: (v) => Navigator.of(dialogContext).pop(v),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(),
-            child: Text(t.audio_manager_cancel),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.of(dialogContext).pop(controller.text),
-            child: Text(t.audio_manager_save),
-          ),
-        ],
+      builder: (_) => _RenameDialogBody(
+        t: t,
+        nombreActual: widget.pendiente.displayName,
       ),
-    ).whenComplete(() => controller.dispose());
+    );
+  }
+}
+
+/// Diálogo de renombrado. Posee su propio [TextEditingController] para que el
+/// dispose ocurra cuando el diálogo se desmonta, no antes (whenComplete
+/// disparaba el assert "TextEditingController used after being disposed").
+class _RenameDialogBody extends StatefulWidget {
+  const _RenameDialogBody({required this.t, required this.nombreActual});
+
+  final AppLocalizations t;
+  final String nombreActual;
+
+  @override
+  State<_RenameDialogBody> createState() => _RenameDialogBodyState();
+}
+
+class _RenameDialogBodyState extends State<_RenameDialogBody> {
+  late final TextEditingController _controller =
+      TextEditingController(text: widget.nombreActual);
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Text(widget.t.audio_manager_rename_title),
+      content: TextField(
+        controller: _controller,
+        autofocus: true,
+        decoration: InputDecoration(
+          labelText: widget.t.audio_manager_name,
+        ),
+        onSubmitted: (v) => Navigator.of(context).pop(v),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: Text(widget.t.audio_manager_cancel),
+        ),
+        FilledButton(
+          onPressed: () => Navigator.of(context).pop(_controller.text),
+          child: Text(widget.t.audio_manager_save),
+        ),
+      ],
+    );
   }
 }
 
