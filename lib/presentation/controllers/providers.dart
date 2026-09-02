@@ -11,6 +11,7 @@ import 'package:supertonic_audiobook/shared/domain/contracts/reproductor_audio.d
 import 'package:supertonic_audiobook/features/biblioteca/domain/use_cases/listar_audios_generados.dart';
 import 'package:supertonic_audiobook/features/convert/domain/use_cases/procesar_archivo.dart';
 import 'package:supertonic_audiobook/features/convert/domain/use_cases/sintetizar_muestra.dart';
+import 'package:supertonic_audiobook/features/benchmark/domain/use_cases/registrar_conversion_en_historial.dart';
 import 'package:supertonic_audiobook/features/benchmark/presentation/controllers/benchmark_controller.dart';
 import 'package:supertonic_audiobook/features/audio_manager/domain/use_cases/guardar_audio.dart';
 import 'package:supertonic_audiobook/features/audio_manager/domain/use_cases/limpiar_temporales.dart';
@@ -68,6 +69,12 @@ final repositorioHistorialProvider = Provider<RepositorioPreferencias>(
   (_) => throw UnimplementedError(
       'repositorioHistorialProvider se inyecta en main.dart'),
 );
+
+/// Caso de uso: persistir entradas en el historial de conversiones.
+final registrarConversionEnHistorialProvider =
+    Provider<RegistrarConversionEnHistorial>((ref) {
+  return RegistrarConversionEnHistorial(ref.watch(repositorioHistorialProvider));
+});
 
 /// Reproducción de audio del botón **Escuchar**.
 final reproductorAudioProvider = Provider<ReproductorAudio>(
