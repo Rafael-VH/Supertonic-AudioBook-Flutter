@@ -84,8 +84,8 @@ class MetadataEditorController extends Notifier<MetadataEditorState> {
   Future<void> cargar(String ruta) async {
     state = state.copyWith(isLoading: true, clearError: true);
     try {
-      final useCase = ref.read(editarMetadataMp3Provider);
-      final metadata = await useCase.ejecutar(ruta);
+      final editor = ref.read(editorMetadataProvider);
+      final metadata = await editor.leer(ruta);
       state = state.copyWith(
         metadata: metadata,
         rutaArchivo: ruta,
@@ -168,8 +168,8 @@ class MetadataEditorController extends Notifier<MetadataEditorState> {
 
     state = state.copyWith(isSaving: true, clearError: true);
     try {
-      final useCase = ref.read(editarMetadataMp3Provider);
-      await useCase.aplicar(ruta, state.metadata);
+      final editor = ref.read(editorMetadataProvider);
+      await editor.guardar(ruta, state.metadata);
       state = state.copyWith(
         isSaving: false,
         mensajeExito: 'Metadatos guardados correctamente.',

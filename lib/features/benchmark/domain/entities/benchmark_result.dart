@@ -34,18 +34,10 @@ class BenchmarkResult {
     return total / tamanios.length;
   }
 
-  /// Cantidad promedio de caracteres procesados por segundo.
-  ///
-  /// Inversa de [avgMsPerChar]: `1000 / avgMsPerChar`. Devuelve `0` si
-  /// no hay datos o el promedio es cero.
-  double get avgCharsPerSec {
-    final ms = avgMsPerChar;
-    return ms > 0 ? 1000.0 / ms : 0;
-  }
-
   /// Serializa a un `Map` plano para persistencia en `RepositorioPreferencias`.
   ///
-  /// Las claves de `tamanios` se serializan como strings (requisito de JSON).
+  /// Usado en tests como fixture para construir el pref `benchmark_results`.
+  /// La serialización en producción se hace inline en `BenchmarkController`.
   Map<String, Object?> toMap() => {
         'tamanios': {
           for (final e in tamanios.entries) '${e.key}': e.value,

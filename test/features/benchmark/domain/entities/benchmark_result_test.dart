@@ -42,19 +42,6 @@ void main() {
       });
     });
 
-    group('avgCharsPerSec', () {
-      test('inversa de avgMsPerChar', () {
-        // avgMsPerChar ≈ 1.51666 → charsPerSec ≈ 659.35
-        final r = _make();
-        expect(r.avgCharsPerSec, closeTo(659.35, 0.5));
-      });
-
-      test('devuelve 0 cuando no hay datos', () {
-        final r = _make(tamanios: const {});
-        expect(r.avgCharsPerSec, 0);
-      });
-    });
-
     group('toMap / fromMap', () {
       test('roundtrip preserva todos los campos', () {
         final original = _make();
@@ -64,12 +51,6 @@ void main() {
         expect(restored.tamanios, original.tamanios);
         expect(restored.voiceConfig, original.voiceConfig);
         expect(restored.fecha, original.fecha);
-      });
-
-      test('tamanios serializa claves como strings', () {
-        final map = _make().toMap();
-        final tamanios = map['tamanios'] as Map;
-        expect(tamanios.keys.first, isA<String>());
       });
 
       test('fromMap maneja defaults para campos faltantes', () {

@@ -7,7 +7,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:supertonic_audiobook/features/editor_metadata/domain/contracts/editor_metadata.dart';
 import 'package:supertonic_audiobook/features/editor_metadata/domain/entities/metadatos_mp3.dart';
-import 'package:supertonic_audiobook/features/editor_metadata/domain/use_cases/editar_metadata_mp3.dart';
 import 'package:supertonic_audiobook/features/editor_metadata/presentation/controllers/metadata_editor_controller.dart';
 import 'package:supertonic_audiobook/presentation/controllers/providers.dart';
 
@@ -37,35 +36,19 @@ class _EditorMetadataFake implements EditorMetadata {
   }
 }
 
-/// Stub de EditarMetadataMp3 que delega al fake.
-class _EditarMetadataMp3Stub extends EditarMetadataMp3 {
-  _EditarMetadataMp3Stub(this._fake) : super(_fake);
-
-  final _EditorMetadataFake _fake;
-
-  @override
-  Future<MetadatosMp3> ejecutar(String rutaMp3) => _fake.leer(rutaMp3);
-
-  @override
-  Future<void> aplicar(String rutaMp3, MetadatosMp3 metadata) =>
-      _fake.guardar(rutaMp3, metadata);
-}
-
 void main() {
   late _EditorMetadataFake fakeEditor;
-  late _EditarMetadataMp3Stub fakeUseCase;
   late FilePickerFake fakePicker;
 
   setUp(() {
     fakeEditor = _EditorMetadataFake();
-    fakeUseCase = _EditarMetadataMp3Stub(fakeEditor);
     fakePicker = FilePickerFake(null);
     FilePickerPlatform.instance = fakePicker;
   });
 
   ProviderContainer crearContenedor() => ProviderContainer(
         overrides: [
-          editarMetadataMp3Provider.overrideWithValue(fakeUseCase),
+          editorMetadataProvider.overrideWithValue(fakeEditor),
         ],
       );
 

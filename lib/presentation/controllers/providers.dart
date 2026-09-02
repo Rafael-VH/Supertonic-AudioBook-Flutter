@@ -16,7 +16,6 @@ import 'package:supertonic_audiobook/features/audio_manager/domain/use_cases/gua
 import 'package:supertonic_audiobook/features/audio_manager/domain/use_cases/limpiar_temporales.dart';
 import 'package:supertonic_audiobook/features/audio_manager/presentation/controllers/audio_manager_controller.dart';
 import 'package:supertonic_audiobook/features/editor_metadata/domain/contracts/editor_metadata.dart';
-import 'package:supertonic_audiobook/features/editor_metadata/domain/use_cases/editar_metadata_mp3.dart';
 
 /// Parámetros técnicos del pipeline de síntesis (plan §5.1), inyectados desde
 /// la composición (`main.dart`). El caso de uso los recibe en el constructor.
@@ -142,11 +141,6 @@ final editorMetadataProvider = Provider<EditorMetadata>(
   (_) => throw UnimplementedError(
       'editorMetadataProvider se inyecta en main.dart'),
 );
-
-/// Caso de uso: leer y escribir metadatos de un archivo MP3.
-final editarMetadataMp3Provider = Provider<EditarMetadataMp3>((ref) {
-  return EditarMetadataMp3(ref.watch(editorMetadataProvider));
-});
 
 // ---------------------------------------------------------------------------
 // Benchmark

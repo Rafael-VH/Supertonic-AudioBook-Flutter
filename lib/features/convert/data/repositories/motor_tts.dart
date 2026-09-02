@@ -6,7 +6,7 @@ import 'package:logger/logger.dart';
 
 import 'package:supertonic_audiobook/shared/domain/constants/producto.dart';
 import 'package:supertonic_audiobook/features/convert/domain/contracts/motor_tts.dart';
-import 'package:supertonic_audiobook/features/convert/data/helpers/supertonic_helper.dart' as supertonic;
+import 'package:supertonic_audiobook/features/convert/data/helpers/text_to_speech.dart' as supertonic;
 
 /// Sin ruido de consola en release: info/debug solo en debug builds,
 /// errores y warnings siempre visibles (auditoría 2026-09-01, H2).
