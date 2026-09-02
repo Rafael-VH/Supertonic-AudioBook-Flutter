@@ -1,6 +1,6 @@
 import 'package:supertonic_audiobook/features/benchmark/domain/entities/benchmark_result.dart';
 import 'package:supertonic_audiobook/features/convert/domain/contracts/motor_tts.dart';
-import 'package:supertonic_audiobook/features/convert/domain/use_cases/segmentar_texto.dart';
+import 'package:supertonic_audiobook/shared/domain/use_cases/segmentar_texto.dart';
 import 'package:supertonic_audiobook/shared/domain/contracts/domain_logger.dart';
 import 'package:supertonic_audiobook/shared/domain/entities/voice_config.dart';
 

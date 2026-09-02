@@ -8,7 +8,7 @@ import 'package:supertonic_audiobook/shared/domain/contracts/domain_logger.dart'
 import 'package:supertonic_audiobook/shared/domain/contracts/repositorio_archivos.dart';
 import 'package:supertonic_audiobook/shared/domain/entities/archivo.dart';
 import 'package:supertonic_audiobook/features/convert/domain/use_cases/limpiar_markdown.dart';
-import 'package:supertonic_audiobook/features/convert/domain/use_cases/segmentar_texto.dart';
+import 'package:supertonic_audiobook/shared/domain/use_cases/segmentar_texto.dart';
 
 /// Resultado de convertir un archivo con [ProcesarArchivo.procesar].
 ///
