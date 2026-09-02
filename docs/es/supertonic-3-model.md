@@ -7,7 +7,7 @@ Modelo de síntesis de texto a voz (TTS) usado en la aplicación.
 Supertonic 3 es un modelo TTS que genera audio de alta calidad a partir de texto, con voces condicionadas por estilo. Se ejecuta on-device vía ONNX Runtime — sin nube ni GPU.
 
 - **Repo oficial**: [Supertone/supertonic-3 en Hugging Face](https://huggingface.co/Supertone/supertonic-3)
-- **Licencia**: OpenRAWL-M (créditos en la sección Acerca de de la app)
+- **Licencia**: OpenRAIL-M (créditos en la sección Acerca de de la app)
 
 ## Especificaciones
 

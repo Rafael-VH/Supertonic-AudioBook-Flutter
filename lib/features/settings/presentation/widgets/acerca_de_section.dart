@@ -5,7 +5,7 @@ import 'package:supertonic_audiobook/presentation/l10n/app_localizations.dart';
 
 /// Metadatos del producto (plan §6.4 — contenido EXACTO).
 const appNombre = 'Supertonic-AudioBook';
-const appVersion = '1.0.3';
+const appVersion = '1.0.0+1';
 const modeloUrl = 'https://huggingface.co/Supertone/supertonic-3';
 const modeloGithubUrl = 'https://github.com/supertone-inc/supertonic';
 

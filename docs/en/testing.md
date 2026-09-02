@@ -14,9 +14,10 @@ flutter analyze lib       # Static analysis
 
 | Metric | Value |
 |---------|-------|
-| Test files | 45 |
-| Test cases | 369 |
-| Skips | Integration tests requiring native FFmpeg |
+| Test files | 50 |
+| Declared test cases | 384 |
+| Passed / Failed | 380 / 0 |
+| Skips | 4 integration tests requiring native FFmpeg |
 | Analysis | 0 warnings |
 
 ## Test Structure

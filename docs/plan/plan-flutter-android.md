@@ -1,5 +1,7 @@
 # Plan de Handoff — Portar Supertonic-AudioBook a Flutter multiplataforma
 
+> **⚠️ Histórico — el producto es mobile-only (Android + iOS) desde 2026-09-01; las plataformas desktop, las versiones de SDK y las dependencias listadas aquí (share_plus, shared_preferences, just_audio_media_kit, file_picker ^8, SDK 3.44.9) NO corresponden al estado actual. Ver `docs/es/architecture.md` y `README.md`.**
+
 > **⚠️ OBSOLETO (2026-08-14).** Este plan contemplaba soporte multiplataforma
 > (Android, iOS, Windows, Linux). La app es **móvil-only** (Android + iOS):
 > se eliminaron las plataformas Windows/Linux y las dependencias desktop.

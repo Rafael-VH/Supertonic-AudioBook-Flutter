@@ -7,7 +7,7 @@
 [![Flutter](https://img.shields.io/badge/Flutter-3.5%2B-02569B?logo=flutter)](https://flutter.dev)
 [![Dart](https://img.shields.io/badge/Dart-3.12%2B-0175C2?logo=dart)](https://dart.dev)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
-[![Tests](https://img.shields.io/badge/tests-390%20passed-brightgreen)](#testing)
+[![Tests](https://img.shields.io/badge/tests-380%20passed-brightgreen)](#testing)
 [![Docs](https://img.shields.io/badge/docs-ES%20%7C%20EN-blue)](#documentación)
 
 Sin nube. Sin API. Sin GPU. Todo ocurre en tu dispositivo.
@@ -190,7 +190,7 @@ Los tests espejan la estructura de `lib/`: `test/features/<feature>/...`, `test/
 
 ### Métricas
 
-- **390 tests** en 52 archivos · 4 skips requieren FFmpeg nativo
+- **380 tests** en 50 archivos · 4 skips requieren FFmpeg nativo
 - **0 análisis warnings** (`flutter analyze lib` limpio)
 
 Ver [testing.md](docs/es/testing.md) para convenciones completas.

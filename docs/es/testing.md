@@ -14,9 +14,10 @@ flutter analyze lib       # Análisis estático
 
 | Métrica | Valor |
 |---------|-------|
-| Archivos de test | 45 |
-| Casos de test | 369 |
-| Skips | Tests de integración que requieren FFmpeg nativo |
+| Archivos de test | 50 |
+| Casos de test declarados | 384 |
+| Pasados / Fallidos | 380 / 0 |
+| Skips | 4 tests de integración que requieren FFmpeg nativo |
 | Análisis | 0 warnings |
 
 ## Estructura de Tests
