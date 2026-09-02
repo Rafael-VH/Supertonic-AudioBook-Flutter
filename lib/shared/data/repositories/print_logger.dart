@@ -1,4 +1,4 @@
-import 'package:flutter/foundation.dart' show kDebugMode;
+import 'package:flutter/foundation.dart' show debugPrint, kDebugMode;
 
 import 'package:supertonic_audiobook/shared/domain/contracts/domain_logger.dart';
 
@@ -14,7 +14,7 @@ class PrintLogger implements DomainLogger {
 
   void _imprimir(String nivel, String mensaje) {
     if (!habilitado) return;
-    print('$nivel $mensaje');
+    debugPrint('$nivel $mensaje');
   }
 
   @override

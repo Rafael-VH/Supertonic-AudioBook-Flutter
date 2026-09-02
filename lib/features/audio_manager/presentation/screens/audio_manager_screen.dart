@@ -304,6 +304,7 @@ class _SaveAllBar extends ConsumerWidget {
 
     final controller = ref.read(audioManagerControllerProvider.notifier);
     await controller.guardarTodos(carpeta);
+    if (!context.mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(t.audio_manager_saved_all)),
     );
