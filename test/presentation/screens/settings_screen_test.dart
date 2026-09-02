@@ -80,7 +80,7 @@ void main() {
 
     expect(find.text('Acerca de'), findsOneWidget);
     expect(find.text('Supertonic-AudioBook'), findsOneWidget);
-    expect(find.text('Versión 1.0.3'), findsOneWidget);
+    expect(find.text('Versión 1.0.0+1'), findsOneWidget);
     expect(
       find.text(
           'Convierte tus libros Markdown en audiolibros con voz sintética: '
