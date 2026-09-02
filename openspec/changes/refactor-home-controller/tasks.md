@@ -31,8 +31,8 @@ Chain strategy: pending
 
 ## Phase 2: Memory Use Case (pure orchestrator)
 
-- [ ] 2.1 Create `lib/features/audio_manager/domain/use_cases/estimar_memoria_disponible.dart`: `EstimarMemoriaDisponible.call({required List<({int chars})> stubs, required int availableBytes})` → `estimarBytesLote` + `fraccionMemoriaRequerida`, returns `(estimatedBytes, availableBytes, fraccion)`. No dart:io. YAGNI: no test (reuses tested math).
-- [ ] 2.2 Safety net: run `flutter test` — full suite green (no callers changed yet).
+- [x] 2.1 Create `lib/features/audio_manager/domain/use_cases/estimar_memoria_disponible.dart`: `EstimarMemoriaDisponible.call({required List<({int chars})> stubs, required int availableBytes})` → `estimarBytesLote` + `fraccionMemoriaRequerida`, returns `(estimatedBytes, availableBytes, fraccion)`. No dart:io. YAGNI: no test (reuses tested math).
+- [x] 2.2 Safety net: run `flutter test` — full suite green (no callers changed yet).
 
 ## Phase 3: Controller Refactor (Extract Method, behavior-preserving)
 
