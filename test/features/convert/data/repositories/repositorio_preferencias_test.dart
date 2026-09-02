@@ -86,8 +86,8 @@ void main() {
       expect(raw['voz'], 'F2');
       expect(raw['steps'], 8);
       expect(raw['speed'], closeTo(1.3, 1e-9));
-      expect(raw['langVoz'], 'en');
-      expect(raw['carpeta_salida'], '/output');
+      expect(raw['lang_voz'], 'en');
+      expect(raw['carpeta_out'], '/output');
       expect(raw['onboarding_visto'], isTrue);
     });
 

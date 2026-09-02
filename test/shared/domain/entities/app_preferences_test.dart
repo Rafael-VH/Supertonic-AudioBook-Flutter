@@ -41,8 +41,8 @@ void main() {
         'voz': 'F2',
         'steps': 8,
         'speed': 1.3,
-        'langVoz': 'en',
-        'carpeta_salida': '/output',
+        'lang_voz': 'en',
+        'carpeta_out': '/output',
         'onboarding_visto': true,
         'modelo_state': 'descargado',
         'modelo_path': '/model/path',
@@ -102,8 +102,8 @@ void main() {
       expect(map['voz'], 'F1');
       expect(map['steps'], 5);
       expect(map['speed'], 1.1);
-      expect(map['langVoz'], 'es');
-      expect(map['carpeta_salida'], '/audio');
+      expect(map['lang_voz'], 'es');
+      expect(map['carpeta_out'], '/audio');
       expect(map['onboarding_visto'], isTrue);
       expect(map['modelo_state'], 'no_descargado');
       expect(map['modelo_path'], '/path');
@@ -114,8 +114,8 @@ void main() {
         'voz': 'F3',
         'steps': 9,
         'speed': 1.5,
-        'langVoz': 'fr',
-        'carpeta_salida': '/out',
+        'lang_voz': 'fr',
+        'carpeta_out': '/out',
         'onboarding_visto': true,
         'modelo_state': 'descargado',
         'modelo_path': '/m',
@@ -183,6 +183,34 @@ void main() {
       expect(prefs.props[2], isTrue);
       expect(prefs.props[3], 'descargado');
       expect(prefs.props[4], '/m');
+    });
+
+    test('fromMap reads loose-system keys carpeta_out and lang_voz', () {
+      final map = <String, Object?>{
+        'carpeta_out': '/chosen/folder',
+        'lang_voz': 'pt',
+      };
+
+      final prefs = AppPreferences.fromMap(map);
+
+      expect(prefs.carpetaSalida, '/chosen/folder');
+      expect(prefs.voiceConfig.langVoz, 'pt');
+    });
+
+    test('toMap writes loose-system keys carpeta_out and lang_voz', () {
+      const prefs = AppPreferences(
+        voiceConfig: VoiceConfig(voz: 'F1', langVoz: 'fr'),
+        carpetaSalida: '/audio',
+      );
+
+      final map = prefs.toMap();
+
+      expect(map.containsKey('carpeta_out'), isTrue);
+      expect(map.containsKey('carpeta_salida'), isFalse);
+      expect(map['carpeta_out'], '/audio');
+      expect(map.containsKey('lang_voz'), isTrue);
+      expect(map.containsKey('langVoz'), isFalse);
+      expect(map['lang_voz'], 'fr');
     });
   });
 }
