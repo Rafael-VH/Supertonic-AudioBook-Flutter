@@ -7,8 +7,8 @@ context: |
     just_audio, ffmpeg_kit_flutter_new. l10n: gen-l10n (app_es.arb / app_en.arb).
   Architecture: Clean Architecture — lib/presentation (UI + controllers/providers),
     lib/domain (contratos + casos de uso), lib/data (repositorios), lib/core.
-  Testing: flutter_test + mocktail. Suite: 179 passed / 4 skipped
-    (FFmpeg no disponible en el entorno de tests).
+  Testing: flutter_test + mocktail. Suite: 390 passed / 4 skipped
+    + E2E (integration_test en Windows; FFmpeg no disponible, el E2E usa formato wav).
   Style: idioma de código español (nombres de casos de uso, repositorios y tests en español);
     conventional commits; commits por unidad de trabajo (work-unit-commits).
 
@@ -20,7 +20,7 @@ testing:
     unit: flutter_test (test/core, test/domain/use_cases)
     widget: flutter_test (test/presentation)
     integration: flutter_test con mocktail — test/domain/use_cases/*_integration_test.dart
-    e2e: no disponible (sin integration_test/; FFmpeg no corre en test env)
+    e2e: flutter drive -d windows --driver=test_driver/integration_test.dart --target=integration_test/app_test.dart
   quality:
     linter: flutter analyze (flutter_lints 5.0.0)
     type_checker: flutter analyze (Dart statically typed)
