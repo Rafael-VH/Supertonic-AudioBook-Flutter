@@ -10,7 +10,7 @@ import 'package:supertonic_audiobook/shared/domain/entities/archivo.dart';
 import 'package:supertonic_audiobook/shared/domain/entities/voice_config.dart';
 import 'package:supertonic_audiobook/features/convert/domain/use_cases/procesar_archivo.dart';
 import 'package:supertonic_audiobook/features/audio_manager/domain/entities/audio_pendiente.dart';
-import 'package:supertonic_audiobook/features/audio_manager/domain/use_cases/estimar_memoria.dart';
+import 'package:supertonic_audiobook/features/audio_manager/domain/use_cases/estimar_memoria_disponible.dart';
 import 'package:supertonic_audiobook/features/audio_manager/presentation/screens/memory_warning_dialog.dart';
 import 'package:supertonic_audiobook/features/benchmark/domain/entities/benchmark_result.dart';
 import 'package:supertonic_audiobook/features/benchmark/domain/entities/conversion_entry.dart';
@@ -431,55 +431,15 @@ class HomeController extends Notifier<HomeEstado> {
     _appendLog(t.log_inicio(seleccion.length, archivos.length));
 
     // Memory pre-check before processing loop.
-    final pendientesEstimados = [
-      for (final a in seleccion)
-        AudioPendiente(
-          tempPath: '',
-          originalName: a.nombre,
-          displayName: a.titulo,
-          format: '',
-          durationSec: 0,
-          fileSizeBytes: 0,
-          chars: a.nombre.length * 50,
-          segments: 0,
-          fecha: DateTime.now(),
-        ),
-    ];
-    final estimatedBytes = estimarBytesLote(pendientesEstimados);
-    final availableBytes = ProcessInfo.currentRss;
-    final fraccion = fraccionMemoriaRequerida(estimatedBytes, availableBytes);
-    if (fraccion > 0.7 && context != null && context.mounted) {
-      final proceder = await showMemoryWarningDialog(
-        context: context,
-        estimatedBytes: estimatedBytes,
-        availableBytes: availableBytes,
-      );
-      if (!proceder) {
-        state = state.copyWith(
-          ejecutando: false,
-          estado: t.estado_cancelado,
-          snackbar: MensajeSnackbar(t.snackbar_exportado),
-        );
-        _appendLog(t.log_cancelado('0 s'));
-        return;
-      }
-    }
+    final memoriaOk = await _verificarMemoria(seleccion, t, context);
+    if (!memoriaOk) return;
 
     final inicio = DateTime.now();
     try {
       await ref.read(motorTtsProvider).cambiarVoz(voz);
       ref.read(repositorioArchivosProvider).crearCarpetasSiNoExisten([salida]);
 
-      _appendLog('=' * 40);
-      _appendLog(t.log_config_titulo);
-      _appendLog(t.log_config_voz(voz));
-      _appendLog(t.log_config_pasos(steps));
-      _appendLog(t.log_config_velocidad('${speed.toStringAsFixed(2)}x'));
-      _appendLog(t.log_config_lang(lang));
-      _appendLog(t.log_config_formatos(
-          formatos.map((f) => f.toUpperCase()).join(', ')));
-      _appendLog(t.log_config_salida(salida));
-      _appendLog('=' * 40);
+      _loguearConfig(t, voz, steps, speed, lang, formatos, salida);
 
       final useCase = ref.read(procesarArchivoProvider);
       final totalArchivos = seleccion.length;
@@ -576,40 +536,17 @@ class HomeController extends Notifier<HomeEstado> {
         pendientes: finalizadoOk ? acumulados : [],
       );
 
-      if (finalizadoOk && errores == 0) {
-        state = state.copyWith(
-          progresoActual: 1,
-          progresoTotal: 1,
-          estado: t.estado_listo_n(exitos, textoElapsed),
-          snackbar: MensajeSnackbar(t.snackbar_procesado(exitos, textoElapsed)),
-        );
-        _appendLog('=' * 40);
-        _appendLog(t.log_completado(exitos, textoElapsed));
-        _mostrarEstimacion(t, seleccion);
-        _appendLog('=' * 40);
-        // Navigate to AudioManagerScreen with accumulated pending audios.
-        if (acumulados.isNotEmpty && context != null) {
-          ref.read(appRouterProvider).push(
-                Rutas.audioManager,
-                extra: acumulados,
-              );
-        }
-      } else if (finalizadoOk && errores > 0) {
-        state = state.copyWith(
-          estado: t.estado_con_errores(exitos, totalArchivos, errores),
-          snackbar: MensajeSnackbar(
-            t.snackbar_con_errores(exitos, errores, textoElapsed),
-            esError: true,
-          ),
-        );
-        _appendLog(t.log_con_errores(errores, totalArchivos));
-      } else {
-        state = state.copyWith(
-          estado: t.estado_cancelado,
-          snackbar: MensajeSnackbar(t.snackbar_exportado),
-        );
-        _appendLog(t.log_cancelado(textoElapsed));
-      }
+      _finalizarCorrida(
+        t,
+        seleccion: seleccion,
+        exitos: exitos,
+        errores: errores,
+        totalArchivos: totalArchivos,
+        textoElapsed: textoElapsed,
+        finalizadoOk: finalizadoOk,
+        acumulados: acumulados,
+        context: context,
+      );
     } catch (exc) {
       state = state.copyWith(ejecutando: false, estado: t.estado_error);
       state = state.copyWith(
@@ -619,7 +556,114 @@ class HomeController extends Notifier<HomeEstado> {
     }
   }
 
+  // ------------------------------------------------------- memoria e historial
+
+  /// Pre-chequeo de memoria antes del loop: construye stubs, estima y, si la
+  /// fracción supera el umbral, muestra el diálogo de advertencia. Devuelve
+  /// `false` si el usuario cancela (detiene la corrida).
+  Future<bool> _verificarMemoria(
+    List<Archivo> seleccion,
+    AppLocalizations t,
+    BuildContext? context,
+  ) async {
+    final stubs = [
+      for (final a in seleccion) (chars: a.nombre.length * 50),
+    ];
+    final availableBytes = ProcessInfo.currentRss;
+    final estimacion = EstimarMemoriaDisponible()(
+      stubs: stubs,
+      availableBytes: availableBytes,
+    );
+    if (estimacion.fraccion > 0.7 && context != null && context.mounted) {
+      final proceder = await showMemoryWarningDialog(
+        context: context,
+        estimatedBytes: estimacion.estimatedBytes,
+        availableBytes: estimacion.availableBytes,
+      );
+      if (!proceder) {
+        state = state.copyWith(
+          ejecutando: false,
+          estado: t.estado_cancelado,
+          snackbar: MensajeSnackbar(t.snackbar_exportado),
+        );
+        _appendLog(t.log_cancelado('0 s'));
+        return false;
+      }
+    }
+    return true;
+  }
+
   // ------------------------------------------------------------- helpers
+
+  /// Registra el bloque de configuración al inicio de la corrida.
+  void _loguearConfig(
+    AppLocalizations t,
+    String voz,
+    int steps,
+    double speed,
+    String lang,
+    List<String> formatos,
+    String salida,
+  ) {
+    _appendLog('=' * 40);
+    _appendLog(t.log_config_titulo);
+    _appendLog(t.log_config_voz(voz));
+    _appendLog(t.log_config_pasos(steps));
+    _appendLog(t.log_config_velocidad('${speed.toStringAsFixed(2)}x'));
+    _appendLog(t.log_config_lang(lang));
+    _appendLog(t.log_config_formatos(
+        formatos.map((f) => f.toUpperCase()).join(', ')));
+    _appendLog(t.log_config_salida(salida));
+    _appendLog('=' * 40);
+  }
+
+  /// Finaliza la corrida según el resultado acumulado y navega si hubo éxito.
+  void _finalizarCorrida(
+    AppLocalizations t, {
+    required List<Archivo> seleccion,
+    required int exitos,
+    required int errores,
+    required int totalArchivos,
+    required String textoElapsed,
+    required bool finalizadoOk,
+    required List<AudioPendiente> acumulados,
+    BuildContext? context,
+  }) {
+    if (finalizadoOk && errores == 0) {
+      state = state.copyWith(
+        progresoActual: 1,
+        progresoTotal: 1,
+        estado: t.estado_listo_n(exitos, textoElapsed),
+        snackbar: MensajeSnackbar(t.snackbar_procesado(exitos, textoElapsed)),
+      );
+      _appendLog('=' * 40);
+      _appendLog(t.log_completado(exitos, textoElapsed));
+      _mostrarEstimacion(t, seleccion);
+      _appendLog('=' * 40);
+      // Navigate to AudioManagerScreen with accumulated pending audios.
+      if (acumulados.isNotEmpty && context != null) {
+        ref.read(appRouterProvider).push(
+              Rutas.audioManager,
+              extra: acumulados,
+            );
+      }
+    } else if (finalizadoOk && errores > 0) {
+      state = state.copyWith(
+        estado: t.estado_con_errores(exitos, totalArchivos, errores),
+        snackbar: MensajeSnackbar(
+          t.snackbar_con_errores(exitos, errores, textoElapsed),
+          esError: true,
+        ),
+      );
+      _appendLog(t.log_con_errores(errores, totalArchivos));
+    } else {
+      state = state.copyWith(
+        estado: t.estado_cancelado,
+        snackbar: MensajeSnackbar(t.snackbar_exportado),
+      );
+      _appendLog(t.log_cancelado(textoElapsed));
+    }
+  }
 
   void _onProgreso(AppLocalizations t, int actual, int total) {
     final paso = math.max(1, total ~/ 20);
@@ -681,20 +725,7 @@ class HomeController extends Notifier<HomeEstado> {
   ///
   /// Prepende las entradas y mantiene un máximo de 100.
   void _persistirHistorial(List<Map<String, Object?>> entradas) {
-    final prefsRepo = ref.read(repositorioHistorialProvider);
-    final datos = prefsRepo.cargar();
-    final raw = datos['conversion_history'];
-    final historial = <Map<String, Object?>>[];
-    if (raw is List) {
-      historial.addAll(raw.whereType<Map>().cast<Map<String, Object?>>());
-    }
-    historial.insertAll(0, entradas);
-    // Cap at 100 entries.
-    if (historial.length > 100) {
-      historial.removeRange(100, historial.length);
-    }
-    datos['conversion_history'] = historial;
-    prefsRepo.guardar(datos);
+    ref.read(registrarConversionEnHistorialProvider)(entradas);
   }
 }
 

@@ -36,15 +36,15 @@ Chain strategy: pending
 
 ## Phase 3: Controller Refactor (Extract Method, behavior-preserving)
 
-- [ ] 3.1 **Replace inline memory pre-check** (lines 434-466) with `_verificarMemoria(seleccion, context)`: builds `({chars})` stubs, reads `ProcessInfo.currentRss`, calls `EstimarMemoriaDisponible`, keeps >0.7 dialog + cancel path in controller.
-- [ ] 3.2 **Replace `_persistirHistorial` body** (lines 683-698) to delegate to `RegistrarConversionEnHistorial` via `ref.read(registrarConversionEnHistorialProvider)`.
-- [ ] 3.3 Slim `procesar()` by extracting pre-processing `_loguearConfig(t, ...)` + post-loop `_finalizarCorrida(...)`; pure movement.
-- [ ] 3.4 Remove now-unused imports (e.g. `estimar_memoria.dart` primitive math if unused elsewhere; `ConversionEntry` if moved to use case).
-- [ ] 3.5 Safety net: run `flutter test` — 16 home_controller tests, 9 benchmark tests, new test all green; run `flutter analyze` clean.
+- [x] 3.1 **Replace inline memory pre-check** (lines 434-466) with `_verificarMemoria(seleccion, context)`: builds `({chars})` stubs, reads `ProcessInfo.currentRss`, calls `EstimarMemoriaDisponible`, keeps >0.7 dialog + cancel path in controller.
+- [x] 3.2 **Replace `_persistirHistorial` body** (lines 683-698) to delegate to `RegistrarConversionEnHistorial` via `ref.read(registrarConversionEnHistorialProvider)`.
+- [x] 3.3 Slim `procesar()` by extracting pre-processing `_loguearConfig(t, ...)` + post-loop `_finalizarCorrida(...)`; pure movement.
+- [x] 3.4 Remove now-unused imports (e.g. `estimar_memoria.dart` primitive math if unused elsewhere; `ConversionEntry` if moved to use case).
+- [x] 3.5 Safety net: run `flutter test` — 16 home_controller tests, 9 benchmark tests, new test all green; run `flutter analyze` clean.
 
 ## Phase 4: Verification
 
-- [ ] 4.1 Full `flutter test` + `flutter analyze` pass; `home_controller.dart` < 550 lines, `procesar()` < 150 lines.
+- [x] 4.1 Full `flutter test` + `flutter analyze` pass; `home_controller.dart` < 550 lines, `procesar()` < 150 lines.
 
 ## Work-Unit Commits
 
