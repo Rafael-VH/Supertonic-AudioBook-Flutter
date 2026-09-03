@@ -605,6 +605,46 @@ void main() {
       expect(container.read(homeControllerProvider).tiempoEstimado, isNull);
     });
 
+    test('EVC-2: sin restante de lote durante el primer archivo', () async {
+      baseFakes(archivos: const [
+        Archivo('C:/libros/a.md'),
+        Archivo('C:/libros/b.md'),
+      ]);
+      // Seed benchmark_results so _cargarBenchmark() returns non-null.
+      preferencias = PreferenciasMemoria({
+        ...preferencias.datos,
+        'benchmark_results': BenchmarkResult(
+          tamanios: {100: 500, 500: 2000},
+          voiceConfig: const VoiceConfig(voz: 'M1'),
+          fecha: DateTime.utc(2025),
+        ).toMap(),
+      });
+      repositorio = RepositorioArchivosFake(
+        const [Archivo('C:/libros/a.md'), Archivo('C:/libros/b.md')],
+        contenidos: {
+          'C:/libros/a.md': 'Esto es texto de prueba.',
+        },
+      );
+      final container = crearContenedor();
+      final controller = container.read(homeControllerProvider.notifier);
+      final t = es();
+      // Bloquear el PRIMER archivo dentro de useCase.procesar: todavía no
+      // terminó ningún archivo, así que no hay restante de lote (EVC-2).
+      final liberar = Completer<void>();
+      procesador.espera = () => liberar.future;
+
+      final futuro = controller.procesar(t);
+      await Future<void>.delayed(const Duration(milliseconds: 20));
+
+      final aMedioPrimero = container.read(homeControllerProvider);
+      expect(aMedioPrimero.estado, startsWith('Archivo 1 de 2: a.md'));
+      // EVC-2: durante el primer archivo NO hay restante estimado de lote.
+      expect(aMedioPrimero.tiempoEstimado, isNull);
+
+      liberar.complete();
+      await futuro;
+    });
+
     test('EVC-3: sin benchmark → tiempoEstimado es null', () async {
       // No benchmark_results seeded — _cargarBenchmark() returns null.
       baseFakes(archivos: const [
