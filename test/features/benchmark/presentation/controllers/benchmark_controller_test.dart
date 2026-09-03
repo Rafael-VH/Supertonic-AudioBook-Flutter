@@ -6,6 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:supertonic_audiobook/features/benchmark/domain/entities/benchmark_result.dart';
 import 'package:supertonic_audiobook/features/benchmark/domain/entities/conversion_entry.dart';
+import 'package:supertonic_audiobook/features/benchmark/domain/entities/device_spec.dart';
 import 'package:supertonic_audiobook/features/benchmark/presentation/controllers/benchmark_controller.dart';
 import 'package:supertonic_audiobook/features/convert/domain/contracts/motor_tts.dart';
 import 'package:supertonic_audiobook/presentation/controllers/providers.dart';
@@ -18,11 +19,13 @@ void main() {
     late PreferenciasMemoria preferencias;
     late MotorFake motor;
 
-    ProviderContainer crearContenedor({Map<String, Object>? prefs}) {
+    ProviderContainer crearContenedor(
+        {Map<String, Object>? prefs, DeviceSpec? deviceSpec}) {
       preferencias = PreferenciasMemoria(prefs);
       motor = MotorFake();
       return ProviderContainer(
         overrides: [
+          deviceSpecProvider.overrideWithValue(deviceSpec),
           repositorioPreferenciasProvider.overrideWithValue(preferencias),
           repositorioBenchmarkProvider.overrideWithValue(preferencias),
           repositorioHistorialProvider.overrideWithValue(preferencias),
@@ -108,6 +111,29 @@ void main() {
       final map = guardado as Map;
       expect(map.containsKey('tamanios'), isTrue);
       expect(map.containsKey('fecha'), isTrue);
+    });
+
+    test('ejecutarFila persiste device_spec en el mapa inline', () async {
+      const device = DeviceSpec(
+        brand: 'Google',
+        model: 'Pixel 8',
+        board: 'cheetah',
+        hardware: 'cheetah',
+        ramBytes: 8589934592,
+      );
+      final container = crearContenedor(deviceSpec: device);
+      final controller = container.read(benchmarkControllerProvider.notifier);
+
+      await controller.ejecutarFila(5000);
+
+      final map =
+          preferencias.datos['benchmark_results'] as Map<String, Object?>;
+      final ds = map['device_spec'] as Map<String, Object?>;
+      expect(ds['brand'], 'Google');
+      expect(ds['model'], 'Pixel 8');
+      expect(ds['board'], 'cheetah');
+      expect(ds['hardware'], 'cheetah');
+      expect(ds['ram_bytes'], 8589934592);
     });
 
     test('ejecutarFila no afecta otras filas', () async {

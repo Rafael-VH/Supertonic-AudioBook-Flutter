@@ -1,3 +1,4 @@
+import 'package:supertonic_audiobook/features/benchmark/domain/entities/device_spec.dart';
 import 'package:supertonic_audiobook/shared/domain/entities/voice_config.dart';
 
 /// Resultado de un benchmark de rendimiento del motor TTS.
@@ -10,6 +11,7 @@ class BenchmarkResult {
     required this.tamanios,
     required this.voiceConfig,
     required this.fecha,
+    this.deviceSpec,
   });
 
   /// Cantidad de caracteres → tiempo de procesamiento en milisegundos.
@@ -20,6 +22,10 @@ class BenchmarkResult {
 
   /// Fecha y hora de ejecución del benchmark.
   final DateTime fecha;
+
+  /// Especificación del dispositivo que generó el resultado. Null en datos
+  /// anteriores al cambio (backward compat).
+  final DeviceSpec? deviceSpec;
 
   /// Tiempo promedio de procesamiento por carácter (milisegundos).
   ///
@@ -49,6 +55,7 @@ class BenchmarkResult {
           'langVoz': voiceConfig.langVoz,
         },
         'fecha': fecha.toIso8601String(),
+        'device_spec': deviceSpec?.toMap(),
       };
 
   /// Deserializa desde un `Map` plano leído de `RepositorioPreferencias`.
@@ -71,6 +78,9 @@ class BenchmarkResult {
             ((map['voice_config'] as Map?)?['langVoz'] as String?) ?? 'es',
       ),
       fecha: DateTime.parse(map['fecha'] as String),
+      deviceSpec: map['device_spec'] != null
+          ? DeviceSpec.fromMap(map['device_spec'] as Map<String, Object?>)
+          : null,
     );
   }
 }

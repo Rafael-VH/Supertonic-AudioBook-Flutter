@@ -183,6 +183,7 @@ class BenchmarkController extends Notifier<BenchmarkEstado> {
         'langVoz': voiceConfig.langVoz,
       },
       'fecha': DateTime.now().toIso8601String(),
+      'device_spec': ref.read(deviceSpecProvider)?.toMap(),
     };
     prefsRepo.guardar(datos);
   }
