@@ -3,7 +3,7 @@ import 'dart:typed_data';
 import 'package:supertonic_audiobook/shared/domain/constants/producto.dart';
 import 'package:supertonic_audiobook/features/convert/domain/contracts/exportador_audio.dart';
 import 'package:supertonic_audiobook/features/convert/domain/contracts/file_system.dart';
-import 'package:supertonic_audiobook/features/convert/domain/contracts/motor_tts.dart';
+import 'package:supertonic_audiobook/shared/domain/contracts/motor_tts.dart';
 import 'package:supertonic_audiobook/shared/domain/contracts/domain_logger.dart';
 import 'package:supertonic_audiobook/shared/domain/contracts/repositorio_archivos.dart';
 import 'package:supertonic_audiobook/shared/domain/entities/archivo.dart';

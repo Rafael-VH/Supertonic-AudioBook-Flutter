@@ -8,7 +8,7 @@ import 'package:supertonic_audiobook/features/benchmark/domain/entities/benchmar
 import 'package:supertonic_audiobook/features/benchmark/domain/entities/conversion_entry.dart';
 import 'package:supertonic_audiobook/features/benchmark/domain/entities/device_spec.dart';
 import 'package:supertonic_audiobook/features/benchmark/presentation/controllers/benchmark_controller.dart';
-import 'package:supertonic_audiobook/features/convert/domain/contracts/motor_tts.dart';
+import 'package:supertonic_audiobook/shared/domain/contracts/motor_tts.dart';
 import 'package:supertonic_audiobook/presentation/controllers/providers.dart';
 import 'package:supertonic_audiobook/shared/domain/entities/voice_config.dart';
 

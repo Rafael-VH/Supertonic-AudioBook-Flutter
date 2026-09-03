@@ -6,7 +6,7 @@ import 'package:file_picker/src/platform/file_picker_platform_interface.dart';
 
 import 'package:supertonic_audiobook/features/convert/domain/contracts/exportador_audio.dart';
 import 'package:supertonic_audiobook/features/modelo/domain/contracts/modelo_gestor.dart';
-import 'package:supertonic_audiobook/features/convert/domain/contracts/motor_tts.dart';
+import 'package:supertonic_audiobook/shared/domain/contracts/motor_tts.dart';
 import 'package:supertonic_audiobook/shared/domain/contracts/domain_logger.dart';
 import 'package:supertonic_audiobook/shared/domain/contracts/repositorio_archivos.dart';
 import 'package:supertonic_audiobook/shared/domain/contracts/repositorio_preferencias.dart';

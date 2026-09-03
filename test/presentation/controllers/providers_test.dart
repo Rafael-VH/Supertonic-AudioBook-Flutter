@@ -7,7 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:supertonic_audiobook/shared/data/config.dart';
 import 'package:supertonic_audiobook/features/convert/data/repositories/file_system_local.dart';
 import 'package:supertonic_audiobook/features/convert/domain/contracts/exportador_audio.dart';
-import 'package:supertonic_audiobook/features/convert/domain/contracts/motor_tts.dart';
+import 'package:supertonic_audiobook/shared/domain/contracts/motor_tts.dart';
 import 'package:supertonic_audiobook/shared/domain/contracts/repositorio_archivos.dart';
 import 'package:supertonic_audiobook/shared/domain/contracts/repositorio_preferencias.dart';
 import 'package:supertonic_audiobook/shared/domain/entities/archivo.dart';

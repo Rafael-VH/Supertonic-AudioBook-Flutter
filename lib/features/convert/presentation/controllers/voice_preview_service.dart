@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:path_provider/path_provider.dart';
 
-import 'package:supertonic_audiobook/features/convert/domain/contracts/motor_tts.dart';
+import 'package:supertonic_audiobook/shared/domain/contracts/motor_tts.dart';
 import 'package:supertonic_audiobook/features/convert/domain/use_cases/sintetizar_muestra.dart';
 import 'package:supertonic_audiobook/shared/domain/contracts/reproductor_audio.dart';
 

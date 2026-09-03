@@ -2,7 +2,7 @@ import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:supertonic_audiobook/features/benchmark/domain/use_cases/run_benchmark.dart';
-import 'package:supertonic_audiobook/features/convert/domain/contracts/motor_tts.dart';
+import 'package:supertonic_audiobook/shared/domain/contracts/motor_tts.dart';
 import 'package:supertonic_audiobook/shared/domain/contracts/domain_logger.dart';
 import 'package:supertonic_audiobook/shared/domain/entities/voice_config.dart';
 
