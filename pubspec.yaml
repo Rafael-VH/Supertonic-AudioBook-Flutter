@@ -28,6 +28,7 @@ dependencies:
   go_router: ^17.5.0
 
   id3_codec: ^1.0.3
+  device_info_plus: ^12.4.0
 
 dev_dependencies:
   flutter_test:

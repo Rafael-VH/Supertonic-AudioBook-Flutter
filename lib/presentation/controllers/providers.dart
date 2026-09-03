@@ -11,6 +11,7 @@ import 'package:supertonic_audiobook/shared/domain/contracts/reproductor_audio.d
 import 'package:supertonic_audiobook/features/biblioteca/domain/use_cases/listar_audios_generados.dart';
 import 'package:supertonic_audiobook/features/convert/domain/use_cases/procesar_archivo.dart';
 import 'package:supertonic_audiobook/features/convert/domain/use_cases/sintetizar_muestra.dart';
+import 'package:supertonic_audiobook/features/benchmark/domain/entities/device_spec.dart';
 import 'package:supertonic_audiobook/features/benchmark/domain/use_cases/registrar_conversion_en_historial.dart';
 import 'package:supertonic_audiobook/features/benchmark/presentation/controllers/benchmark_controller.dart';
 import 'package:supertonic_audiobook/features/audio_manager/domain/use_cases/guardar_audio.dart';
@@ -152,6 +153,11 @@ final editorMetadataProvider = Provider<EditorMetadata>(
 // ---------------------------------------------------------------------------
 // Benchmark
 // ---------------------------------------------------------------------------
+
+/// Datos del dispositivo, leídos en la composición (`main.dart`).
+final deviceSpecProvider = Provider<DeviceSpec?>(
+  (_) => throw UnimplementedError('deviceSpecProvider se inyecta en main.dart'),
+);
 
 /// Controller del benchmark de rendimiento del motor TTS.
 final benchmarkControllerProvider =
