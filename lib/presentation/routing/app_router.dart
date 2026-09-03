@@ -12,7 +12,7 @@ import 'package:supertonic_audiobook/features/onboarding/presentation/screens/on
 import 'package:supertonic_audiobook/features/settings/presentation/screens/settings_screen.dart';
 import 'package:supertonic_audiobook/features/editor_metadata/presentation/screens/metadata_editor_screen.dart';
 import 'package:supertonic_audiobook/features/audio_manager/presentation/screens/audio_manager_screen.dart';
-import 'package:supertonic_audiobook/features/audio_manager/domain/entities/audio_pendiente.dart';
+import 'package:supertonic_audiobook/shared/domain/entities/audio_pendiente.dart';
 import 'package:supertonic_audiobook/features/splash/presentation/screens/splash_screen.dart';
 
 /// Nombres de ruta centralizados para que ninguna screen importe otra.

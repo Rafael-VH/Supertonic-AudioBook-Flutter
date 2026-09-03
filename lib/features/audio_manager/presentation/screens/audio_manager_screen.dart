@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import 'package:supertonic_audiobook/features/audio_manager/domain/entities/audio_pendiente.dart';
+import 'package:supertonic_audiobook/shared/domain/entities/audio_pendiente.dart';
 import 'package:supertonic_audiobook/presentation/controllers/providers.dart';
 import 'package:supertonic_audiobook/presentation/l10n/app_localizations.dart';
 import 'package:supertonic_audiobook/presentation/routing/app_router.dart';

@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:supertonic_audiobook/features/audio_manager/domain/entities/audio_pendiente.dart';
+import 'package:supertonic_audiobook/shared/domain/entities/audio_pendiente.dart';
 
 void main() {
   group('AudioPendiente', () {

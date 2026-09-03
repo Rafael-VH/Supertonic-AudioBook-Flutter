@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'package:supertonic_audiobook/features/audio_manager/domain/entities/audio_pendiente.dart';
+import 'package:supertonic_audiobook/shared/domain/entities/audio_pendiente.dart';
 import 'package:supertonic_audiobook/presentation/controllers/providers.dart';
 
 /// Estado de la pantalla AudioManager.
