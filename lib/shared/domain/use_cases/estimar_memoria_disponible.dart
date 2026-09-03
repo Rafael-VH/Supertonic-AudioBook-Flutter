@@ -1,4 +1,4 @@
-import 'package:supertonic_audiobook/features/audio_manager/domain/use_cases/estimar_memoria.dart';
+import 'package:supertonic_audiobook/shared/domain/use_cases/estimar_memoria.dart';
 
 /// Orquesta la estimación de memoria requerida para un lote de audios a
 /// sintetizar, dado el espacio disponible en bytes.
