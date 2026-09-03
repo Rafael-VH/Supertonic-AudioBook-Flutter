@@ -43,6 +43,16 @@ class BarraAccion extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
               ],
+              if (estado.tiempoEstimado != null) ...[
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    estado.tiempoEstimado!,
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                ),
+                const SizedBox(height: 8),
+              ],
               Row(
                 children: [
                   Expanded(

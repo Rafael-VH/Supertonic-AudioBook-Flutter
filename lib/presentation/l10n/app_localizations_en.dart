@@ -786,4 +786,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get memory_warning_cancel => 'Cancel';
+
+  @override
+  String restante_estimado(String tiempo) {
+    return 'Estimated remaining: $tiempo';
+  }
 }

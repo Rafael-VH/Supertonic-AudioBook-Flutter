@@ -11,7 +11,11 @@ import 'package:supertonic_audiobook/shared/domain/entities/voice_config.dart';
 
 class _MockController extends Mock implements HomeController {}
 
-HomeEstado _estado({List<String> lineasLog = const [], String estado = ''}) =>
+HomeEstado _estado({
+  List<String> lineasLog = const [],
+  String estado = '',
+  String? tiempoEstimado,
+}) =>
     HomeEstado(
       carpetaIn: '',
       carpetaOut: '',
@@ -27,6 +31,7 @@ HomeEstado _estado({List<String> lineasLog = const [], String estado = ''}) =>
       estado: estado,
       lineasLog: lineasLog,
       snackbar: null,
+      tiempoEstimado: tiempoEstimado,
     );
 
 Widget _wrap(HomeEstado estado) => MaterialApp(
@@ -86,6 +91,20 @@ void main() {
       expect(find.byType(VistaLog), findsOneWidget);
       expect(find.text('log'), findsOneWidget);
       expect(find.text('Trabajando'), findsOneWidget);
+    });
+
+    testWidgets('muestra tiempoEstimado cuando no es null', (tester) async {
+      await tester.pumpWidget(
+        _wrap(_estado(tiempoEstimado: 'Restante estimado: 1 min 30 s')),
+      );
+
+      expect(find.text('Restante estimado: 1 min 30 s'), findsOneWidget);
+    });
+
+    testWidgets('no muestra tiempoEstimado cuando es null', (tester) async {
+      await tester.pumpWidget(_wrap(_estado()));
+
+      expect(find.textContaining('Restante estimado'), findsNothing);
     });
   });
 }

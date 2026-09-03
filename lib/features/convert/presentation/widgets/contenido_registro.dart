@@ -38,6 +38,13 @@ class ContenidoRegistro extends StatelessWidget {
           estado.estado.isEmpty ? t.estado_listo : estado.estado,
           style: Theme.of(context).textTheme.bodyMedium,
         ),
+        if (estado.tiempoEstimado != null) ...[
+          const SizedBox(height: 4),
+          Text(
+            estado.tiempoEstimado!,
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
+        ],
       ],
     );
   }

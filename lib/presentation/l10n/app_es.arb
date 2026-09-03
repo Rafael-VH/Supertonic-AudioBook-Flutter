@@ -447,5 +447,11 @@
     }
   },
   "memory_warning_proceed": "Procesar de todos modos",
-  "memory_warning_cancel": "Cancelar"
+  "memory_warning_cancel": "Cancelar",
+  "restante_estimado": "Restante estimado: {tiempo}",
+  "@restante_estimado": {
+    "placeholders": {
+      "tiempo": {"type": "String"}
+    }
+  }
 }

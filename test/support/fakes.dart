@@ -64,11 +64,16 @@ class RepositorioArchivosFake implements RepositorioArchivos {
     this.archivos, {
     this.carpetasCreadas,
     List<String>? audios,
-  }) : audios = audios ?? const [];
+    Map<String, String>? contenidos,
+  })  : audios = audios ?? const [],
+        contenidos = contenidos ?? const {};
 
   final List<Archivo> archivos;
   final List<String>? carpetasCreadas;
   final List<String> audios;
+
+  /// Contenido por ruta; si no está, `leerArchivo` devuelve ''.
+  final Map<String, String> contenidos;
 
   int listados = 0;
 
@@ -87,7 +92,7 @@ class RepositorioArchivosFake implements RepositorioArchivos {
   List<String> listarAudios(String carpeta) => audios;
 
   @override
-  String leerArchivo(String ruta) => '';
+  String leerArchivo(String ruta) => contenidos[ruta] ?? '';
 
   @override
   void eliminarSiExiste(String ruta) {}

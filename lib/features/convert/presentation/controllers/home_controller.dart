@@ -9,6 +9,7 @@ import 'package:supertonic_audiobook/features/convert/domain/entities/selection_
 import 'package:supertonic_audiobook/shared/domain/entities/archivo.dart';
 import 'package:supertonic_audiobook/shared/domain/entities/voice_config.dart';
 import 'package:supertonic_audiobook/features/convert/domain/use_cases/procesar_archivo.dart';
+import 'package:supertonic_audiobook/features/convert/domain/use_cases/limpiar_markdown.dart';
 import 'package:supertonic_audiobook/features/audio_manager/domain/entities/audio_pendiente.dart';
 import 'package:supertonic_audiobook/features/audio_manager/domain/use_cases/estimar_memoria_disponible.dart';
 import 'package:supertonic_audiobook/features/audio_manager/presentation/screens/memory_warning_dialog.dart';
@@ -51,6 +52,7 @@ class HomeEstado {
     required this.snackbar,
     this.modoSeleccion = SelectionMode.carpeta,
     this.pendientes = const [],
+    this.tiempoEstimado,
   });
 
   final String carpetaIn;
@@ -84,6 +86,9 @@ class HomeEstado {
   /// Audios pendientes generados tras procesar.
   final List<AudioPendiente> pendientes;
 
+  /// Tiempo restante estimado del lote, preformateado. `null` = silencio.
+  final String? tiempoEstimado;
+
   HomeEstado copyWith({
     String? carpetaIn,
     String? carpetaOut,
@@ -102,6 +107,8 @@ class HomeEstado {
     bool clearSnackbar = false,
     SelectionMode? modoSeleccion,
     List<AudioPendiente>? pendientes,
+    String? tiempoEstimado,
+    bool clearTiempoEstimado = false,
   }) {
     return HomeEstado(
       carpetaIn: carpetaIn ?? this.carpetaIn,
@@ -120,6 +127,9 @@ class HomeEstado {
       snackbar: clearSnackbar ? null : (snackbar ?? this.snackbar),
       modoSeleccion: modoSeleccion ?? this.modoSeleccion,
       pendientes: pendientes ?? this.pendientes,
+      tiempoEstimado: clearTiempoEstimado
+          ? null
+          : (tiempoEstimado ?? this.tiempoEstimado),
     );
   }
 }
@@ -449,11 +459,32 @@ class HomeController extends Notifier<HomeEstado> {
       // Se acumulan entradas de historial y se persisten SOLO si el lote
       // completa sin cancelación (ver más abajo).
       final historialPendiente = <Map<String, Object?>>[];
+      // Benchmark cargado una vez: null silencia toda la ruta viva (EVC-3).
+      final benchmark = _cargarBenchmark();
+      var procesados = 0;
       for (var i = 0; i < totalArchivos; i++) {
         final archivo = seleccion[i];
         if (state.cancelar) break;
+        var estadoArchivo = t.estado_archivo(i + 1, totalArchivos, archivo.nombre);
+        // Estimación por archivo (EVC-1): chars × tasa del benchmark.
+        if (benchmark != null) {
+          try {
+            final chars = limpiarMarkdown(
+              ref.read(repositorioArchivosProvider).leerArchivo(archivo.ruta),
+            ).length;
+            if (chars > 0) {
+              final estimado = estimarTiempo(benchmark: benchmark, textoChars: chars);
+              if (estimado != null) {
+                estadoArchivo =
+                    '$estadoArchivo · ~${_formatearTiempo(t, estimado)}';
+              }
+            }
+          } catch (_) {
+            // Fallo de lectura silencioso: la conversión continúa (EVC-1).
+          }
+        }
         state = state.copyWith(
-          estado: t.estado_archivo(i + 1, totalArchivos, archivo.nombre),
+          estado: estadoArchivo,
           progresoActual: 0,
           progresoTotal: 0,
         );
@@ -474,6 +505,18 @@ class HomeController extends Notifier<HomeEstado> {
               _appendLog(t.log_archivo_fin(i + 1, totalArchivos));
               _appendLog('  Segmentos: ${resultado.segmentos}, Audio: ${resultado.duracionAudioSeg.toStringAsFixed(1)}s');
               exitos++;
+              procesados++;
+              // Tiempo restante del lote (EVC-2): promedio real × restantes.
+              final elapsedSec = DateTime.now().difference(inicio).inSeconds.toDouble();
+              final filesRemaining = totalArchivos - (i + 1);
+              if (procesados > 0 && filesRemaining > 0) {
+                final avgRealSec = elapsedSec / procesados;
+                final remainingSec = avgRealSec * filesRemaining;
+                state = state.copyWith(
+                  tiempoEstimado:
+                      t.restante_estimado(_formatearTiempo(t, remainingSec)),
+                );
+              }
               // Se acumula en memoria; se escribe al historial solo si el
               // lote completo sin cancelación.
               historialPendiente.add(ConversionEntry(
@@ -511,6 +554,9 @@ class HomeController extends Notifier<HomeEstado> {
           _appendLog('Error en ${archivo.nombre}: $exc');
         }
       }
+
+      // EVC-4: al terminar el loop (con o sin cancelación) no queda restante.
+      state = state.copyWith(clearTiempoEstimado: true);
 
       final elapsed = DateTime.now().difference(inicio).inSeconds.toDouble();
       final textoElapsed = _formatearTiempo(t, elapsed);
@@ -700,14 +746,18 @@ class HomeController extends Notifier<HomeEstado> {
     }
   }
 
+  /// Benchmark guardado no vacío, o null si no hay (path vivo + estimación post).
+  BenchmarkResult? _cargarBenchmark() {
+    final data = ref.read(repositorioBenchmarkProvider).cargar()['benchmark_results'];
+    if (data is! Map<String, Object?>) return null;
+    final b = BenchmarkResult.fromMap(data);
+    return b.tamanios.isEmpty ? null : b;
+  }
+
   /// Muestra la estimación de tiempo si hay un benchmark guardado.
   void _mostrarEstimacion(AppLocalizations t, List<Archivo> archivos) {
-    final prefs = ref.read(repositorioBenchmarkProvider).cargar();
-    final benchmarkData = prefs['benchmark_results'];
-    if (benchmarkData is! Map<String, Object?>) return;
-
-    final benchmark = BenchmarkResult.fromMap(benchmarkData);
-    if (benchmark.tamanios.isEmpty) return;
+    final benchmark = _cargarBenchmark();
+    if (benchmark == null) return;
 
     // Calcular total de caracteres aproximados de los archivos seleccionados.
     var totalChars = 0;

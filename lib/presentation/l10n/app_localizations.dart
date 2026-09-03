@@ -1447,6 +1447,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Cancel'**
   String get memory_warning_cancel;
+
+  /// No description provided for @restante_estimado.
+  ///
+  /// In en, this message translates to:
+  /// **'Estimated remaining: {tiempo}'**
+  String restante_estimado(String tiempo);
 }
 
 class _AppLocalizationsDelegate

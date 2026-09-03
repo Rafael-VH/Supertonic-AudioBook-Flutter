@@ -7,6 +7,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:supertonic_audiobook/shared/domain/entities/archivo.dart';
+import 'package:supertonic_audiobook/shared/domain/entities/voice_config.dart';
+import 'package:supertonic_audiobook/features/benchmark/domain/entities/benchmark_result.dart';
 import 'package:supertonic_audiobook/features/convert/data/repositories/file_system_local.dart';
 import 'package:supertonic_audiobook/features/convert/domain/use_cases/procesar_archivo.dart';
 import 'package:supertonic_audiobook/features/convert/domain/use_cases/sintetizar_muestra.dart';
@@ -517,6 +519,136 @@ void main() {
       expect(estado.estado, t.estado_con_errores(0, 2, 2));
       expect(estado.snackbar?.esError, isTrue);
       expect(estado.lineasLog, contains(t.log_archivo_error(1, 2, 'a.md')));
+    });
+
+    test('EVC-1: el estado muestra la estimación por archivo con benchmark',
+        () async {
+      baseFakes(archivos: const [
+        Archivo('C:/libros/a.md'),
+        Archivo('C:/libros/b.md'),
+      ]);
+      // Seed benchmark so _cargarBenchmark() returns non-null.
+      preferencias = PreferenciasMemoria({
+        ...preferencias.datos,
+        'benchmark_results': BenchmarkResult(
+          tamanios: {1000: 1000},
+          voiceConfig: const VoiceConfig(voz: 'M1'),
+          fecha: DateTime.utc(2025),
+        ).toMap(),
+      });
+      // a.md con contenido real (chars>0) para que se estime EVC-1.
+      repositorio = RepositorioArchivosFake(
+        const [Archivo('C:/libros/a.md'), Archivo('C:/libros/b.md')],
+        contenidos: {
+          'C:/libros/a.md': 'Esto es texto de prueba.',
+        },
+      );
+      final container = crearContenedor();
+      final controller = container.read(homeControllerProvider.notifier);
+      final t = es();
+      // Bloquear el primer archivo dentro de useCase.procesar: el estado del
+      // archivo (con la estimación por archivo) ya fue seteado antes.
+      final liberar = Completer<void>();
+      procesador.espera = () => liberar.future;
+
+      final futuro = controller.procesar(t);
+      await Future<void>.delayed(const Duration(milliseconds: 20));
+
+      // avgMsPerChar=1 → chars(22)=22ms → ~0 s.
+      final aMedioArchivo = container.read(homeControllerProvider);
+      expect(aMedioArchivo.estado, startsWith('Archivo 1 de 2: a.md'));
+      expect(aMedioArchivo.estado, contains('· ~'));
+
+      liberar.complete();
+      await futuro;
+    });
+
+    test('EVC-2: tiempoEstimado muestra restante con benchmark', () async {
+      baseFakes(archivos: const [
+        Archivo('C:/libros/a.md'),
+        Archivo('C:/libros/b.md'),
+      ]);
+      // Seed benchmark_results so _cargarBenchmark() returns non-null.
+      preferencias = PreferenciasMemoria({
+        ...preferencias.datos,
+        'benchmark_results': BenchmarkResult(
+          tamanios: {100: 500, 500: 2000},
+          voiceConfig: const VoiceConfig(voz: 'M1'),
+          fecha: DateTime.utc(2025),
+        ).toMap(),
+      });
+      final container = crearContenedor();
+      final controller = container.read(homeControllerProvider.notifier);
+      final t = es();
+
+      // Bloquear el segundo archivo para poder inspeccionar el estado a
+      // mitad de lote: tras el 1º se setea el restante (EVC-2); el 2º queda
+      // esperando. Luego se completa para dejar terminar el lote (EVC-4).
+      var llamadas = 0;
+      final liberar = Completer<void>();
+      procesador.espera = () {
+        llamadas++;
+        return llamadas >= 2 ? liberar.future : Future<void>.value();
+      };
+
+      final futuro = controller.procesar(t);
+      // Esperar a que el 1º complete y setee el restante (0 archivos sin
+      // tardanza → "0 s").
+      await Future<void>.delayed(const Duration(milliseconds: 20));
+
+      final aMedioLote = container.read(homeControllerProvider);
+      expect(aMedioLote.tiempoEstimado, t.restante_estimado(t.tiempo_seg(0)));
+
+      liberar.complete();
+      await futuro;
+      // EVC-4: al terminar el lote no queda restante visible.
+      expect(container.read(homeControllerProvider).tiempoEstimado, isNull);
+    });
+
+    test('EVC-3: sin benchmark → tiempoEstimado es null', () async {
+      // No benchmark_results seeded — _cargarBenchmark() returns null.
+      baseFakes(archivos: const [
+        Archivo('C:/libros/a.md'),
+        Archivo('C:/libros/b.md'),
+      ]);
+      final container = crearContenedor();
+      final controller = container.read(homeControllerProvider.notifier);
+      final t = es();
+
+      await controller.procesar(t);
+
+      final estado = container.read(homeControllerProvider);
+      expect(estado.tiempoEstimado, isNull);
+    });
+
+    test('EVC-4: cancelar limpia tiempoEstimado', () async {
+      baseFakes(archivos: const [
+        Archivo('C:/libros/a.md'),
+        Archivo('C:/libros/b.md'),
+      ]);
+      // Seed benchmark so tiempoEstimado gets set during the run...
+      preferencias = PreferenciasMemoria({
+        ...preferencias.datos,
+        'benchmark_results': BenchmarkResult(
+          tamanios: {100: 500},
+          voiceConfig: const VoiceConfig(voz: 'M1'),
+          fecha: DateTime.utc(2025),
+        ).toMap(),
+      });
+      final container = crearContenedor();
+      final controller = container.read(homeControllerProvider.notifier);
+      final t = es();
+      final liberar = Completer<void>();
+      procesador.espera = () => liberar.future;
+
+      final futuro = controller.procesar(t);
+      await Future<void>.delayed(Duration.zero);
+      controller.cancelar(t);
+      liberar.complete();
+      await futuro;
+
+      final estado = container.read(homeControllerProvider);
+      expect(estado.tiempoEstimado, isNull);
     });
   });
 }
