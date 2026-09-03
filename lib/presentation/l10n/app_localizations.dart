@@ -1292,6 +1292,24 @@ abstract class AppLocalizations {
   /// **'Select test sizes'**
   String get benchmark_seleccionar_tamanios;
 
+  /// No description provided for @benchmark_device_brand.
+  ///
+  /// In en, this message translates to:
+  /// **'Device'**
+  String get benchmark_device_brand;
+
+  /// No description provided for @benchmark_device_cpu.
+  ///
+  /// In en, this message translates to:
+  /// **'Processor'**
+  String get benchmark_device_cpu;
+
+  /// No description provided for @benchmark_device_ram.
+  ///
+  /// In en, this message translates to:
+  /// **'RAM'**
+  String get benchmark_device_ram;
+
   /// No description provided for @historial_titulo.
   ///
   /// In en, this message translates to:

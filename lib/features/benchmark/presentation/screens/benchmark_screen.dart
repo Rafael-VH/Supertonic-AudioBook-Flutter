@@ -56,6 +56,11 @@ class _BenchmarkBody extends ConsumerWidget {
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
+        // --- Device spec card ---
+        const _DeviceSpecCard(),
+
+        const SizedBox(height: 12),
+
         // --- Info columnas ---
         Card(
           child: Padding(
@@ -328,4 +333,64 @@ String _formatearDuracion(double segundos) {
   final horas = minutos ~/ 60;
   final min = minutos % 60;
   return '$horas h - $min min - $seg seg';
+}
+
+class _DeviceSpecCard extends ConsumerWidget {
+  const _DeviceSpecCard();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final t = AppLocalizations.of(context)!;
+    final spec = ref.watch(deviceSpecProvider);
+
+    if (spec == null || (spec.brand == null && spec.model == null)) {
+      return const SizedBox.shrink();
+    }
+
+    final processor = _processorText(spec.board, spec.hardware);
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _label(t.benchmark_device_brand),
+            Text('${spec.brand ?? ''} ${spec.model ?? ''}'.trim()),
+            if (processor != null) ...[
+              const SizedBox(height: 8),
+              _label(t.benchmark_device_cpu),
+              Text(processor),
+            ],
+            if (spec.ramBytes != null) ...[
+              const SizedBox(height: 8),
+              _label(t.benchmark_device_ram),
+              Text(_formatRam(spec.ramBytes)),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  static Widget _label(String text) => Padding(
+        padding: const EdgeInsets.only(bottom: 2),
+        child: Text(
+          text,
+          style: const TextStyle(fontWeight: FontWeight.bold),
+        ),
+      );
+
+  static String? _processorText(String? board, String? hardware) {
+    if (board != null) return board;
+    if (hardware != null) return hardware;
+    return null;
+  }
+}
+
+/// Formatea `ramBytes` a texto legible: >= 1 GB → "X.X GB", sino "X MB".
+String _formatRam(int? bytes) {
+  if (bytes == null) return '';
+  final gb = bytes / (1024 * 1024 * 1024);
+  return gb >= 1.0 ? '${gb.toStringAsFixed(1)} GB' : '${(bytes / (1024 * 1024)).toInt()} MB';
 }

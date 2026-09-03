@@ -714,6 +714,15 @@ class AppLocalizationsEs extends AppLocalizations {
   String get benchmark_seleccionar_tamanios => 'Seleccionar tamaños de prueba';
 
   @override
+  String get benchmark_device_brand => 'Dispositivo';
+
+  @override
+  String get benchmark_device_cpu => 'Procesador';
+
+  @override
+  String get benchmark_device_ram => 'RAM';
+
+  @override
   String get historial_titulo => 'Historial de conversiones';
 
   @override

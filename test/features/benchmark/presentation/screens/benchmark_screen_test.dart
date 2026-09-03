@@ -3,6 +3,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:supertonic_audiobook/features/benchmark/domain/entities/device_spec.dart';
 import 'package:supertonic_audiobook/features/benchmark/presentation/controllers/benchmark_controller.dart';
 import 'package:supertonic_audiobook/features/benchmark/presentation/screens/benchmark_screen.dart';
 import 'package:supertonic_audiobook/presentation/controllers/providers.dart';
@@ -11,9 +12,14 @@ import 'package:supertonic_audiobook/presentation/l10n/app_localizations.dart';
 import '../../../../support/fakes.dart';
 
 /// Harness con el modelo listo para que el gate no redirija a /modelo.
-Widget _harness({Map<String, Object>? preferencias, Map<String, Object>? benchmark}) {
+Widget _harness({
+  Map<String, Object>? preferencias,
+  Map<String, Object>? benchmark,
+  DeviceSpec? deviceSpec,
+}) {
   return ProviderScope(
     overrides: [
+      deviceSpecProvider.overrideWithValue(deviceSpec),
       repositorioPreferenciasProvider.overrideWithValue(
         PreferenciasMemoria(preferencias ?? {'modelo_descargado': true}),
       ),
@@ -42,12 +48,14 @@ Widget _harness({Map<String, Object>? preferencias, Map<String, Object>? benchma
 }
 
 Future<void> _pump(WidgetTester tester,
-    {Map<String, Object>? preferencias, Map<String, Object>? benchmark}) async {
+    {Map<String, Object>? preferencias,
+    Map<String, Object>? benchmark,
+    DeviceSpec? deviceSpec}) async {
   tester.view.physicalSize = const Size(1280, 800);
   tester.view.devicePixelRatio = 1.0;
   addTearDown(tester.view.reset);
-  await tester.pumpWidget(
-      _harness(preferencias: preferencias, benchmark: benchmark));
+  await tester.pumpWidget(_harness(
+      preferencias: preferencias, benchmark: benchmark, deviceSpec: deviceSpec));
   await tester.pumpAndSettle();
 }
 
@@ -95,7 +103,90 @@ void main() {
   testWidgets('el historial vacío muestra su estado', (tester) async {
     await _pump(tester);
 
+    // The text is at the bottom of a ListView; scroll it into view.
+    await tester.scrollUntilVisible(
+      find.text('Sin conversiones registradas'),
+      100,
+      scrollable: find.byType(Scrollable).first,
+    );
+
     expect(find.text('Sin conversiones registradas'), findsOneWidget);
     expect(find.text('Historial de conversiones'), findsNothing);
+  });
+
+  group('_DeviceSpecCard', () {
+    testWidgets('se muestra con deviceSpec completo (Android)', (tester) async {
+      const device = DeviceSpec(
+        brand: 'Google',
+        model: 'Pixel 8',
+        board: 'cheetah',
+        hardware: 'cheetah',
+        ramBytes: 8589934592,
+      );
+      await _pump(tester, deviceSpec: device);
+
+      // brand + model
+      expect(find.text('Google Pixel 8'), findsOneWidget);
+      // processor row shows board (cheetah)
+      expect(find.text('cheetah'), findsOneWidget);
+      // RAM shows "8.0 GB"
+      expect(find.text('8.0 GB'), findsOneWidget);
+      // label text
+      expect(find.text('Dispositivo'), findsOneWidget);
+      expect(find.text('Procesador'), findsOneWidget);
+      expect(find.text('RAM'), findsOneWidget);
+    });
+
+    testWidgets('oculta fila procesador cuando board/hardware son null (iOS)',
+        (tester) async {
+      const device = DeviceSpec(
+        brand: 'Apple',
+        model: 'iPhone 15',
+        ramBytes: 8589934592,
+      );
+      await _pump(tester, deviceSpec: device);
+
+      expect(find.text('Apple iPhone 15'), findsOneWidget);
+      expect(find.text('8.0 GB'), findsOneWidget);
+      expect(find.text('Procesador'), findsNothing);
+    });
+
+    testWidgets('oculta card cuando deviceSpec es null', (tester) async {
+      await _pump(tester, deviceSpec: null);
+
+      expect(find.text('Dispositivo'), findsNothing);
+      expect(find.text('Procesador'), findsNothing);
+      expect(find.text('RAM'), findsNothing);
+    });
+
+    testWidgets('oculta card cuando todos los campos son null (all-null)',
+        (tester) async {
+      await _pump(tester, deviceSpec: const DeviceSpec());
+
+      expect(find.text('Dispositivo'), findsNothing);
+    });
+
+    testWidgets('formatea RAM en MB cuando < 1 GB', (tester) async {
+      const device = DeviceSpec(
+        brand: 'Test',
+        model: 'X1',
+        ramBytes: 512 * 1024 * 1024, // 512 MB
+      );
+      await _pump(tester, deviceSpec: device);
+
+      expect(find.text('Test X1'), findsOneWidget);
+      expect(find.text('512 MB'), findsOneWidget);
+    });
+
+    testWidgets('oculta fila RAM cuando ramBytes es null', (tester) async {
+      const device = DeviceSpec(
+        brand: 'Test',
+        model: 'X1',
+      );
+      await _pump(tester, deviceSpec: device);
+
+      expect(find.text('Test X1'), findsOneWidget);
+      expect(find.text('RAM'), findsNothing);
+    });
   });
 }
