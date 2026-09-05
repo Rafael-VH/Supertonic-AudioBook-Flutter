@@ -26,7 +26,7 @@ class BibliotecaScreen extends ConsumerWidget {
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
-            tooltip: 'Actualizar',
+            tooltip: t.refrescar,
             onPressed: () =>
                 ref.read(bibliotecaControllerProvider.notifier).recargar(),
           ),

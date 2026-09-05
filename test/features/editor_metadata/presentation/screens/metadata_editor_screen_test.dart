@@ -63,6 +63,31 @@ Widget _buildScreen({
   );
 }
 
+/// Variante en locale EN para verificar que los errores se traducen.
+Widget _buildScreenEn({
+  required _EditorMetadataFake fakeEditor,
+}) {
+  final fakePicker = FilePickerFake(null);
+  FilePickerPlatform.instance = fakePicker;
+
+  return ProviderScope(
+    overrides: [
+      editorMetadataProvider.overrideWithValue(fakeEditor),
+    ],
+    child: MaterialApp(
+      locale: const Locale('en'),
+      supportedLocales: const [Locale('es'), Locale('en')],
+      localizationsDelegates: const [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      home: const MetadataEditorScreen(),
+    ),
+  );
+}
+
 void main() {
   late _EditorMetadataFake fakeEditor;
 
@@ -214,7 +239,8 @@ void main() {
       expect(find.text('Ir al editor'), findsOneWidget);
     });
 
-    testWidgets('error muestra SnackBar', (WidgetTester tester) async {
+    testWidgets('error muestra SnackBar con mensaje localizado',
+        (WidgetTester tester) async {
       fakeEditor.errorGuardar = Exception('escritura fallida');
 
       await tester.pumpWidget(_buildScreen(fakeEditor: fakeEditor));
@@ -228,12 +254,40 @@ void main() {
       await controller.cargar('/path/test.mp3');
       await tester.pumpAndSettle();
 
-      // Tap save — should fail and show snackbar
+      // Tap save — should fail and show snackbar with localized ES message.
       await tester.tap(find.text('Guardar'));
       await tester.pumpAndSettle();
 
       expect(find.byType(SnackBar), findsOneWidget);
-      expect(find.textContaining('escritura fallida'), findsOneWidget);
+      expect(
+        find.text('No se pudieron guardar los metadatos.'),
+        findsOneWidget,
+      );
+      expect(find.textContaining('escritura fallida'), findsNothing);
+    });
+
+    testWidgets('error de guardado muestra mensaje en inglés en locale EN',
+        (WidgetTester tester) async {
+      fakeEditor.errorGuardar = Exception('escritura fallida');
+
+      await tester.pumpWidget(_buildScreenEn(fakeEditor: fakeEditor));
+      await tester.pumpAndSettle();
+
+      final container = ProviderScope.containerOf(
+        tester.element(find.byType(MetadataEditorScreen)),
+      );
+      final controller =
+          container.read(metadataEditorControllerProvider.notifier);
+      await controller.cargar('/path/test.mp3');
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Save'));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(SnackBar), findsOneWidget);
+      expect(find.text('Could not save metadata.'), findsOneWidget);
+      expect(find.textContaining('escritura fallida'), findsNothing);
+      expect(find.textContaining('No se pudieron'), findsNothing);
     });
 
     testWidgets('éxito muestra SnackBar y hace pop',

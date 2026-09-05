@@ -6,6 +6,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supertonic_audiobook/features/editor_metadata/domain/entities/metadatos_mp3.dart';
 import 'package:supertonic_audiobook/presentation/controllers/providers.dart';
 
+/// Código tipado de error del editor. La pantalla lo mapea a la clave l10n.
+enum MetadataEditorError { lectura, escritura, portadaInvalida, sinArchivo }
+
 /// Estado de la pantalla Editor de Metadatos.
 class MetadataEditorState {
   const MetadataEditorState({
@@ -14,8 +17,7 @@ class MetadataEditorState {
     this.nombreArchivo,
     this.isLoading = false,
     this.isSaving = false,
-    this.error,
-    this.mensajeExito,
+    this.errorTipo,
   });
 
   final MetadatosMp3 metadata;
@@ -23,8 +25,7 @@ class MetadataEditorState {
   final String? nombreArchivo;
   final bool isLoading;
   final bool isSaving;
-  final String? error;
-  final String? mensajeExito;
+  final MetadataEditorError? errorTipo;
 
   MetadataEditorState copyWith({
     MetadatosMp3? metadata,
@@ -34,10 +35,8 @@ class MetadataEditorState {
     bool clearNombreArchivo = false,
     bool? isLoading,
     bool? isSaving,
-    String? error,
+    MetadataEditorError? errorTipo,
     bool clearError = false,
-    String? mensajeExito,
-    bool clearMensajeExito = false,
   }) {
     return MetadataEditorState(
       metadata: metadata ?? this.metadata,
@@ -47,9 +46,7 @@ class MetadataEditorState {
           clearNombreArchivo ? null : (nombreArchivo ?? this.nombreArchivo),
       isLoading: isLoading ?? this.isLoading,
       isSaving: isSaving ?? this.isSaving,
-      error: clearError ? null : (error ?? this.error),
-      mensajeExito:
-          clearMensajeExito ? null : (mensajeExito ?? this.mensajeExito),
+      errorTipo: clearError ? null : (errorTipo ?? this.errorTipo),
     );
   }
 }
@@ -75,7 +72,6 @@ class MetadataEditorController extends Notifier<MetadataEditorState> {
     state = state.copyWith(
       nombreArchivo: archivo.name,
       clearError: true,
-      clearMensajeExito: true,
     );
     await cargar(ruta);
   }
@@ -94,7 +90,7 @@ class MetadataEditorController extends Notifier<MetadataEditorState> {
     } catch (e) {
       state = state.copyWith(
         isLoading: false,
-        error: '$e',
+        errorTipo: MetadataEditorError.lectura,
       );
     }
   }
@@ -107,7 +103,6 @@ class MetadataEditorController extends Notifier<MetadataEditorState> {
     state = state.copyWith(
       metadata: nueva,
       clearError: true,
-      clearMensajeExito: true,
     );
   }
 
@@ -123,18 +118,12 @@ class MetadataEditorController extends Notifier<MetadataEditorState> {
     final archivo = resultado.files.first;
     final bytes = archivo.bytes;
     if (bytes == null) {
-      state = state.copyWith(
-        error:
-            'La portada debe ser JPEG y no superar 500KB.',
-      );
+      state = state.copyWith(errorTipo: MetadataEditorError.portadaInvalida);
       return;
     }
 
     if (bytes.length > 500 * 1024) {
-      state = state.copyWith(
-        error:
-            'La portada debe ser JPEG y no superar 500KB.',
-      );
+      state = state.copyWith(errorTipo: MetadataEditorError.portadaInvalida);
       return;
     }
 
@@ -144,7 +133,6 @@ class MetadataEditorController extends Notifier<MetadataEditorState> {
         coverArtMime: 'image/jpeg',
       ),
       clearError: true,
-      clearMensajeExito: true,
     );
   }
 
@@ -162,7 +150,7 @@ class MetadataEditorController extends Notifier<MetadataEditorState> {
   Future<void> guardar() async {
     final ruta = state.rutaArchivo;
     if (ruta == null) {
-      state = state.copyWith(error: 'No hay archivo seleccionado.');
+      state = state.copyWith(errorTipo: MetadataEditorError.sinArchivo);
       return;
     }
 
@@ -170,14 +158,11 @@ class MetadataEditorController extends Notifier<MetadataEditorState> {
     try {
       final editor = ref.read(editorMetadataProvider);
       await editor.guardar(ruta, state.metadata);
-      state = state.copyWith(
-        isSaving: false,
-        mensajeExito: 'Metadatos guardados correctamente.',
-      );
+      state = state.copyWith(isSaving: false);
     } catch (e) {
       state = state.copyWith(
         isSaving: false,
-        error: '$e',
+        errorTipo: MetadataEditorError.escritura,
       );
     }
   }

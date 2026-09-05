@@ -59,9 +59,10 @@ class _MetadataEditorScreenState
     final newState = ref.read(metadataEditorControllerProvider);
     if (!mounted) return;
 
-    if (newState.error != null) {
+    final error = newState.errorTipo;
+    if (error != null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(newState.error!)),
+        SnackBar(content: Text(_errorText(t, error))),
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -69,6 +70,16 @@ class _MetadataEditorScreenState
       );
       Navigator.of(context).pop();
     }
+  }
+
+  /// Mapea un [MetadataEditorError] a su texto localizado.
+  String _errorText(AppLocalizations t, MetadataEditorError error) {
+    return switch (error) {
+      MetadataEditorError.lectura => t.editor_metadata_error_lectura,
+      MetadataEditorError.escritura => t.editor_metadata_error_escritura,
+      MetadataEditorError.portadaInvalida => t.editor_metadata_error_portada,
+      MetadataEditorError.sinArchivo => t.editor_metadata_error_sin_archivo,
+    };
   }
 
   Widget _buildNoFileSelected(AppLocalizations t) {

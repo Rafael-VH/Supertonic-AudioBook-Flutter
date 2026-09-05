@@ -82,7 +82,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // MotorFake sintetiza en 0 ms; el controller clampa a 1 ms.
-    expect(find.text('0 seg'), findsOneWidget);
+    expect(find.text('0 s'), findsOneWidget);
     expect(find.text('2500000.0'), findsOneWidget);
     expect(find.text('—'), findsNWidgets((benchmarkTamanios.length - 1) * 2));
   });
@@ -96,7 +96,7 @@ void main() {
       },
     });
 
-    expect(find.text('2 seg'), findsOneWidget);
+    expect(find.text('2 s'), findsOneWidget);
     expect(find.text('1250.0'), findsOneWidget);
   });
 

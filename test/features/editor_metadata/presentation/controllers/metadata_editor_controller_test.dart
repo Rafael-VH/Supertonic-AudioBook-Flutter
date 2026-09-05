@@ -62,8 +62,7 @@ void main() {
       expect(estado.nombreArchivo, isNull);
       expect(estado.isLoading, isFalse);
       expect(estado.isSaving, isFalse);
-      expect(estado.error, isNull);
-      expect(estado.mensajeExito, isNull);
+      expect(estado.errorTipo, isNull);
     });
 
     test('cargar() establece metadata y rutaArchivo', () async {
@@ -84,11 +83,11 @@ void main() {
       expect(estado.metadata, equals(esperado));
       expect(estado.rutaArchivo, '/path/audio.mp3');
       expect(estado.isLoading, isFalse);
-      expect(estado.error, isNull);
+      expect(estado.errorTipo, isNull);
       expect(fakeEditor.rutaLeida, '/path/audio.mp3');
     });
 
-    test('cargar() con archivo inexistente establece error', () async {
+    test('cargar() con archivo inexistente establece error de lectura', () async {
       fakeEditor.errorLeer = Exception('Archivo no encontrado: /bad.mp3');
 
       final container = crearContenedor();
@@ -98,7 +97,7 @@ void main() {
       await controller.cargar('/bad.mp3');
 
       final estado = container.read(metadataEditorControllerProvider);
-      expect(estado.error, contains('Archivo no encontrado'));
+      expect(estado.errorTipo, MetadataEditorError.lectura);
       expect(estado.isLoading, isFalse);
       expect(estado.rutaArchivo, isNull);
     });
@@ -132,13 +131,12 @@ void main() {
 
       final estado = container.read(metadataEditorControllerProvider);
       expect(estado.isSaving, isFalse);
-      expect(estado.mensajeExito, contains('guardados correctamente'));
-      expect(estado.error, isNull);
+      expect(estado.errorTipo, isNull);
       expect(fakeEditor.rutaGuardada, '/path/audio.mp3');
       expect(fakeEditor.metadataGuardada?.titulo, 'Test');
     });
 
-    test('guardar() con error establece error en el estado', () async {
+    test('guardar() con error establece error de escritura en el estado', () async {
       fakeEditor.metadataLeida = const MetadatosMp3(titulo: 'Test');
       fakeEditor.errorGuardar = Exception('escritura fallida');
 
@@ -151,11 +149,10 @@ void main() {
 
       final estado = container.read(metadataEditorControllerProvider);
       expect(estado.isSaving, isFalse);
-      expect(estado.error, contains('escritura fallida'));
-      expect(estado.mensajeExito, isNull);
+      expect(estado.errorTipo, MetadataEditorError.escritura);
     });
 
-    test('guardar() sin archivo seleccionado establece error', () async {
+    test('guardar() sin archivo seleccionado establece error de sin archivo', () async {
       final container = crearContenedor();
       final controller =
           container.read(metadataEditorControllerProvider.notifier);
@@ -163,7 +160,7 @@ void main() {
       await controller.guardar();
 
       final estado = container.read(metadataEditorControllerProvider);
-      expect(estado.error, contains('No hay archivo'));
+      expect(estado.errorTipo, MetadataEditorError.sinArchivo);
     });
 
     test('reset() limpia todo el estado', () async {
@@ -186,8 +183,7 @@ void main() {
       expect(estado.nombreArchivo, isNull);
       expect(estado.isLoading, isFalse);
       expect(estado.isSaving, isFalse);
-      expect(estado.error, isNull);
-      expect(estado.mensajeExito, isNull);
+      expect(estado.errorTipo, isNull);
     });
 
     test('seleccionarArchivo() abre picker y carga el archivo', () async {
@@ -269,7 +265,7 @@ void main() {
       await controller.seleccionarCoverArt();
 
       final estado = container.read(metadataEditorControllerProvider);
-      expect(estado.error, contains('500KB'));
+      expect(estado.errorTipo, MetadataEditorError.portadaInvalida);
       expect(estado.metadata.coverArtBytes, isNull);
     });
 
@@ -311,8 +307,7 @@ void main() {
         nombreArchivo: 'file.mp3',
         isLoading: true,
         isSaving: true,
-        error: 'err',
-        mensajeExito: 'ok',
+        errorTipo: MetadataEditorError.escritura,
       );
 
       final copia = original.copyWith(isLoading: false);
@@ -321,23 +316,18 @@ void main() {
       expect(copia.isSaving, isTrue);
       expect(copia.metadata.titulo, 'A');
       expect(copia.rutaArchivo, '/path');
-      expect(copia.error, 'err');
-      expect(copia.mensajeExito, 'ok');
+      expect(copia.errorTipo, MetadataEditorError.escritura);
     });
 
     test('copyWith clearError limpia el error', () {
-      const original = MetadataEditorState(error: 'fail');
+      const original = MetadataEditorState(
+        errorTipo: MetadataEditorError.escritura,
+      );
       final copia = original.copyWith(clearError: true);
-      expect(copia.error, isNull);
+      expect(copia.errorTipo, isNull);
     });
 
-    test('copyWith clearMensajeExito limpia el mensaje', () {
-      const original = MetadataEditorState(mensajeExito: 'ok');
-      final copia = original.copyWith(clearMensajeExito: true);
-      expect(copia.mensajeExito, isNull);
-    });
-
-    test('actualizarCampo() limpia error y mensaje de éxito', () async {
+    test('actualizarCampo() limpia el error', () async {
       fakeEditor.metadataLeida = const MetadatosMp3(titulo: 'Test');
 
       final container = crearContenedor();
@@ -350,8 +340,7 @@ void main() {
       );
 
       final estado = container.read(metadataEditorControllerProvider);
-      expect(estado.error, isNull);
-      expect(estado.mensajeExito, isNull);
+      expect(estado.errorTipo, isNull);
     });
   });
 }

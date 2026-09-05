@@ -32,7 +32,7 @@ class BenchmarkScreen extends ConsumerWidget {
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
-            tooltip: 'Actualizar',
+            tooltip: t.refrescar,
             onPressed: () =>
                 ref.read(benchmarkControllerProvider.notifier).recargar(),
           ),
@@ -224,6 +224,7 @@ class _FilaBenchmark extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final t = AppLocalizations.of(context)!;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
       child: Row(
@@ -242,7 +243,10 @@ class _FilaBenchmark extends ConsumerWidget {
                     )
                   : Text(
                       resultado != null
-                          ? _formatearDuracion(resultado!.tiempoMs / 1000)
+                          ? _formatearDuracion(
+                              t,
+                              resultado!.tiempoMs / 1000,
+                            )
                           : '—',
                     ),
             ),
@@ -281,7 +285,9 @@ class _FilaBenchmark extends ConsumerWidget {
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
                     : const Icon(Icons.play_arrow),
-                tooltip: ejecutando ? 'Procesando...' : 'Benchmark $tamanio',
+                tooltip: ejecutando
+                    ? t.benchmark_tooltip_procesando
+                    : t.benchmark_tooltip_ejecutar(tamanio),
               ),
             ),
           ),
@@ -314,7 +320,7 @@ class _HistorialTable extends StatelessWidget {
               cells: [
                 DataCell(Text('${entry.caracteres}')),
                 DataCell(Text('${entry.segmentos}')),
-                DataCell(Text(_formatearDuracion(entry.duracionAudioSeg))),
+                DataCell(Text(_formatearDuracion(t, entry.duracionAudioSeg))),
               ],
             ),
         ],
@@ -323,16 +329,17 @@ class _HistorialTable extends StatelessWidget {
   }
 }
 
-/// Formats duration as "Xh - Y min - Z seg" / "Y min - Z seg" / "Z seg".
-String _formatearDuracion(double segundos) {
+/// Formatea [segundos] con las claves `tiempo_*` localizadas, igual que
+/// `home_controller._formatearTiempo`.
+String _formatearDuracion(AppLocalizations t, double segundos) {
   final total = segundos.floor();
-  if (total < 60) return '$total seg';
+  if (total < 60) return t.tiempo_seg(total);
   final minutos = total ~/ 60;
   final seg = total % 60;
-  if (minutos < 60) return '$minutos min - $seg seg';
+  if (minutos < 60) return t.tiempo_min_seg(minutos, seg);
   final horas = minutos ~/ 60;
   final min = minutos % 60;
-  return '$horas h - $min min - $seg seg';
+  return t.tiempo_hora_min(horas, min);
 }
 
 class _DeviceSpecCard extends ConsumerWidget {

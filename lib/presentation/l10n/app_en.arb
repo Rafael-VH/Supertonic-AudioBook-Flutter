@@ -370,6 +370,7 @@
   "editor_metadata_cancelar": "Cancel",
   "editor_metadata_exito": "Metadata saved successfully.",
   "editor_metadata_error_lectura": "Could not read file metadata.",
+  "editor_metadata_error_sin_archivo": "No file selected.",
   "editor_metadata_error_escritura": "Could not save metadata.",
   "editor_metadata_error_portada": "Cover art must be JPEG and under 500KB.",
   "benchmark_titulo": "Engine benchmark",
@@ -408,6 +409,13 @@
   "@benchmark_estimacion_valor": {
     "placeholders": {
       "tiempo": {"type": "String"}
+    }
+  },
+  "benchmark_tooltip_procesando": "Processing...",
+  "benchmark_tooltip_ejecutar": "Benchmark {tamanio}",
+  "@benchmark_tooltip_ejecutar": {
+    "placeholders": {
+      "tamanio": {"type": "int"}
     }
   },
   "benchmark_modelo_no_listo": "The voice model is not downloaded. Download it first from Settings.",

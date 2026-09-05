@@ -1172,6 +1172,12 @@ abstract class AppLocalizations {
   /// **'Could not read file metadata.'**
   String get editor_metadata_error_lectura;
 
+  /// No description provided for @editor_metadata_error_sin_archivo.
+  ///
+  /// In en, this message translates to:
+  /// **'No file selected.'**
+  String get editor_metadata_error_sin_archivo;
+
   /// No description provided for @editor_metadata_error_escritura.
   ///
   /// In en, this message translates to:
@@ -1279,6 +1285,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'~{tiempo}'**
   String benchmark_estimacion_valor(String tiempo);
+
+  /// No description provided for @benchmark_tooltip_procesando.
+  ///
+  /// In en, this message translates to:
+  /// **'Processing...'**
+  String get benchmark_tooltip_procesando;
+
+  /// No description provided for @benchmark_tooltip_ejecutar.
+  ///
+  /// In en, this message translates to:
+  /// **'Benchmark {tamanio}'**
+  String benchmark_tooltip_ejecutar(int tamanio);
 
   /// No description provided for @benchmark_modelo_no_listo.
   ///

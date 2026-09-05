@@ -639,6 +639,10 @@ class AppLocalizationsEs extends AppLocalizations {
       'No se pudo leer los metadatos del archivo.';
 
   @override
+  String get editor_metadata_error_sin_archivo =>
+      'No hay archivo seleccionado.';
+
+  @override
   String get editor_metadata_error_escritura =>
       'No se pudieron guardar los metadatos.';
 
@@ -704,6 +708,14 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String benchmark_estimacion_valor(String tiempo) {
     return '~$tiempo';
+  }
+
+  @override
+  String get benchmark_tooltip_procesando => 'Procesando...';
+
+  @override
+  String benchmark_tooltip_ejecutar(int tamanio) {
+    return 'Benchmark $tamanio';
   }
 
   @override

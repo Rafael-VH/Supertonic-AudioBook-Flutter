@@ -370,6 +370,7 @@
   "editor_metadata_cancelar": "Cancelar",
   "editor_metadata_exito": "Metadatos guardados correctamente.",
   "editor_metadata_error_lectura": "No se pudo leer los metadatos del archivo.",
+  "editor_metadata_error_sin_archivo": "No hay archivo seleccionado.",
   "editor_metadata_error_escritura": "No se pudieron guardar los metadatos.",
   "editor_metadata_error_portada": "La portada debe ser JPEG y no superar 500KB.",
   "benchmark_titulo": "Benchmark del motor",
@@ -408,6 +409,13 @@
   "@benchmark_estimacion_valor": {
     "placeholders": {
       "tiempo": {"type": "String"}
+    }
+  },
+  "benchmark_tooltip_procesando": "Procesando...",
+  "benchmark_tooltip_ejecutar": "Benchmark {tamanio}",
+  "@benchmark_tooltip_ejecutar": {
+    "placeholders": {
+      "tamanio": {"type": "int"}
     }
   },
   "benchmark_modelo_no_listo": "El modelo de voz no está descargado. Descargalo primero desde Ajustes.",
