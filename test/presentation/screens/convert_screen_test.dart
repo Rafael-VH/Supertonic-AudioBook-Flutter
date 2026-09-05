@@ -6,6 +6,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:supertonic_audiobook/features/convert/data/repositories/file_system_local.dart';
 import 'package:supertonic_audiobook/features/convert/domain/use_cases/sintetizar_muestra.dart';
 import 'package:supertonic_audiobook/shared/domain/entities/archivo.dart';
 import 'package:supertonic_audiobook/presentation/controllers/providers.dart';
@@ -13,18 +14,38 @@ import 'package:supertonic_audiobook/features/settings/presentation/controllers/
 import 'package:supertonic_audiobook/presentation/l10n/app_localizations.dart';
 import 'package:supertonic_audiobook/features/convert/presentation/screens/convert_screen.dart';
 import 'package:supertonic_audiobook/presentation/theme/app_theme.dart';
+import 'package:supertonic_audiobook/presentation/routing/app_router.dart';
 
 import '../../support/fakes.dart';
 
-Widget _harness({RepositorioArchivosFake? repositorio, MotorFake? motor}) {
+Future<ProviderContainer> _montar(
+  WidgetTester tester, {
+  RepositorioArchivosFake? repositorio,
+  MotorFake? motor,
+  ProcesarArchivoStub? procesador,
+  int? rssBytes,
+}) async {
   final motorEf = motor ?? MotorFake();
   final exportador = ExportadorFake();
-  return ProviderScope(
+  final repo = repositorio ?? RepositorioArchivosFake(const []);
+  final procesadorEf = procesador ??
+      ProcesarArchivoStub(
+        motor: motorEf,
+        archivos: repo,
+        exportador: exportador,
+        fileSystem: FileSystemLocal(),
+        silencioMuestras: 0,
+        memoriaSafeMarginBytes: 0,
+        topeMovilBytes: 0,
+        logger: NoOpLogger(),
+      );
+
+  final container = ProviderContainer(
     overrides: [
-      repositorioPreferenciasProvider
-          .overrideWithValue(PreferenciasMemoria()),
-      repositorioArchivosProvider.overrideWithValue(
-          repositorio ?? RepositorioArchivosFake(const [])),
+      repositorioPreferenciasProvider.overrideWithValue(
+        PreferenciasMemoria({'modelo_descargado': true}),
+      ),
+      repositorioArchivosProvider.overrideWithValue(repo),
       motorTtsProvider.overrideWithValue(motorEf),
       exportadorAudioProvider.overrideWithValue(exportador),
       reproductorAudioProvider.overrideWithValue(ReproductorFake()),
@@ -32,6 +53,7 @@ Widget _harness({RepositorioArchivosFake? repositorio, MotorFake? motor}) {
       // procesar al terminar lee el benchmark y persiste el historial.
       repositorioBenchmarkProvider.overrideWithValue(PreferenciasMemoria()),
       repositorioHistorialProvider.overrideWithValue(PreferenciasMemoria()),
+      procesarArchivoProvider.overrideWithValue(procesadorEf),
       // escuchar usa sintetizarMuestra + domainLogger; sin override cae al
       // catch y probandoVoz vuelve a false (botón Procesar habilitado).
       domainLoggerProvider.overrideWithValue(NoOpLogger()),
@@ -42,42 +64,72 @@ Widget _harness({RepositorioArchivosFake? repositorio, MotorFake? motor}) {
           logger: NoOpLogger(),
         ),
       ),
+      // RSS por defecto alto (no dispara advertencia); rssBytes bajo la fuerza.
+      rssProcesoProvider.overrideWithValue(rssBytes ?? (1 << 40)),
+      // El gate del modelo y la navegación post-corrida usan el modelo.
+      modeloManagerProvider.overrideWithValue(ModeloGestorFake(disponible: true)),
     ],
-    child: Consumer(builder: (context, ref, _) {
-      final ajustes = ref.watch(settingsControllerProvider);
-      return MaterialApp(
-        locale: Locale(ajustes.idioma),
-        supportedLocales: const [Locale('es'), Locale('en')],
-        localizationsDelegates: const [
-          AppLocalizations.delegate,
-          GlobalMaterialLocalizations.delegate,
-          GlobalWidgetsLocalizations.delegate,
-          GlobalCupertinoLocalizations.delegate,
-        ],
-        theme: construirTema(oscuro: false, estilo: ajustes.estilo),
-        darkTheme: construirTema(oscuro: true, estilo: ajustes.estilo),
-        themeMode: ajustes.temaOscuro ? ThemeMode.dark : ThemeMode.light,
-        home: const ConvertScreen(),
-      );
-    }),
   );
+  addTearDown(container.dispose);
+
+  final router = container.read(appRouterProvider);
+  router.go(Rutas.home);
+
+  await tester.pumpWidget(
+    UncontrolledProviderScope(
+      container: container,
+      child: Consumer(builder: (context, ref, _) {
+        final ajustes = ref.watch(settingsControllerProvider);
+        return MaterialApp.router(
+          routerConfig: router,
+          locale: Locale(ajustes.idioma),
+          supportedLocales: const [Locale('es'), Locale('en')],
+          localizationsDelegates: const [
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          theme: construirTema(oscuro: false, estilo: ajustes.estilo),
+          darkTheme: construirTema(oscuro: true, estilo: ajustes.estilo),
+          themeMode: ajustes.temaOscuro ? ThemeMode.dark : ThemeMode.light,
+        );
+      }),
+    ),
+  );
+  await tester.pumpAndSettle();
+  return container;
 }
 
 Future<void> _pump(WidgetTester tester,
-    {RepositorioArchivosFake? repositorio, MotorFake? motor}) async {
+    {RepositorioArchivosFake? repositorio,
+    MotorFake? motor,
+    ProcesarArchivoStub? procesador,
+    int? rssBytes}) async {
   tester.view.physicalSize = const Size(1280, 800);
   tester.view.devicePixelRatio = 1.0;
   addTearDown(tester.view.reset);
-  await tester.pumpWidget(_harness(repositorio: repositorio, motor: motor));
+  await _montar(tester,
+      repositorio: repositorio,
+      motor: motor,
+      procesador: procesador,
+      rssBytes: rssBytes);
 }
 
 /// Tamaño de móvil compacto (ancho < umbral) con barra de acción inferior.
 Future<void> _pumpMovil(WidgetTester tester,
-    {RepositorioArchivosFake? repositorio, MotorFake? motor}) async {
+    {RepositorioArchivosFake? repositorio,
+    MotorFake? motor,
+    ProcesarArchivoStub? procesador,
+    int? rssBytes}) async {
   tester.view.physicalSize = const Size(390, 844);
   tester.view.devicePixelRatio = 1.0;
   addTearDown(tester.view.reset);
-  await tester.pumpWidget(_harness(repositorio: repositorio, motor: motor));
+  await _montar(tester,
+      repositorio: repositorio,
+      motor: motor,
+      procesador: procesador,
+      rssBytes: rssBytes);
 }
 
 void main() {
@@ -292,5 +344,89 @@ void main() {
       ),
     );
     expect(boton2.enabled, isTrue);
+  });
+
+  testWidgets(
+      'memoria: con RSS mínimo la pantalla muestra el diálogo y confirmar ejecuta el lote',
+      (tester) async {
+    final motorEf = MotorFake();
+    final exportador = ExportadorFake();
+    final procesador = ProcesarArchivoStub(
+      motor: motorEf,
+      archivos: RepositorioArchivosFake(const [
+        Archivo('C:/libros/capitulo1.md'),
+      ]),
+      exportador: exportador,
+      fileSystem: FileSystemLocal(),
+      silencioMuestras: 0,
+      memoriaSafeMarginBytes: 0,
+      topeMovilBytes: 0,
+      logger: NoOpLogger(),
+    );
+    await _pumpMovil(
+      tester,
+      repositorio: RepositorioArchivosFake(const [
+        Archivo('C:/libros/capitulo1.md'),
+      ]),
+      procesador: procesador,
+      rssBytes: 1,
+    );
+
+    await tester.tap(find.textContaining('Procesar'));
+    await tester.pumpAndSettle();
+
+    // La vista muestra el diálogo (decisión en la capa de vista).
+    expect(find.byType(AlertDialog), findsOneWidget);
+    // Todavía no se ejecutó ningún archivo.
+    expect(procesador.llamadas, isEmpty);
+
+    // Confirmar reanuda el lote.
+    await tester.tap(find.text('Procesar de todos modos'));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(AlertDialog), findsNothing);
+    expect(procesador.llamadas, hasLength(1));
+    expect(find.textContaining('Cancelar'), findsNothing);
+  });
+
+  testWidgets('memoria: cancelar la advertencia detiene la corrida',
+      (tester) async {
+    final motorEf = MotorFake();
+    final exportador = ExportadorFake();
+    final procesador = ProcesarArchivoStub(
+      motor: motorEf,
+      archivos: RepositorioArchivosFake(const [
+        Archivo('C:/libros/capitulo1.md'),
+      ]),
+      exportador: exportador,
+      fileSystem: FileSystemLocal(),
+      silencioMuestras: 0,
+      memoriaSafeMarginBytes: 0,
+      topeMovilBytes: 0,
+      logger: NoOpLogger(),
+    );
+    await _pumpMovil(
+      tester,
+      repositorio: RepositorioArchivosFake(const [
+        Archivo('C:/libros/capitulo1.md'),
+      ]),
+      procesador: procesador,
+      rssBytes: 1,
+    );
+
+    await tester.tap(find.textContaining('Procesar'));
+    await tester.pumpAndSettle();
+    expect(find.byType(AlertDialog), findsOneWidget);
+
+    await tester.tap(find.descendant(
+      of: find.byType(AlertDialog),
+      matching: find.text('Cancelar'),
+    ));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(AlertDialog), findsNothing);
+    expect(procesador.llamadas, isEmpty);
+    // El estado queda sin ejecutar y con el snackbar de cancelación.
+    expect(find.textContaining('Exportado'), findsNothing);
   });
 }

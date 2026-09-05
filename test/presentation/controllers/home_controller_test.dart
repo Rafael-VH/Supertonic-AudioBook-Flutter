@@ -49,6 +49,9 @@ void main() {
             // procesar persiste el historial y lee el benchmark al terminar.
             repositorioBenchmarkProvider.overrideWithValue(preferencias),
             repositorioHistorialProvider.overrideWithValue(preferencias),
+            // procesar lee el RSS para el umbral de memoria; alto = nunca
+            // dispara la advertencia (los tests corren sin BuildContext).
+            rssProcesoProvider.overrideWithValue(1 << 40),
           ],
         );
 

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:supertonic_audiobook/core/widgets/memory_warning_dialog.dart';
 import 'package:supertonic_audiobook/features/convert/presentation/controllers/home_controller.dart';
 import 'package:supertonic_audiobook/presentation/l10n/app_localizations.dart';
 import 'package:supertonic_audiobook/presentation/routing/app_router.dart';
@@ -72,6 +73,26 @@ class ConvertBody extends ConsumerWidget {
         ),
       );
     });
+
+    // La decisión de mostrar la advertencia de memoria vive en la vista: el
+    // controller solo setea `advertenciaMemoria` y pausa la corrida.
+    ref.listen(
+        homeControllerProvider.select((s) => s.advertenciaMemoria),
+        (prev, advertencia) async {
+          if (advertencia == null) return;
+          final proceder = await showMemoryWarningDialog(
+            context: context,
+            estimatedBytes: advertencia.estimatedBytes,
+            availableBytes: advertencia.availableBytes,
+          );
+          if (!context.mounted) return;
+          final controller = ref.read(homeControllerProvider.notifier);
+          if (proceder) {
+            await controller.reanudarProcesamiento(t, context: context);
+          } else {
+            controller.cancelarAdvertencia(t);
+          }
+        });
 
     if (ladoAlado) {
       return CuerpoLadoAlado(estado: estado, controller: controller, t: t);

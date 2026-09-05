@@ -72,6 +72,7 @@ Future<void> main() async {
           esMovil: Platform.isAndroid || Platform.isIOS,
         )),
         carpetaBaseProvider.overrideWithValue(docsBase),
+        rssProcesoProvider.overrideWithValue(ProcessInfo.currentRss),
         modeloManagerProvider.overrideWithValue(ModeloManager()),
         editorMetadataProvider.overrideWithValue(EditorMetadataId3Codec()),
         domainLoggerProvider.overrideWithValue(const PrintLogger()),

@@ -93,6 +93,13 @@ final carpetaBaseProvider = Provider<String>(
   (_) => throw UnimplementedError('carpetaBaseProvider se inyecta en main.dart'),
 );
 
+/// Bytes en uso por el proceso actual (RSS). Seam para poder probar el umbral
+/// de memoria (>0.7) de forma determinista; en producción se inyecta con
+/// `ProcessInfo.currentRss` desde la composición (`main.dart`).
+final rssProcesoProvider = Provider<int>(
+  (_) => throw UnimplementedError('rssProcesoProvider se inyecta en main.dart'),
+);
+
 /// Gestión del modelo supertonic-3 (descarga + verificación, plan §5.5),
 /// inyectada desde la composición (`data/modelo/modelo_manager.dart`).
 final modeloManagerProvider = Provider<ModeloGestor>(

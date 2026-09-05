@@ -12,7 +12,6 @@ import 'package:supertonic_audiobook/features/convert/domain/use_cases/procesar_
 import 'package:supertonic_audiobook/features/convert/domain/use_cases/limpiar_markdown.dart';
 import 'package:supertonic_audiobook/shared/domain/entities/audio_pendiente.dart';
 import 'package:supertonic_audiobook/shared/domain/use_cases/estimar_memoria_disponible.dart';
-import 'package:supertonic_audiobook/core/widgets/memory_warning_dialog.dart';
 import 'package:supertonic_audiobook/features/benchmark/domain/entities/benchmark_result.dart';
 import 'package:supertonic_audiobook/features/benchmark/domain/entities/conversion_entry.dart';
 import 'package:supertonic_audiobook/features/benchmark/domain/use_cases/estimar_tiempo.dart';
@@ -31,6 +30,46 @@ class MensajeSnackbar {
 
   final String texto;
   final bool esError;
+}
+
+/// Solicitud de confirmación de memoria: la vista muestra el diálogo y
+/// reanuda o cancela. `null` en el estado = sin advertencia pendiente.
+class AdvertenciaMemoria {
+  const AdvertenciaMemoria({
+    required this.estimatedBytes,
+    required this.availableBytes,
+  });
+
+  final int estimatedBytes;
+  final int availableBytes;
+}
+
+/// Parámetros de una corrida pausada por la advertencia de memoria. Solo vive
+/// durante la ventana de pausa (campo `_lotePendiente` del controller).
+class _ParametrosLote {
+  const _ParametrosLote({
+    required this.t,
+    required this.seleccion,
+    required this.archivos,
+    required this.formatos,
+    required this.voz,
+    required this.steps,
+    required this.speed,
+    required this.lang,
+    required this.salida,
+    required this.context,
+  });
+
+  final AppLocalizations t;
+  final List<Archivo> seleccion;
+  final List<Archivo> archivos;
+  final List<String> formatos;
+  final String voz;
+  final int steps;
+  final double speed;
+  final String lang;
+  final String salida;
+  final BuildContext? context;
 }
 
 /// Estado de la pantalla Home (paridad con `gui.py`).
@@ -53,6 +92,7 @@ class HomeEstado {
     this.modoSeleccion = SelectionMode.carpeta,
     this.pendientes = const [],
     this.tiempoEstimado,
+    this.advertenciaMemoria,
   });
 
   final String carpetaIn;
@@ -89,6 +129,9 @@ class HomeEstado {
   /// Tiempo restante estimado del lote, preformateado. `null` = silencio.
   final String? tiempoEstimado;
 
+  /// Solicitud de confirmación de memoria pendiente. `null` = sin advertencia.
+  final AdvertenciaMemoria? advertenciaMemoria;
+
   HomeEstado copyWith({
     String? carpetaIn,
     String? carpetaOut,
@@ -109,6 +152,8 @@ class HomeEstado {
     List<AudioPendiente>? pendientes,
     String? tiempoEstimado,
     bool clearTiempoEstimado = false,
+    AdvertenciaMemoria? advertenciaMemoria,
+    bool clearAdvertenciaMemoria = false,
   }) {
     return HomeEstado(
       carpetaIn: carpetaIn ?? this.carpetaIn,
@@ -130,6 +175,9 @@ class HomeEstado {
       tiempoEstimado: clearTiempoEstimado
           ? null
           : (tiempoEstimado ?? this.tiempoEstimado),
+      advertenciaMemoria: clearAdvertenciaMemoria
+          ? null
+          : (advertenciaMemoria ?? this.advertenciaMemoria),
     );
   }
 }
@@ -437,13 +485,83 @@ class HomeController extends Notifier<HomeEstado> {
       estado: '',
       lineasLog: const [],
       snackbar: null,
+      clearAdvertenciaMemoria: true,
     );
     _appendLog(t.log_inicio(seleccion.length, archivos.length));
 
-    // Memory pre-check before processing loop.
-    final memoriaOk = await _verificarMemoria(seleccion, t, context);
-    if (!memoriaOk) return;
+    // Memory pre-check: si la fracción supera el umbral y hay vista viva, se
+    // setea la advertencia y se pausa (la vista decide y reanuda/cancela).
+    if (await _requiereAdvertenciaMemoria(seleccion, t, context)) {
+      _lotePendiente = _ParametrosLote(
+        t: t,
+        seleccion: seleccion,
+        archivos: archivos,
+        formatos: formatos,
+        voz: voz,
+        steps: steps,
+        speed: speed,
+        lang: lang,
+        salida: salida,
+        context: context,
+      );
+      return;
+    }
+    await _ejecutarLote(t, seleccion, archivos, formatos, voz, steps, speed,
+        lang, salida, context);
+  }
 
+  /// Parámetros de una corrida pausada por la advertencia de memoria.
+  /// Solo se conserva durante la ventana de pausa; se limpia al reanudar o
+  /// cancelar (nunca persiste entre corridas).
+  _ParametrosLote? _lotePendiente;
+
+  /// Reanuda el lote tras confirmar la advertencia de memoria.
+  Future<void> reanudarProcesamiento(AppLocalizations t,
+      {BuildContext? context}) async {
+    final pendiente = _lotePendiente;
+    if (pendiente == null) return;
+    _lotePendiente = null;
+    state = state.copyWith(clearAdvertenciaMemoria: true);
+    await _ejecutarLote(
+      t,
+      pendiente.seleccion,
+      pendiente.archivos,
+      pendiente.formatos,
+      pendiente.voz,
+      pendiente.steps,
+      pendiente.speed,
+      pendiente.lang,
+      pendiente.salida,
+      context ?? pendiente.context,
+    );
+  }
+
+  /// Cancela la corrida tras la advertencia de memoria.
+  void cancelarAdvertencia(AppLocalizations t) {
+    if (_lotePendiente == null) return;
+    _lotePendiente = null;
+    state = state.copyWith(
+      ejecutando: false,
+      clearAdvertenciaMemoria: true,
+      estado: t.estado_cancelado,
+      snackbar: MensajeSnackbar(t.snackbar_exportado),
+    );
+    _appendLog(t.log_cancelado('0 s'));
+  }
+
+  /// Ejecuta el lote (cambiarVoz + loop + finalización + navegación).
+  Future<void> _ejecutarLote(
+    AppLocalizations t,
+    List<Archivo> seleccion,
+    List<Archivo> archivos,
+    List<String> formatos,
+    String voz,
+    int steps,
+    double speed,
+    String lang,
+    String salida,
+    BuildContext? context,
+  ) async {
     final inicio = DateTime.now();
     try {
       await ref.read(motorTtsProvider).cambiarVoz(voz);
@@ -521,9 +639,10 @@ class HomeController extends Notifier<HomeEstado> {
   // ------------------------------------------------------- memoria e historial
 
   /// Pre-chequeo de memoria antes del loop: construye stubs, estima y, si la
-  /// fracción supera el umbral, muestra el diálogo de advertencia. Devuelve
-  /// `false` si el usuario cancela (detiene la corrida).
-  Future<bool> _verificarMemoria(
+  /// fracción supera el umbral y hay vista viva, setea `advertenciaMemoria`
+  /// (la vista muestra el diálogo). Devuelve `true` si la corrida debe
+  /// pausarse (hay advertencia pendiente).
+  Future<bool> _requiereAdvertenciaMemoria(
     List<Archivo> seleccion,
     AppLocalizations t,
     BuildContext? context,
@@ -531,28 +650,21 @@ class HomeController extends Notifier<HomeEstado> {
     final stubs = [
       for (final a in seleccion) (chars: a.nombre.length * 50),
     ];
-    final availableBytes = ProcessInfo.currentRss;
+    final availableBytes = ref.read(rssProcesoProvider);
     final estimacion = EstimarMemoriaDisponible()(
       stubs: stubs,
       availableBytes: availableBytes,
     );
     if (estimacion.fraccion > 0.7 && context != null && context.mounted) {
-      final proceder = await showMemoryWarningDialog(
-        context: context,
-        estimatedBytes: estimacion.estimatedBytes,
-        availableBytes: estimacion.availableBytes,
+      state = state.copyWith(
+        advertenciaMemoria: AdvertenciaMemoria(
+          estimatedBytes: estimacion.estimatedBytes,
+          availableBytes: estimacion.availableBytes,
+        ),
       );
-      if (!proceder) {
-        state = state.copyWith(
-          ejecutando: false,
-          estado: t.estado_cancelado,
-          snackbar: MensajeSnackbar(t.snackbar_exportado),
-        );
-        _appendLog(t.log_cancelado('0 s'));
-        return false;
-      }
+      return true;
     }
-    return true;
+    return false;
   }
 
   /// Ejecuta el loop de conversión archivo por archivo (lote). Devuelve los
