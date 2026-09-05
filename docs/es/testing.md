@@ -14,9 +14,9 @@ flutter analyze lib       # Análisis estático
 
 | Métrica | Valor |
 |---------|-------|
-| Archivos de test | 50 |
-| Casos de test declarados | 384 |
-| Pasados / Fallidos | 380 / 0 |
+| Archivos de test | 52 |
+| Casos de test declarados | 413 |
+| Pasados / Fallidos | 413 / 0 |
 | Skips | 4 tests de integración que requieren FFmpeg nativo |
 | Análisis | 0 warnings |
 
@@ -184,14 +184,14 @@ flutter test --coverage test/features/
 
 ## Integración CI
 
-```yaml
-# Ejemplo de GitHub Actions
-- name: Test
-  run: flutter test
+El repo corre GitHub Actions en cada push/PR (`.github/workflows/ci.yml`): análisis
+estático + suite completa en Linux. El E2E de escritorio no corre en CI (requiere
+dispositivo con FFmpeg).
 
+```yaml
 - name: Analyze
   run: flutter analyze lib
 
-- name: Coverage
-  run: flutter test --coverage
+- name: Test
+  run: flutter test
 ```

@@ -6,6 +6,7 @@
 
 [![Flutter](https://img.shields.io/badge/Flutter-3.44-02569B?logo=flutter&logoColor=white)](https://flutter.dev)
 [![Dart](https://img.shields.io/badge/Dart-3.12-0175C2?logo=dart&logoColor=white)](https://dart.dev)
+[![CI](https://github.com/Rafael-VH/Supertonic-AudioBook-Flutter/actions/workflows/ci.yml/badge.svg)](https://github.com/Rafael-VH/Supertonic-AudioBook-Flutter/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![Tests](https://img.shields.io/badge/tests-413%20passed-brightgreen)](#testing)
 [![Platform](https://img.shields.io/badge/platform-Android%20%7C%20iOS-blue)](#instalación)
@@ -24,10 +25,19 @@ sintetiza con voces en **31 idiomas + auto**. Nada sale de tu equipo.
 
 ## Tabla de contenidos
 
-[Características](#características) · [Instalación](#instalación) · [Uso](#uso) ·
-[Arquitectura](#arquitectura) · [Stack técnico](#stack-técnico) · [Testing](#testing) ·
-[Formatos de audio](#formatos-de-audio) · [Contribuir](#contribuir) ·
+[Características](#características) · [Privacidad](#privacidad) · [Instalación](#instalación) ·
+[Uso](#uso) · [Arquitectura](#arquitectura) · [Stack técnico](#stack-técnico) ·
+[Testing](#testing) · [Formatos de audio](#formatos-de-audio) · [Contribuir](#contribuir) ·
 [Documentación](#documentación) · [Licencia](#licencia)
+
+## Privacidad
+
+| | Garantía | Detalle |
+|---|----------|---------|
+| 🔒 | **100 % local** | El Markdown y el audio generado nunca salen de tu dispositivo |
+| 📡 | **Sin conexión requerida** | Tras descargar el modelo, funciona offline |
+| 💸 | **Sin coste por API** | Sin suscripciones ni llamadas a servicios de TTS de pago |
+| 🗑️ | **Tú controlas tus archivos** | Nada se sube; los WAVs temporales se descartan al cancelar y los huérfanos se limpian solo |
 
 ## Características
 
@@ -94,6 +104,26 @@ flowchart TD
 2. Configurá voz, velocidad, pasos e idioma en **Opciones**
 3. Tocá **Procesar** — los archivos se convierten secuencialmente con registro en vivo
 4. Al terminar se abre **AudioManager**: renombrá, elegí carpeta y guardá (o cancelá para descartar WAVs temporales)
+
+### Pipeline de conversión
+
+Qué ocurre con cada archivo `.md` al tocar **Procesar**:
+
+```mermaid
+flowchart LR
+    A[Leer .md] --> B[Limpiar<br/>Markdown]
+    B --> C[Segmentar<br/>texto]
+    C --> D[Sintetizar<br/>ONNX]
+    D --> E[WAV temporal<br/>en _temp/]
+    E --> F[Convertir a<br/>MP3 · FLAC · OGG]
+    E --> G[Revisar en<br/>Audio Manager]
+    F --> G
+    G --> H[Guardar<br/>rename atómico]
+```
+
+La síntesis nunca escribe en la ruta final: todo pasa por `<carpeta_salida>/_temp/`
+hasta que confirmás el audio desde **Audio Manager**. Ver
+[pipeline.md](docs/es/pipeline.md) para el detalle de cada etapa.
 
 **Biblioteca**: lista los audios guardados en la carpeta de salida con play/pausa.
 
@@ -199,9 +229,17 @@ flutter test --coverage   # Cobertura
 Los tests espejan la estructura de `lib/`: `test/features/<feature>/...`,
 `test/presentation/...`, `test/core/`, `test/shared/`.
 
+Hay además un flujo E2E (md → WAV) con `integration_test` para escritorio:
+
+```bash
+flutter drive -d windows --driver=test_driver/integration_test.dart \
+  --target=integration_test/app_test.dart
+```
+
 ### Métricas
 
 - **413 tests** en 52 archivos · 4 skips requieren FFmpeg nativo
+  (solo corren en dispositivo/desktop con el binario instalado)
 - **0 análisis warnings** (`flutter analyze lib` limpio)
 
 Ver [testing.md](docs/es/testing.md) para convenciones completas.
