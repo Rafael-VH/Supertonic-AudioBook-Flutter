@@ -4,16 +4,14 @@ How Markdown files become audios — the full transformation flow.
 
 ## Overview
 
-```
-┌─────────────┐   ┌──────────┐   ┌───────────┐   ┌────────────┐
-│  Read .md   │ → │  Clean   │ → │ Segment   │ → │ Synthesize │
-│             │   │ (regex)  │   │  (pure)   │   │   (ONNX)   │
-└─────────────┘   └──────────┘   └───────────┘   └─────┬──────┘
-                                                       │
-┌──────────────────┐   ┌───────────────────┐   ┌──────▼───────┐
-│ Save (user)      │ ← │ Pending audios    │ ← │ Export WAV   │
-│ atomic rename    │   │ (Audio Manager)   │   │ to _temp/    │
-└──────────────────┘   └───────────────────┘   └──────────────┘
+```mermaid
+flowchart LR
+    Read[Read .md] --> Clean[Clean · regex]
+    Clean --> Segment[Segment · pure]
+    Segment --> Synth[Synthesize · ONNX]
+    Synth --> Export[Export WAV · to _temp/]
+    Export --> Pending[Pending audios · Audio Manager]
+    Pending --> Save[Save · atomic rename]
 ```
 
 **Core rule**: synthesis never writes to the final path. Everything stays in `<output_folder>/_temp/` until the user saves from the Audio Manager.
@@ -55,7 +53,7 @@ Strips all Markdown syntax in order:
 
 ### 3. Segment Text
 
-**Use case**: `segmentarTexto()` (pure function)
+**Use case**: `segmentarTexto()` (pure function, `shared/domain/use_cases/segmentar_texto.dart`)
 
 Splits the clean text into TTS-ready chunks:
 
@@ -77,7 +75,7 @@ Dr. García                  (restore)
 
 ### 4. Synthesize
 
-**Use case**: `MotorTts.sintetizar()` → `MotorTtsSupertonic`
+**Use case**: `MotorTts.sintetizar()` → `MotorTtsSupertonic` (contract in `shared/domain/contracts/motor_tts.dart`; implementation in `features/convert/data/repositories/`)
 
 Converts text segments into Float32 audio samples:
 
@@ -125,18 +123,31 @@ After a batch completes without errors, `HomeController` accumulates the `AudioP
 
 `HomeController.procesar()` orchestrates the whole batch:
 
+```mermaid
+flowchart TD
+    P[Persist preferences] --> V[Validate formats + files]
+    V --> M{Memory pre-check<br/>> 70 % RAM?}
+    M -- Yes --> D[HomeController sets advertenciaMemoria<br/>and pauses]
+    M -- No --> L[Run batch]
+    D --> S[View shows dialog · core/widgets]
+    S -- Proceed --> R[reanudarProcesamiento]
+    S -- Cancel --> C[cancelarAdvertencia]
+    R --> L
+    L --> E[Finish: persist history / cleanup temps /<br/>push audio-manager]
 ```
+
 1. Persist preferences (voice, formats, folders)
-2. Validate: non-empty formats, .md files present
-3. Memory pre-check → MemoryWarningDialog if estimated > 70 % RAM
+2. Validate: non-empty formats, `.md` files present
+3. Memory pre-check: `_requiereAdvertenciaMemoria` (via `EstimarMemoriaDisponible` +
+   `rssProcesoProvider`). If > 70 % RAM → sets `advertenciaMemoria` and pauses; the
+   view shows the dialog and calls `reanudarProcesamiento` / `cancelarAdvertencia`
 4. For each selected file:
-   - ProcesarArchivo.procesar(...) → temp WAV
-   - Accumulate AudioPendiente + history entry (in memory)
+   - `ProcesarArchivo.procesar(...)` → temp WAV
+   - Accumulate `AudioPendiente` + history entry (in memory)
 5. At the end:
    - Batch completed without cancellation → persist history (cap 100 entries)
    - Cancellation → delete accumulated temps, do NOT persist history
-   - Success without errors → push /audio-manager with pendings
-```
+   - Success without errors → push `/audio-manager` with pendings
 
 **Concurrency**: single-threaded. The TTS engine does not support concurrent synthesis.
 
@@ -160,18 +171,12 @@ If benchmark data exists (`benchmark.json`), after completing a batch the estima
 
 ## Data Flow Summary
 
-```
-Input:      .md file (UTF-8)
-            ↓
-Clean:      Plain text (no Markdown syntax)
-            ↓
-Segment:    List<String> (≤ 1500 chars each)
-            ↓
-Synthesize: List<Float32List> (audio samples + silence)
-            ↓
-Export:     Temp WAV in <output>/_temp/
-            ↓
-Review:     Audio Manager (rename / choose folder / save or discard)
-            ↓
-Publish:    Atomic renameSync → final file
+```mermaid
+flowchart TD
+    A["Input: .md file (UTF-8)"] --> B["Clean: plain text<br/>(no Markdown syntax)"]
+    B --> C["Segment: List&lt;String&gt;<br/>(≤ 1500 chars each)"]
+    C --> D["Synthesize: List&lt;Float32List&gt;<br/>(audio samples + silence)"]
+    D --> E["Export: temp WAV in<br/>&lt;output&gt;/_temp/"]
+    E --> F["Review: Audio Manager<br/>(rename / folder / save or discard)"]
+    F --> G["Publish: atomic renameSync<br/>→ final file"]
 ```

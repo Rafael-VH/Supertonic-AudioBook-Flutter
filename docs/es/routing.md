@@ -4,24 +4,29 @@ Flujo de navegación de la aplicación con go_router.
 
 ## Resumen
 
-```
-┌─────────┐     ┌─────────────┐     ┌──────────────────────────────────┐
-│ Splash  │ ──→ │ Onboarding  │ ──→ │           Dashboard              │
-│ (1.2s)  │     │ (5 pasos,   │     │   NavigationBar · IndexedStack   │
-└─────────┘     │  1ª vez)    │     │  ┌──────┬────────────┬─────────┐ │
-                └─────────────┘     │  │ Home │ Biblioteca │ Settings│ │
-                                    │  └──────┴────────────┴─────────┘ │
-                                    └───────┬──────────────────────────┘
-                                            │ hub Home
-                     ┌──────────────────────┼──────────────────────┐
-                     ▼                      ▼                      ▼
-               /home (Convert)      /editor-metadata         /benchmark
-                     │
-                     ▼
-             /audio-manager (audios pendientes)
+```mermaid
+flowchart TD
+    Splash[Splash · 1.2 s] --> Onboarding[Onboarding · 5 pasos,<br/>primera vez]
+    Onboarding --> Dashboard
+    Splash -->|siguientes<br/>ejecuciones| Dashboard
 
-  Gate del modelo: /home sin modelo → /modelo → vuelve al origen
+    subgraph Dashboard["Dashboard · NavigationBar + IndexedStack"]
+        direction LR
+        HomeTab[Home]
+        BiblioTab[Biblioteca]
+        SettingsTab[Settings]
+    end
+
+    HomeTab -- hub --> Home["/home · Convert"]
+    HomeTab --> Editor["/editor-metadata"]
+    SettingsTab --> Bench["/benchmark"]
+    Home --> Audio["/audio-manager · audios pendientes"]
+
+    Home -- sin modelo --> Modelo["/modelo"]
+    Modelo -- vuelve al origen --> Home
 ```
+
+**Gate del modelo**: `/home` sin modelo → `/modelo` → vuelve al origen (`/home` o `/dashboard`).
 
 ## Definición de Rutas
 

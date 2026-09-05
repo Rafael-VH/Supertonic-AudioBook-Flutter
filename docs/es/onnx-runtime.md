@@ -23,35 +23,24 @@ Cómo ONNX Runtime potencia el motor de inferencia TTS.
 
 ## Arquitectura
 
-```
-┌─────────────────────────────────────────────────────────┐
-│                    Flutter App                           │
-│                                                         │
-│  ┌──────────────┐    ┌──────────────────────────────┐   │
-│  │ MotorTts     │    │   supertonic_helper.dart      │   │
-│  │ Supertonic   │───→│                              │   │
-│  └──────────────┘    │  ┌────────────────────────┐  │   │
-│                      │  │   TextToSpeech         │  │   │
-│                      │  │   ┌──────────────────┐ │  │   │
-│                      │  │   │ UnicodeProcessor  │ │  │   │
-│                      │  │   └──────────────────┘ │  │   │
-│                      │  └────────────────────────┘  │   │
-│                      └──────────┬───────────────────┘   │
-│                                 │                       │
-└─────────────────────────────────┼───────────────────────┘
-                                  │
-                                  ▼
-                    ┌─────────────────────────┐
-                    │   flutter_onnxruntime    │
-                    │   (ONNX Runtime)         │
-                    └─────────────────────────┘
-                                  │
-                    ┌─────────────┼─────────────┐
-                    ▼             ▼             ▼
-              ┌──────────┐ ┌──────────┐ ┌──────────┐
-              │ .onnx    │ │ .onnx    │ │ .onnx    │
-              │ models   │ │ models   │ │ models   │
-              └──────────┘ └──────────┘ └──────────┘
+```mermaid
+flowchart TD
+    subgraph App["Flutter App"]
+        Motor["MotorTtsSupertonic"]
+        subgraph TTS["text_to_speech.dart"]
+            TTS1["TextToSpeech"]
+            UP["UnicodeProcessor<br/>unicode_processor.dart"]
+            TP["TextPreprocessor<br/>text_preprocessor.dart"]
+            ML["ModelLoader<br/>model_loader.dart"]
+        end
+        Motor --> TTS
+    end
+
+    TTS --> Ort["flutter_onnxruntime<br/>(ONNX Runtime)"]
+    Ort --> M1["duration_predictor.onnx"]
+    Ort --> M2["text_encoder.onnx"]
+    Ort --> M3["vector_estimator.onnx"]
+    Ort --> M4["vocoder.onnx"]
 ```
 
 ## Sesiones ONNX

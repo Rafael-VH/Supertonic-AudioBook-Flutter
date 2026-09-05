@@ -23,7 +23,7 @@ Constantes técnicas, preferencias y configuración en tiempo de ejecución.
 | `defaultTtsSteps` | `5` | Pasos de inferencia TTS (rango 5–12) |
 | `defaultSpeed` | `1.1` | Velocidad de habla (rango 0.7–2.0) |
 
-### Configuración de Segmentos (`features/convert/domain/use_cases/segmentar_texto.dart`)
+### Configuración de Segmentos (`shared/domain/use_cases/segmentar_texto.dart`)
 
 | Constante | Valor | Descripción |
 |-----------|-------|-------------|

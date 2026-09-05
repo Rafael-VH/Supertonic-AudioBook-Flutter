@@ -4,24 +4,29 @@ Application navigation flow with go_router.
 
 ## Overview
 
-```
-┌─────────┐     ┌─────────────┐     ┌──────────────────────────────────┐
-│ Splash  │ ──→ │ Onboarding  │ ──→ │           Dashboard              │
-│ (1.2s)  │     │ (5 steps,   │     │   NavigationBar · IndexedStack   │
-└─────────┘     │  1st run)   │     │  ┌──────┬────────────┬─────────┐ │
-                └─────────────┘     │  │ Home │  Library   │ Settings│ │
-                                    │  └──────┴────────────┴─────────┘ │
-                                    └───────┬──────────────────────────┘
-                                            │ Home hub
-                     ┌──────────────────────┼──────────────────────┐
-                     ▼                      ▼                      ▼
-               /home (Convert)      /editor-metadata         /benchmark
-                     │
-                     ▼
-             /audio-manager (pending audios)
+```mermaid
+flowchart TD
+    Splash[Splash · 1.2 s] --> Onboarding[Onboarding · 5 steps,<br/>first run]
+    Onboarding --> Dashboard
+    Splash -->|later<br/>runs| Dashboard
 
-  Model gate: /home without model → /modelo → back to origin
+    subgraph Dashboard["Dashboard · NavigationBar + IndexedStack"]
+        direction LR
+        HomeTab[Home]
+        LibraryTab[Library]
+        SettingsTab[Settings]
+    end
+
+    HomeTab -- hub --> Home["/home · Convert"]
+    HomeTab --> Editor["/editor-metadata"]
+    SettingsTab --> Bench["/benchmark"]
+    Home --> Audio["/audio-manager · pending audios"]
+
+    Home -- without model --> Modelo["/modelo"]
+    Modelo -- back to origin --> Home
 ```
+
+**Model gate**: `/home` without a model → `/modelo` → back to the origin (`/home` or `/dashboard`).
 
 ## Route Definitions
 

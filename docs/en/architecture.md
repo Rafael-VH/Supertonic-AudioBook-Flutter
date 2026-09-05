@@ -4,29 +4,19 @@ Clean Architecture with feature-based modules and a shared infrastructure layer 
 
 ## Overview
 
-```
-┌──────────────────────────────────────────────────────────────────────┐
-│                          features/                                    │
-│                                                                      │
-│  ┌────────────────┐  ┌────────────────┐  ┌────────────────┐         │
-│  │  convert/      │  │  biblioteca/   │  │  modelo/       │  ...   │
-│  │  domain ← data │  │  domain        │  │  domain ← data │         │
-│  │  presentation  │  │  presentation  │  │  presentation  │         │
-│  └───────┬────────┘  └───────┬────────┘  └───────┬────────┘         │
-│          │ depends on        │ depends on         │ depends on       │
-│          ▼                   ▼                    ▼                  │
-│  ┌──────────────────────────────────────────────────────────────┐   │
-│  │                     shared/                                   │   │
-│  │  domain/contracts/  entities  constants                       │   │
-│  │  data/config.dart   repositories (archivos, prefs, player)    │   │
-│  │  ⚠ NO dart:io in domain/                                      │   │
-│  └──────────────────────────────────────────────────────────────┘   │
-└──────────────────────────────────────────────────────────────────────┘
-                                     │
-                                     │ injected in
-                                     ▼
-                          lib/main.dart + providers.dart
-                        (composition root + DI)
+```mermaid
+flowchart TD
+    subgraph Features["features/ — each feature is self-contained"]
+        Convert["convert/ · domain ← data · presentation"]
+        Biblio["biblioteca/ · domain · presentation"]
+        Modelo["modelo/ · domain ← data · presentation"]
+        Rest["…"]
+    end
+
+    Core["core/ — shared widgets, audio & utils"] -.-> Features
+    Features -->|depend on| Shared
+    Shared["shared/ — domain/contracts · entities · constants<br/>data/config · repositories<br/>⚠ no dart:io in domain/"]
+    Shared -->|injected in| Root["main.dart + providers.dart<br/>composition root + DI"]
 ```
 
 **Features**: `audio_manager`, `benchmark`, `biblioteca`, `convert`, `dashboard`, `editor_metadata`, `home`, `modelo`, `onboarding`, `settings`, `splash`.
@@ -37,8 +27,8 @@ Clean Architecture with feature-based modules and a shared infrastructure layer 
 
 This is the central invariant. Violations are caught by `flutter analyze` and architecture tests.
 
-- Each feature owns its contracts in `features/X/domain/contracts/` (e.g. `MotorTts`, `ExportadorAudio`)
-- `shared/domain/contracts/` defines contracts used by multiple features (e.g. `RepositorioArchivos`, `RepositorioPreferencias`)
+- Each feature owns its contracts in `features/X/domain/contracts/` (e.g. `ExportadorAudio`, `FileSystemContract`)
+- `shared/domain/contracts/` defines contracts used by multiple features or promoted from a feature (e.g. `RepositorioArchivos`, `MotorTts`)
 - `features/X/data/` provides concrete implementations for the feature
 - `shared/data/` provides implementations of shared contracts
 - `main.dart` wires everything via Riverpod overrides in `providers.dart`
@@ -92,6 +82,8 @@ ProviderScope(
 | `domainLoggerProvider` | `PrintLogger` | `shared/data/repositories/` |
 | `configTtsProvider` | `TtsConfig` record | `providers.dart` |
 | `carpetaBaseProvider` | Platform path | `main.dart` |
+| `rssProcesoProvider` | `ProcessInfo.currentRss` (int) | `main.dart` |
+| `deviceSpecProvider` | `DeviceSpec?` (from `device_info_plus`) | `main.dart` |
 
 The three JSON repositories (`preferencias`, `benchmark`, `historial_conversiones`) are separate instances of the same `PreferenciasJsonLocal` class.
 
@@ -107,12 +99,12 @@ Abstract interfaces used by multiple features.
 | `RepositorioPreferencias` | Load/save key-value preferences (JSON) |
 | `ReproductorAudio` | Play/pause/resume/stop local audio |
 | `DomainLogger` | Abstract logging (implemented by `PrintLogger`) |
+| `MotorTts` | Synthesize text → Float32 audio samples (promoted from convert) |
 
 ### Per-Feature Contracts (`features/X/domain/contracts/`)
 
 | Contract | Feature | Responsibility |
 |----------|---------|----------------|
-| `MotorTts` | convert | Synthesize text → Float32 audio samples |
 | `ExportadorAudio` | convert | Write/convert audio files (WAV/MP3/FLAC/OGG) |
 | `FileSystemContract` | convert | Path operations (parentOf, fileName, separator) |
 | `ModeloGestor` | modelo | Download, verify and manage the TTS model |
@@ -125,9 +117,10 @@ Abstract interfaces used by multiple features.
 | `Archivo` | shared | A Markdown file to convert (extends `Equatable`) |
 | `VoiceConfig` | shared | Voice + steps + speed + synthesis language |
 | `AppPreferences` | shared | Typed app preferences |
+| `AudioPendiente` | shared | Temp WAV awaiting save/cancel (promoted from audio_manager) |
 | `LibroGenerado` | biblioteca | A grouped audiobook with format priority |
 | `MetadatosMp3` | editor_metadata | ID3 tags of an MP3 file |
-| `AudioPendiente` | audio_manager | Temp WAV awaiting save/cancel |
+| `DeviceSpec` | benchmark | Device hardware info (brand, model, CPU, RAM) |
 | `BenchmarkResult` | benchmark | Benchmark results per text size |
 | `ConversionEntry` | benchmark | Metrics of one conversion (chars, segments, duration) |
 
@@ -137,14 +130,13 @@ Abstract interfaces used by multiple features.
 |----------|---------|---------|
 | `ProcesarArchivo` | convert | Convert MD → temp WAV in `_temp/` |
 | `LimpiarMarkdown` | convert | Strip Markdown syntax → plain text |
-| `SegmentarTexto` | convert | Split text into TTS-ready chunks |
 | `SintetizarMuestra` | convert | Generate voice preview |
-| `Formato` | convert | Validate and normalize output formats |
+| `SegmentarTexto` | shared | Split text into TTS-ready chunks (promoted from convert) |
+| `EstimarMemoriaDisponible` | shared | Estimate batch memory budget (promoted from audio_manager) |
 | `ListarAudiosGenerados` | biblioteca | Group generated audios by book |
 | `EditarMetadataMp3` | editor_metadata | Edit ID3 tags of MP3 files |
 | `GuardarAudio` | audio_manager | Move temp WAV → final destination (`(N)` suffix on conflict) |
 | `LimpiarTemporales` | audio_manager | Delete temp WAVs older than 24 h |
-| `EstimarMemoria` | audio_manager | Estimate batch memory budget before processing |
 | `RunBenchmark` | benchmark | Run benchmark at a given text size |
 | `EstimarTiempo` | benchmark | Estimate conversion time from benchmark data |
 
@@ -282,14 +274,15 @@ Mirrors `lib/` feature by feature:
 
 ```
 test/
-├── core/                        # WAV I/O, natural sort
-├── shared/                      # Shared repositories and entities
+├── core/                        # audio/, utils/, widgets/ (dialog test)
+├── shared/                      # Shared repositories, entities and use cases
 ├── features/                    # One directory per feature
 │   ├── audio_manager/           # Entities and use cases (save, cleanup)
-│   ├── benchmark/               # Entities, use cases, controller
+│   ├── benchmark/               # Entities, use cases, controller, screen
 │   ├── biblioteca/              # List audios use case
 │   ├── convert/                 # Data, use cases, widgets
 │   ├── editor_metadata/         # ID3 codec, entity, controller, screen
+│   ├── home/                    # Hub screen tests
 │   └── modelo/                  # ModeloManager
 ├── presentation/                # Shared controllers, routing, screens, theme
 └── support/                     # Test helpers
@@ -325,7 +318,12 @@ if (memoriaAcumulada > presupuesto) {
 }
 ```
 
-Additionally, before starting a batch the required memory is estimated: if it exceeds 70 % of available RAM, a warning dialog is shown.
+Additionally, before starting a batch the required memory is estimated via
+`EstimarMemoriaDisponible` + `rssProcesoProvider`: if it exceeds 70 % of available
+RAM, `HomeController` sets the `advertenciaMemoria` state and **pauses**; the view
+(`ConvertBody` in `convert_screen.dart`) listens to that state, shows
+`showMemoryWarningDialog` from `core/widgets/` and resumes with
+`reanudarProcesamiento` or cancels with `cancelarAdvertencia`.
 
 ### 4. Deferred Publishing (audio-manager)
 

@@ -4,29 +4,19 @@ Clean Architecture con módulos por feature y capa compartida (`shared/`).
 
 ## Resumen
 
-```
-┌──────────────────────────────────────────────────────────────────────┐
-│                          features/                                    │
-│                                                                      │
-│  ┌────────────────┐  ┌────────────────┐  ┌────────────────┐         │
-│  │  convert/      │  │  biblioteca/   │  │  modelo/       │  ...   │
-│  │  domain ← data │  │  domain        │  │  domain ← data │         │
-│  │  presentation  │  │  presentation  │  │  presentation  │         │
-│  └───────┬────────┘  └───────┬────────┘  └───────┬────────┘         │
-│          │ depends on        │ depends on         │ depends on       │
-│          ▼                   ▼                    ▼                  │
-│  ┌──────────────────────────────────────────────────────────────┐   │
-│  │                     shared/                                   │   │
-│  │  domain/contracts/  entities  constants                       │   │
-│  │  data/config.dart   repositories (archivos, prefs, player)    │   │
-│  │  ⚠ NO dart:io en domain/                                      │   │
-│  └──────────────────────────────────────────────────────────────┘   │
-└──────────────────────────────────────────────────────────────────────┘
-                                     │
-                                     │ injected in
-                                     ▼
-                          lib/main.dart + providers.dart
-                        (composition root + DI)
+```mermaid
+flowchart TD
+    subgraph Features["features/ — cada feature autocontenida"]
+        Convert["convert/ · domain ← data · presentation"]
+        Biblio["biblioteca/ · domain · presentation"]
+        Modelo["modelo/ · domain ← data · presentation"]
+        Rest["…"]
+    end
+
+    Core["core/ — widgets, audio y utilidades<br/>compartidas"] -.-> Features
+    Features -->|dependen de| Shared
+    Shared["shared/ — domain/contracts · entities · constants<br/>data/config · repositories<br/>⚠ no dart:io en domain/"]
+    Shared -->|se inyecta en| Root["main.dart + providers.dart<br/>composition root + DI"]
 ```
 
 **Features**: `audio_manager`, `benchmark`, `biblioteca`, `convert`, `dashboard`, `editor_metadata`, `home`, `modelo`, `onboarding`, `settings`, `splash`.
@@ -37,8 +27,8 @@ Clean Architecture con módulos por feature y capa compartida (`shared/`).
 
 Este es el invariante central. Las violaciones se detectan con `flutter analyze` y tests de arquitectura.
 
-- Cada feature tiene sus propios contratos en `features/X/domain/contracts/` (ej. `MotorTts`, `ExportadorAudio`)
-- `shared/domain/contracts/` define contratos usados por múltiples features (ej. `RepositorioArchivos`, `RepositorioPreferencias`)
+- Cada feature tiene sus propios contratos en `features/X/domain/contracts/` (ej. `ExportadorAudio`, `FileSystemContract`)
+- `shared/domain/contracts/` define contratos usados por múltiples features o promovidos desde una feature (ej. `RepositorioArchivos`, `MotorTts`)
 - `features/X/data/` provee implementaciones concretas del feature
 - `shared/data/` provee implementaciones de contratos compartidos
 - `main.dart` los conecta mediante overrides de Riverpod en `providers.dart`
@@ -92,6 +82,8 @@ ProviderScope(
 | `domainLoggerProvider` | `PrintLogger` | `shared/data/repositories/` |
 | `configTtsProvider` | Record `TtsConfig` | `providers.dart` |
 | `carpetaBaseProvider` | Ruta de plataforma | `main.dart` |
+| `rssProcesoProvider` | `ProcessInfo.currentRss` (int) | `main.dart` |
+| `deviceSpecProvider` | `DeviceSpec?` (desde `device_info_plus`) | `main.dart` |
 
 Los tres repositorios JSON (`preferencias`, `benchmark`, `historial_conversiones`) son instancias separadas de la misma clase `PreferenciasJsonLocal`.
 
@@ -107,12 +99,12 @@ Interfaces abstractas usadas por múltiples features.
 | `RepositorioPreferencias` | Cargar/guardar preferencias clave-valor (JSON) |
 | `ReproductorAudio` | Reproducir/pausar/reanudar/detener audio local |
 | `DomainLogger` | Logging abstracto (implementado por `PrintLogger`) |
+| `MotorTts` | Sintetizar texto → muestras de audio Float32 (promovido desde convert) |
 
 ### Contratos por Feature (`features/X/domain/contracts/`)
 
 | Contrato | Feature | Responsabilidad |
 |----------|---------|----------------|
-| `MotorTts` | convert | Sintetizar texto → muestras de audio Float32 |
 | `ExportadorAudio` | convert | Escribir/convertir archivos de audio (WAV/MP3/FLAC/OGG) |
 | `FileSystemContract` | convert | Operaciones de rutas (parentOf, fileName, separator) |
 | `ModeloGestor` | modelo | Descargar, verificar y gestionar el modelo TTS |
@@ -125,9 +117,10 @@ Interfaces abstractas usadas por múltiples features.
 | `Archivo` | shared | Un archivo Markdown a convertir (extiende `Equatable`) |
 | `VoiceConfig` | shared | Voz + steps + speed + idioma de síntesis |
 | `AppPreferences` | shared | Preferencias tipadas de la app |
+| `AudioPendiente` | shared | WAV temporal esperando guardar/cancelar (promovido desde audio_manager) |
 | `LibroGenerado` | biblioteca | Un audiolibro agrupado con prioridad de formato |
 | `MetadatosMp3` | editor_metadata | Metadatos ID3 de un archivo MP3 |
-| `AudioPendiente` | audio_manager | WAV temporal esperando guardar/cancelar |
+| `DeviceSpec` | benchmark | Hardware del dispositivo (marca, modelo, CPU, RAM) |
 | `BenchmarkResult` | benchmark | Resultados del benchmark por tamaño |
 | `ConversionEntry` | benchmark | Métricas de una conversión (chars, segmentos, duración) |
 
@@ -137,14 +130,13 @@ Interfaces abstractas usadas por múltiples features.
 |-------------|---------|-----------|
 | `ProcesarArchivo` | convert | Convertir MD → WAV temporal en `_temp/` |
 | `LimpiarMarkdown` | convert | Eliminar sintaxis Markdown → texto plano |
-| `SegmentarTexto` | convert | Dividir texto en chunks listos para TTS |
 | `SintetizarMuestra` | convert | Generar vista previa de voz |
-| `Formato` | convert | Validar y normalizar formatos de salida |
+| `SegmentarTexto` | shared | Dividir texto en chunks listos para TTS (promovido desde convert) |
+| `EstimarMemoriaDisponible` | shared | Presupuesto de memoria del lote (promovido desde audio_manager) |
 | `ListarAudiosGenerados` | biblioteca | Agrupar audios generados por libro |
 | `EditarMetadataMp3` | editor_metadata | Editar metadatos ID3 en archivos MP3 |
 | `GuardarAudio` | audio_manager | Mover WAV temporal → destino final (con sufijo `(N)` en conflicto) |
 | `LimpiarTemporales` | audio_manager | Eliminar WAVs temporales con más de 24 h |
-| `EstimarMemoria` | audio_manager | Presupuesto de memoria del lote antes de procesar |
 | `RunBenchmark` | benchmark | Ejecutar benchmark en un tamaño de texto |
 | `EstimarTiempo` | benchmark | Estimar duración de conversión desde el benchmark |
 
@@ -282,14 +274,15 @@ Espeja `lib/` feature por feature:
 
 ```
 test/
-├── core/                        # WAV I/O, natural sort
-├── shared/                      # Repositorios y entidades compartidas
+├── core/                        # audio/, utils/, widgets/ (test del diálogo)
+├── shared/                      # Repositorios, entidades y use cases compartidos
 ├── features/                    # Un directorio por feature
 │   ├── audio_manager/           # Entidades y use cases (guardar, limpiar)
-│   ├── benchmark/               # Entidades, use cases, controller
+│   ├── benchmark/               # Entidades, use cases, controller, screen
 │   ├── biblioteca/              # Use case listar audios
 │   ├── convert/                 # Data, use cases, widgets
 │   ├── editor_metadata/         # Codec ID3, entidad, controller, pantalla
+│   ├── home/                    # Tests de la pantalla hub
 │   └── modelo/                  # ModeloManager
 ├── presentation/                # Controllers compartidos, routing, screens, theme
 └── support/                     # Helpers de test
@@ -325,7 +318,12 @@ if (memoriaAcumulada > presupuesto) {
 }
 ```
 
-Además, antes de iniciar un lote se estima la memoria requerida: si supera el 70 % de la disponible, se muestra un diálogo de advertencia.
+Además, antes de iniciar un lote se estima la memoria requerida vía
+`EstimarMemoriaDisponible` + `rssProcesoProvider`: si supera el 70 % de la RAM
+disponible, `HomeController` setea el estado `advertenciaMemoria` y **pausa**; la
+vista (`ConvertBody` en `convert_screen.dart`) escucha ese estado, muestra
+`showMemoryWarningDialog` desde `core/widgets/` y reanuda con
+`reanudarProcesamiento` o cancela con `cancelarAdvertencia`.
 
 ### 4. Publicación Diferida (audio-manager)
 

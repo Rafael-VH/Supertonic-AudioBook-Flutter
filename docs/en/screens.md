@@ -4,16 +4,21 @@ The 11 screens of the application, with responsibilities, state and navigation.
 
 ## Navigation Flow
 
-```
-Splash
-  └─→ Onboarding (first run)
-       └─→ Dashboard (NavigationBar shell)
-            ├─ Home tab (function hub)
-            │    ├─→ Convert (/home) ─→ Audio Manager (pending audios)
-            │    └─→ Metadata editor
-            ├─ Library tab (generated audios)
-            └─ Settings tab
-                 └─→ Benchmark
+```mermaid
+flowchart TD
+    Splash[Splash] --> First{First run?}
+    First -- Yes --> Onboarding[Onboarding]
+    First -- No --> Dashboard[Dashboard]
+    Onboarding --> Dashboard
+
+    Dashboard --> Home[Home · hub]
+    Dashboard --> Library[Library · generated audios]
+    Dashboard --> Settings[Settings]
+
+    Home --> Convert[Convert · /home]
+    Home --> Editor[Metadata editor]
+    Convert --> AudioManager[Audio Manager · pending audios]
+    Settings --> Bench[Benchmark]
 ```
 
 ---
@@ -104,6 +109,8 @@ Batch processing screen — the heart of the app.
 | `progresoActual/Total` | `int` | Per-segment progress |
 | `lineasLog` | `List<String>` | Log (truncated to 2500 lines) |
 | `pendientes` | `List<AudioPendiente>` | Temp WAVs generated after processing |
+| `tiempoEstimado` | `String?` | Live batch ETA, pre-formatted (`null` = silent, EVC) |
+| `advertenciaMemoria` | `AdvertenciaMemoria?` | Pending memory-warning request (`null` = none) |
 
 #### Responsive layout
 
@@ -124,7 +131,12 @@ One section open at a time; Folders expanded by default; fade+slide transitions 
 #### Key behaviors
 
 - Persists preferences before processing
-- Memory pre-check: if the batch estimates > 70 % of available RAM, shows `MemoryWarningDialog`
+- Memory pre-check: if the batch estimates > 70 % of available RAM, the controller
+  sets `advertenciaMemoria` and **pauses**; the view (`ConvertBody`) listens to that
+  state and shows `showMemoryWarningDialog` (from `core/widgets/`), then resumes
+  with `reanudarProcesamiento` or cancels with `cancelarAdvertencia`
+- Live estimation while running: per-file estimate (`· ~`) and batch ETA
+  (`tiempoEstimado`) shown in the bottom bar, log panel and tablet card (EVC)
 - Log throttling: `paso = max(1, total ~/ 20)`
 - Cancellation: exports what was generated so far, deletes temps, does not persist history
 - Blocks concurrent runs (the TTS engine is single-threaded)
@@ -217,6 +229,7 @@ Measures TTS engine performance on the device.
 
 | Component | Description |
 |------------|-------------|
+| Device card | Hardware of the device when available: brand, model, CPU (`DeviceSpec`) |
 | Info card | Explains the columns: Size, Time, Chars/sec |
 | Fixed table | 4 columns × 6 rows (2500–15000 characters) |
 | Execution | Play button per row; spinner while running; rest locked |

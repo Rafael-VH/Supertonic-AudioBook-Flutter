@@ -29,36 +29,43 @@ test/
 ├── core/
 │   ├── audio/
 │   │   └── wav_io_test.dart               # Escritura WAV PCM16
-│   └── utils/
-│       └── natural_sort_test.dart         # Ordenamiento natural
+│   ├── utils/
+│   │   └── natural_sort_test.dart         # Ordenamiento natural
+│   └── widgets/
+│       └── memory_warning_dialog_test.dart # Diálogo de advertencia de memoria
 │
 ├── shared/
-│   ├── data/repositories/                 # Archivos, preferencias JSON
-│   └── domain/entities/                   # Entidades compartidas
+│   ├── data/repositories/                 # Archivos, preferencias JSON, logger
+│   ├── domain/entities/                   # Entidades compartidas
+│   └── domain/use_cases/                  # SegmentarTexto, EstimarMemoria
 │
 ├── features/
 │   ├── audio_manager/
 │   │   ├── domain/entities/               # AudioPendiente
-│   │   └── domain/use_cases/              # GuardarAudio, LimpiarTemporales
+│   │   ├── domain/use_cases/              # GuardarAudio, LimpiarTemporales
+│   │   └── presentation/screens/          # AudioManagerScreen
 │   ├── benchmark/
-│   │   ├── domain/{entities,use_cases}/   # BenchmarkResult, RunBenchmark, EstimarTiempo
-│   │   └── presentation/controllers/      # BenchmarkController
+│   │   ├── domain/{entities,use_cases}/   # BenchmarkResult, DeviceSpec, RunBenchmark…
+│   │   └── presentation/{controllers,screens}/  # BenchmarkController, pantalla
 │   ├── biblioteca/
 │   │   └── domain/use_cases/              # ListarAudiosGenerados
 │   ├── convert/
 │   │   ├── data/repositories/             # Exportador FFmpeg, motor TTS
-│   │   ├── domain/use_cases/              # ProcesarArchivo (unit + integración), etc.
+│   │   ├── domain/use_cases/              # ProcesarArchivo (unit + integración), LimpiarMarkdown
 │   │   └── presentation/widgets/          # Registro, vista log
 │   ├── editor_metadata/
 │   │   ├── data/repositories/             # Codec ID3
 │   │   ├── domain/{contracts,entities,use_cases}/
 │   │   └── presentation/{controllers,screens}/
+│   ├── home/
+│   │   └── presentation/screens/          # HomeScreen (hub)
 │   └── modelo/
 │       └── data/repositories/             # ModeloManager (descarga/verificación)
 │
 ├── presentation/
 │   ├── controllers/                       # HomeController, BibliotecaController,
 │   │                                      # ModeloController, providers
+│   ├── l10n/                              # Paridad ES/EN de claves
 │   ├── routing/app_router_test.dart       # Navegación y redirects
 │   ├── screens/                           # Convert, Settings, Dashboard, Modelo,
 │   │   └── biblioteca/                    # Benchmark, AudioManager, Biblioteca
@@ -161,13 +168,21 @@ group('ProcesarArchivo', () {
 
 ## Tests con FFmpeg
 
-Algunos tests de exportación requieren el binario nativo de `ffmpeg_kit` y se marcan con skip:
+Algunos tests de exportación requieren el binario nativo de `ffmpeg_kit` y se omiten
+en entornos sin él mediante `markTestSkipped` (patrón real usado en el repo):
 
 ```dart
-skip: 'Requiere binario nativo de FFmpeg',
+test('convierte a MP3', () async {
+  if (!ffmpegDisponible) {
+    markTestSkipped('FFmpeg no disponible en este entorno');
+    return;
+  }
+  // ...
+});
 ```
 
-Son tests de nivel de integración que solo pueden ejecutarse en dispositivos reales.
+Son tests de nivel de integración que solo pueden ejecutarse en dispositivos reales
+o escritorio con el binario instalado.
 
 ## Ejecutar Tests Específicos
 

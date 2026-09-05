@@ -29,36 +29,43 @@ test/
 ├── core/
 │   ├── audio/
 │   │   └── wav_io_test.dart               # PCM16 WAV writing
-│   └── utils/
-│       └── natural_sort_test.dart         # Natural sorting
+│   ├── utils/
+│   │   └── natural_sort_test.dart         # Natural sorting
+│   └── widgets/
+│       └── memory_warning_dialog_test.dart # Memory warning dialog
 │
 ├── shared/
-│   ├── data/repositories/                 # Files, JSON preferences
-│   └── domain/entities/                   # Shared entities
+│   ├── data/repositories/                 # Files, JSON preferences, logger
+│   ├── domain/entities/                   # Shared entities
+│   └── domain/use_cases/                  # SegmentarTexto, EstimarMemoria
 │
 ├── features/
 │   ├── audio_manager/
 │   │   ├── domain/entities/               # AudioPendiente
-│   │   └── domain/use_cases/              # GuardarAudio, LimpiarTemporales
+│   │   ├── domain/use_cases/              # GuardarAudio, LimpiarTemporales
+│   │   └── presentation/screens/          # AudioManagerScreen
 │   ├── benchmark/
-│   │   ├── domain/{entities,use_cases}/   # BenchmarkResult, RunBenchmark, EstimarTiempo
-│   │   └── presentation/controllers/      # BenchmarkController
+│   │   ├── domain/{entities,use_cases}/   # BenchmarkResult, DeviceSpec, RunBenchmark…
+│   │   └── presentation/{controllers,screens}/  # BenchmarkController, screen
 │   ├── biblioteca/
 │   │   └── domain/use_cases/              # ListarAudiosGenerados
 │   ├── convert/
 │   │   ├── data/repositories/             # FFmpeg exporter, TTS engine
-│   │   ├── domain/use_cases/              # ProcesarArchivo (unit + integration), etc.
+│   │   ├── domain/use_cases/              # ProcesarArchivo (unit + integration), LimpiarMarkdown
 │   │   └── presentation/widgets/          # Log content, log view
 │   ├── editor_metadata/
 │   │   ├── data/repositories/             # ID3 codec
 │   │   ├── domain/{contracts,entities,use_cases}/
 │   │   └── presentation/{controllers,screens}/
+│   ├── home/
+│   │   └── presentation/screens/          # HomeScreen (hub)
 │   └── modelo/
 │       └── data/repositories/             # ModeloManager (download/verification)
 │
 ├── presentation/
 │   ├── controllers/                       # HomeController, BibliotecaController,
 │   │                                      # ModeloController, providers
+│   ├── l10n/                              # ES/EN key parity
 │   ├── routing/app_router_test.dart       # Navigation and redirects
 │   ├── screens/                           # Convert, Settings, Dashboard, Model,
 │   │   └── biblioteca/                    # Benchmark, AudioManager, Library
@@ -161,13 +168,21 @@ group('ProcesarArchivo', () {
 
 ## FFmpeg Tests
 
-Some export tests require the native `ffmpeg_kit` binary and are marked with skip:
+Some export tests require the native `ffmpeg_kit` binary and are skipped in
+environments without it via `markTestSkipped` (the actual pattern used in the repo):
 
 ```dart
-skip: 'Requires native FFmpeg binary',
+test('converts to MP3', () async {
+  if (!ffmpegAvailable) {
+    markTestSkipped('FFmpeg not available in this environment');
+    return;
+  }
+  // ...
+});
 ```
 
-These are integration-level tests that can only run on real devices.
+These are integration-level tests that can only run on real devices or desktop
+with the binary installed.
 
 ## Running Specific Tests
 

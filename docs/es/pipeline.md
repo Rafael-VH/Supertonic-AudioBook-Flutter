@@ -4,16 +4,14 @@ Cómo los archivos Markdown se convierten en audios — el flujo completo de tra
 
 ## Resumen
 
-```
-┌─────────────┐   ┌──────────┐   ┌───────────┐   ┌────────────┐
-│  Leer .md   │ → │  Limpiar │ → │ Segmentar │ → │ Sintetizar │
-│             │   │ (regex)  │   │  (puro)   │   │   (ONNX)   │
-└─────────────┘   └──────────┘   └───────────┘   └─────┬──────┘
-                                                       │
-┌──────────────────┐   ┌───────────────────┐   ┌──────▼───────┐
-│ Guardar (usuario)│ ← │ Audios pendientes │ ← │ Exportar WAV │
-│ rename atómico   │   │ (Audio Manager)   │   │ a _temp/     │
-└──────────────────┘   └───────────────────┘   └──────────────┘
+```mermaid
+flowchart LR
+    Read[Leer .md] --> Clean[Limpiar · regex]
+    Clean --> Segment[Segmentar · puro]
+    Segment --> Synth[Sintetizar · ONNX]
+    Synth --> Export[Exportar WAV · a _temp/]
+    Export --> Pending[Audios pendientes · Audio Manager]
+    Pending --> Save[Guardar · rename atómico]
 ```
 
 **Regla central**: la síntesis nunca escribe en la ruta final. Todo queda en `<carpeta_salida>/_temp/` hasta que el usuario guarda desde el Audio Manager.
@@ -55,7 +53,7 @@ Elimina toda la sintaxis Markdown en orden:
 
 ### 3. Segmentar Texto
 
-**Caso de uso**: `segmentarTexto()` (función pura)
+**Caso de uso**: `segmentarTexto()` (función pura, `shared/domain/use_cases/segmentar_texto.dart`)
 
 Divide el texto limpio en chunks listos para TTS:
 
@@ -77,7 +75,7 @@ Dr. García                  (restaurar)
 
 ### 4. Sintetizar
 
-**Caso de uso**: `MotorTts.sintetizar()` → `MotorTtsSupertonic`
+**Caso de uso**: `MotorTts.sintetizar()` → `MotorTtsSupertonic` (contrato en `shared/domain/contracts/motor_tts.dart`; implementación en `features/convert/data/repositories/`)
 
 Convierte segmentos de texto en muestras de audio Float32:
 
@@ -125,18 +123,31 @@ Al completar un lote sin errores, `HomeController` acumula los `AudioPendiente` 
 
 `HomeController.procesar()` orquesta el lote completo:
 
+```mermaid
+flowchart TD
+    P[Persistir preferencias] --> V[Validar formatos + archivos]
+    V --> M{Pre-chequeo de memoria<br/>> 70 % RAM?}
+    M -- Sí --> D[HomeController setea advertenciaMemoria<br/>y pausa]
+    M -- No --> L[Ejecutar lote]
+    D --> S[La vista muestra el diálogo · core/widgets]
+    S -- Continuar --> R[reanudarProcesamiento]
+    S -- Cancelar --> C[cancelarAdvertencia]
+    R --> L
+    L --> E[Terminar: persistir historial / limpiar temps /<br/>push audio-manager]
 ```
+
 1. Persistir preferencias (voz, formatos, carpetas)
 2. Validar: formatos no vacío, hay archivos .md
-3. Pre-chequeo de memoria → MemoryWarningDialog si estima > 70 % de RAM
+3. Pre-chequeo de memoria: `_requiereAdvertenciaMemoria` (vía `EstimarMemoriaDisponible`
+   + `rssProcesoProvider`). Si supera > 70 % de RAM → setea `advertenciaMemoria` y pausa;
+   la vista muestra el diálogo y llama `reanudarProcesamiento` / `cancelarAdvertencia`
 4. Por cada archivo seleccionado:
-   - ProcesarArchivo.procesar(...) → WAV temporal
-   - Acumular AudioPendiente + entrada de historial (en memoria)
+   - `ProcesarArchivo.procesar(...)` → WAV temporal
+   - Acumular `AudioPendiente` + entrada de historial (en memoria)
 5. Al terminar:
    - Lote completo sin cancelación → persistir historial (cap 100 entradas)
    - Cancelación → eliminar temps acumulados, NO persistir historial
-   - Éxito sin errores → push /audio-manager con los pendientes
-```
+   - Éxito sin errores → push `/audio-manager` con los pendientes
 
 **Concurrencia**: de un solo hilo. El motor TTS no soporta síntesis concurrente.
 
@@ -160,18 +171,12 @@ Si hay un benchmark guardado (`benchmark.json`), al completar un lote se registr
 
 ## Resumen del Flujo de Datos
 
-```
-Input:      Archivo .md (UTF-8)
-            ↓
-Clean:      Texto plano (sin sintaxis Markdown)
-            ↓
-Segment:    List<String> (≤ 1500 chars cada uno)
-            ↓
-Synthesize: List<Float32List> (muestras de audio + silencio)
-            ↓
-Export:     WAV temporal en <salida>/_temp/
-            ↓
-Review:     Audio Manager (renombrar / elegir carpeta / guardar o descartar)
-            ↓
-Publish:    renameSync atómico → archivo final
+```mermaid
+flowchart TD
+    A["Input: archivo .md (UTF-8)"] --> B["Limpiar: texto plano<br/>(sin sintaxis Markdown)"]
+    B --> C["Segmentar: List&lt;String&gt;<br/>(≤ 1500 chars cada uno)"]
+    C --> D["Sintetizar: List&lt;Float32List&gt;<br/>(muestras de audio + silencio)"]
+    D --> E["Exportar: WAV temporal<br/>en &lt;salida&gt;/_temp/"]
+    E --> F["Revisar: Audio Manager<br/>(renombrar / carpeta / guardar o descartar)"]
+    F --> G["Publicar: renameSync atómico<br/>→ archivo final"]
 ```

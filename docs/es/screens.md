@@ -4,16 +4,21 @@ Las 11 pantallas de la aplicación, con responsabilidades, estado y navegación.
 
 ## Flujo de Navegación
 
-```
-Splash
-  └─→ Onboarding (primera ejecución)
-       └─→ Dashboard (shell con NavigationBar)
-            ├─ Tab Home (hub de funciones)
-            │    ├─→ Convert (/home) ─→ Audio Manager (audios pendientes)
-            │    └─→ Editor de metadatos
-            ├─ Tab Biblioteca (audios generados)
-            └─ Tab Settings
-                 └─→ Benchmark
+```mermaid
+flowchart TD
+    Splash[Splash] --> Primera{¿Primera<br/>ejecución?}
+    Primera -- Sí --> Onboarding[Onboarding]
+    Primera -- No --> Dashboard[Dashboard]
+    Onboarding --> Dashboard
+
+    Dashboard --> Home[Home · hub]
+    Dashboard --> Biblioteca[Biblioteca · audios<br/>generados]
+    Dashboard --> Settings[Settings]
+
+    Home --> Convert[Convert · /home]
+    Home --> Editor[Editor de metadatos]
+    Convert --> AudioManager[Audio Manager · audios<br/>pendientes]
+    Settings --> Bench[Benchmark]
 ```
 
 ---
@@ -104,6 +109,8 @@ Pantalla de procesamiento por lotes — el corazón de la app.
 | `progresoActual/Total` | `int` | Progreso por segmentos |
 | `lineasLog` | `List<String>` | Registro (truncado a 2500 líneas) |
 | `pendientes` | `List<AudioPendiente>` | WAVs temporales generados tras procesar |
+| `tiempoEstimado` | `String?` | Restante del lote en vivo, preformateado (`null` = silencio, EVC) |
+| `advertenciaMemoria` | `AdvertenciaMemoria?` | Solicitud de confirmación de memoria pendiente (`null` = sin advertencia) |
 
 #### Layout responsive
 
@@ -124,7 +131,12 @@ Una sección abierta a la vez; Carpetas expandida por defecto; transiciones fade
 #### Comportamientos clave
 
 - Persiste preferencias antes de procesar
-- Pre-chequeo de memoria: si el lote estima > 70 % de RAM disponible, muestra `MemoryWarningDialog`
+- Pre-chequeo de memoria: si el lote estima > 70 % de RAM disponible, el controller
+  setea `advertenciaMemoria` y **pausa**; la vista (`ConvertBody`) escucha ese estado
+  y muestra `showMemoryWarningDialog` (desde `core/widgets/`), luego reanuda con
+  `reanudarProcesamiento` o cancela con `cancelarAdvertencia`
+- Estimación en vivo durante la corrida: estimación por archivo (`· ~`) y restante del
+  lote (`tiempoEstimado`) visibles en la barra inferior, el registro y la card tablet (EVC)
 - Throttle del registro: `paso = max(1, total ~/ 20)`
 - Cancelación: exporta lo generado hasta ahora, elimina los temps y no persiste historial
 - Bloquea ejecuciones concurrentes (el motor TTS es de un solo hilo)
@@ -217,6 +229,7 @@ Mide el rendimiento del motor TTS en el dispositivo.
 
 | Componente | Descripción |
 |------------|-------------|
+| Card del dispositivo | Hardware del equipo cuando está disponible: marca, modelo, CPU (`DeviceSpec`) |
 | Info card | Explica las columnas: Tamaño, Tiempo, Chars/seg |
 | Tabla fija | 4 columnas × 6 filas (2500–15000 caracteres) |
 | Ejecución | Botón play por fila; spinner mientras corre; resto bloqueado |

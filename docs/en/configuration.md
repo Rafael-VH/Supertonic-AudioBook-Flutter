@@ -23,7 +23,7 @@ Technical constants, preferences and runtime configuration.
 | `defaultTtsSteps` | `5` | Default TTS inference steps (range 5–12) |
 | `defaultSpeed` | `1.1` | Default speech speed (range 0.7–2.0) |
 
-### Segmentation Configuration (`features/convert/domain/use_cases/segmentar_texto.dart`)
+### Segmentation Configuration (`shared/domain/use_cases/segmentar_texto.dart`)
 
 | Constant | Value | Description |
 |-----------|-------|-------------|
