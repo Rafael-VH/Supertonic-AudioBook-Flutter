@@ -4,19 +4,30 @@
 
 **Convierte archivos Markdown en audiolibros con voz sintética. 100 % local.**
 
-[![Flutter](https://img.shields.io/badge/Flutter-3.5%2B-02569B?logo=flutter)](https://flutter.dev)
-[![Dart](https://img.shields.io/badge/Dart-3.12%2B-0175C2?logo=dart)](https://dart.dev)
+[![Flutter](https://img.shields.io/badge/Flutter-3.44-02569B?logo=flutter&logoColor=white)](https://flutter.dev)
+[![Dart](https://img.shields.io/badge/Dart-3.12-0175C2?logo=dart&logoColor=white)](https://dart.dev)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
-[![Tests](https://img.shields.io/badge/tests-380%20passed-brightgreen)](#testing)
+[![Tests](https://img.shields.io/badge/tests-413%20passed-brightgreen)](#testing)
+[![Platform](https://img.shields.io/badge/platform-Android%20%7C%20iOS-blue)](#instalación)
 [![Docs](https://img.shields.io/badge/docs-ES%20%7C%20EN-blue)](#documentación)
 
-Sin nube. Sin API. Sin GPU. Todo ocurre en tu dispositivo.
-
-[Características](#características) · [Instalación](#instalación) · [Uso](#uso) · [Arquitectura](#arquitectura) · [Documentación](#documentación) · [Testing](#testing)
+Sin nube · Sin API · Sin GPU · Todo ocurre en tu dispositivo.
 
 </div>
 
 ---
+
+**Supertonic AudioBook** es una app Flutter que convierte tus `.md` en audiolibros
+usando el modelo TTS [Supertonic 3](https://huggingface.co/spaces/Supertone/supertonic-3)
+(ONNX Runtime on-device): lee el archivo, limpia el Markdown, lo segmenta y lo
+sintetiza con voces en **31 idiomas + auto**. Nada sale de tu equipo.
+
+## Tabla de contenidos
+
+[Características](#características) · [Instalación](#instalación) · [Uso](#uso) ·
+[Arquitectura](#arquitectura) · [Stack técnico](#stack-técnico) · [Testing](#testing) ·
+[Formatos de audio](#formatos-de-audio) · [Contribuir](#contribuir) ·
+[Documentación](#documentación) · [Licencia](#licencia)
 
 ## Características
 
@@ -30,16 +41,17 @@ Sin nube. Sin API. Sin GPU. Todo ocurre en tu dispositivo.
 | 🌍 | **31 idiomas + auto** | Voces sintéticas en español, inglés, francés, alemán, japonés y más |
 | 📱 | **Responsive** | Móvil: acordeones apilados · Tablet (≥ 900 px): paneles lado a lado |
 | 🔄 | **Descarga resumible** | Modelo Supertonic 3 (~400 MB) con verificación SHA-256 |
+| 🧠 | **Advertencia de memoria** | Estima el presupuesto del lote antes de procesar; avisa si supera el 70 % de la RAM disponible |
 
 ## Instalación
 
 ### Requisitos
 
-- Flutter SDK `^3.5.0`
-- Dart SDK `^3.12.2`
-- Android SDK (API 21+)
+- Flutter SDK `^3.44.0` (canal stable)
+- Dart SDK `^3.12.2` (incluido con Flutter)
+- Android SDK (API 21+) o Xcode (iOS)
 
-### Pasos
+### Pasos rápidos
 
 ```bash
 git clone https://github.com/Rafael-VH/Supertonic-AudioBook-Flutter.git
@@ -50,7 +62,8 @@ flutter gen-l10n
 flutter run
 ```
 
-> **Nota:** La primera ejecución descarga el modelo de voz (~400 MB). Es una sola vez, resumible, y queda guardado en tu dispositivo.
+> **Nota:** La primera ejecución descarga el modelo de voz (~400 MB). Es una sola
+> vez, resumible, y queda guardado en tu dispositivo.
 
 ## Uso
 
@@ -89,7 +102,8 @@ flutter run
 
 **Biblioteca**: lista los audios guardados en la carpeta de salida con play/pausa.
 
-**Benchmark** (Settings → Benchmark): medí chars/seg en tu dispositivo (6 tamaños, 2500–15000 chars). Resultado usado para estimar tiempos de conversión.
+**Benchmark** (Settings → Benchmark): medí chars/seg en tu dispositivo (6 tamaños,
+2500–15000 chars). El resultado se usa para estimar el tiempo de conversión en vivo.
 
 ## Arquitectura
 
@@ -97,7 +111,8 @@ Clean Architecture con módulos por feature y capa compartida:
 
 ```
 lib/
-├── core/                        # Utilidades de bajo nivel
+├── core/                        # Widgets y utilidades transversales
+│   ├── widgets/                     # memory_warning_dialog (genérico)
 │   ├── audio/wav_io.dart            # Escritura WAV PCM16
 │   └── utils/natural_sort.dart      # Ordenamiento natural
 │
@@ -108,7 +123,8 @@ lib/
 │   └── domain/
 │       ├── constants/producto.dart  # Valores por defecto del producto
 │       ├── contracts/               # Interfaces compartidas
-│       └── entities/                # Archivo, VoiceConfig, AppPreferences
+│       ├── entities/                # Archivo, VoiceConfig, AppPreferences, AudioPendiente
+│       └── use_cases/               # Estimar memoria, segmentar texto
 │
 ├── features/                    # Módulos por feature (cada uno autocontenido)
 │   ├── audio_manager/           # Audios pendientes: guardar/cancelar/limpiar temps
@@ -142,7 +158,6 @@ features/convert/
 │   ├── entities/                # Modelos de dominio
 │   └── use_cases/               # Casos de uso puros
 ├── data/
-│   ├── helpers/                 # Helpers específicos del feature
 │   └── repositories/            # Implementaciones concretas
 └── presentation/
     ├── controllers/             # State management (Riverpod)
@@ -164,7 +179,7 @@ features/X/presentation → features/X/domain ← features/X/data
 - `shared/data/` provee implementaciones de contratos compartidos
 - La inyección ocurre en `main.dart` con overrides de Riverpod en `providers.dart`
 
-### Stack técnico
+## Stack técnico
 
 | Capa | Tecnología | Versión |
 |------|-----------|---------|
@@ -186,11 +201,12 @@ flutter analyze lib       # Análisis estático
 flutter test --coverage   # Cobertura
 ```
 
-Los tests espejan la estructura de `lib/`: `test/features/<feature>/...`, `test/presentation/...`, `test/core/`, `test/shared/`.
+Los tests espejan la estructura de `lib/`: `test/features/<feature>/...`,
+`test/presentation/...`, `test/core/`, `test/shared/`.
 
 ### Métricas
 
-- **380 tests** en 50 archivos · 4 skips requieren FFmpeg nativo
+- **413 tests** en 52 archivos · 4 skips requieren FFmpeg nativo
 - **0 análisis warnings** (`flutter analyze lib` limpio)
 
 Ver [testing.md](docs/es/testing.md) para convenciones completas.
@@ -215,7 +231,8 @@ Ver [testing.md](docs/es/testing.md) para convenciones completas.
 | FLAC | WAV temporal → FFmpeg | Lossless |
 | OGG | WAV temporal → FFmpeg | Vorbis |
 
-La síntesis siempre produce un WAV temporal en `<carpeta_salida>/_temp/`; los formatos adicionales se convierten desde ese WAV.
+La síntesis siempre produce un WAV temporal en `<carpeta_salida>/_temp/`; los formatos
+adicionales se convierten desde ese WAV.
 
 ## Contribuir
 
@@ -251,8 +268,6 @@ Documentación completa del proyecto disponible en español e inglés.
 ### Roadmap
 
 Funcionalidades recomendadas y su estado: [funcionalidades-recomendadas.md](docs/funcionalidades-recomendadas.md).
-
-Planes históricos de fases anteriores: [docs/plan/](docs/plan/) (referencia — las rutas de código que citan corresponden a la estructura previa a la refactorización).
 
 ## Licencia
 
