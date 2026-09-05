@@ -20,7 +20,6 @@ class BenchmarkEstado {
   const BenchmarkEstado({
     this.resultados = const {},
     this.filaEjecutando,
-    this.cancelado = false,
     this.error,
     this.historial = const [],
   });
@@ -30,9 +29,6 @@ class BenchmarkEstado {
 
   /// Tamaño que se está ejecutando ahora (null = idle).
   final int? filaEjecutando;
-
-  /// True si se solicitó cancelación.
-  final bool cancelado;
 
   /// Mensaje de error, si lo hubo.
   final String? error;
@@ -46,7 +42,6 @@ class BenchmarkEstado {
     Map<int, FilaBenchmark?>? resultados,
     int? filaEjecutando,
     bool clearFilaEjecutando = false,
-    bool? cancelado,
     String? error,
     bool clearError = false,
     List<ConversionEntry>? historial,
@@ -55,7 +50,6 @@ class BenchmarkEstado {
       resultados: resultados ?? this.resultados,
       filaEjecutando:
           clearFilaEjecutando ? null : (filaEjecutando ?? this.filaEjecutando),
-      cancelado: cancelado ?? this.cancelado,
       error: clearError ? null : (error ?? this.error),
       historial: historial ?? this.historial,
     );
@@ -110,7 +104,6 @@ class BenchmarkController extends Notifier<BenchmarkEstado> {
     if (state.ejecutando) return;
     state = state.copyWith(
       filaEjecutando: tamanio,
-      cancelado: false,
       clearError: true,
     );
 
@@ -126,12 +119,11 @@ class BenchmarkController extends Notifier<BenchmarkEstado> {
       final resultado = await useCase.ejecutar(
         voiceConfig: voiceConfig,
         onProgreso: (_, __, ___) {},
-        debeDetenerse: () => state.cancelado,
         tamanios: [tamanio],
       );
 
-      if (state.cancelado || resultado.tamanios.isEmpty) {
-        state = state.copyWith(clearFilaEjecutando: true, cancelado: false);
+      if (resultado.tamanios.isEmpty) {
+        state = state.copyWith(clearFilaEjecutando: true);
         return;
       }
 
@@ -186,10 +178,6 @@ class BenchmarkController extends Notifier<BenchmarkEstado> {
       'device_spec': ref.read(deviceSpecProvider)?.toMap(),
     };
     prefsRepo.guardar(datos);
-  }
-
-  void cancelar() {
-    state = state.copyWith(cancelado: true);
   }
 
   void recargar() {

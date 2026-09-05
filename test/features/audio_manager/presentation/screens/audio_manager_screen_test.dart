@@ -31,14 +31,10 @@ AudioPendiente _pendiente(String nombre,
         {double durationSec = 90.0, int fileSizeBytes = 1572864}) =>
     AudioPendiente(
       tempPath: 'C:/tmp/${nombre.toLowerCase()}.wav',
-      originalName: '$nombre.mp3',
       displayName: nombre,
       format: 'wav',
       durationSec: durationSec,
       fileSizeBytes: fileSizeBytes,
-      chars: 100,
-      segments: 2,
-      fecha: DateTime(2026, 1, 1),
     );
 
 Future<void> _pump(WidgetTester tester, List<AudioPendiente> pendientes,

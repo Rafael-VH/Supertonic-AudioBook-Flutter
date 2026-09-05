@@ -6,7 +6,6 @@ class FunctionCard extends StatelessWidget {
   const FunctionCard({
     super.key,
     required this.icon,
-    required this.selectedIcon,
     required this.title,
     required this.description,
     required this.onTap,
@@ -14,7 +13,6 @@ class FunctionCard extends StatelessWidget {
   });
 
   final IconData icon;
-  final IconData selectedIcon;
   final String title;
   final String description;
   final VoidCallback onTap;

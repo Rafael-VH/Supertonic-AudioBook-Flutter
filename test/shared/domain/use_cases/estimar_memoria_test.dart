@@ -1,5 +1,4 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:supertonic_audiobook/shared/domain/entities/audio_pendiente.dart';
 import 'package:supertonic_audiobook/shared/domain/use_cases/estimar_memoria.dart';
 
 void main() {
@@ -23,29 +22,11 @@ void main() {
 
   group('estimarBytesLote', () {
     test('suma estimación de bytes de cada audio por chars', () {
+      // El tipo de entrada es el record `({int chars})` que usa
+      // `EstimarMemoriaDisponible` en producción (no `AudioPendiente`).
       final audios = [
-        AudioPendiente(
-          tempPath: '/a.wav',
-          originalName: 'a.md',
-          displayName: 'A',
-          format: 'wav',
-          durationSec: 1,
-          fileSizeBytes: 1000,
-          chars: 100,
-          segments: 5,
-          fecha: DateTime(2025),
-        ),
-        AudioPendiente(
-          tempPath: '/b.wav',
-          originalName: 'b.md',
-          displayName: 'B',
-          format: 'wav',
-          durationSec: 2,
-          fileSizeBytes: 2000,
-          chars: 200,
-          segments: 10,
-          fecha: DateTime(2025),
-        ),
+        (chars: 100),
+        (chars: 200),
       ];
 
       // 100 chars → 400, 200 chars → 800, total = 1200

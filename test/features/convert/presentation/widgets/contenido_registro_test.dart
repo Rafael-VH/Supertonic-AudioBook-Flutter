@@ -1,15 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mocktail/mocktail.dart';
 
 import 'package:supertonic_audiobook/features/convert/presentation/controllers/home_controller.dart';
 import 'package:supertonic_audiobook/features/convert/presentation/widgets/contenido_registro.dart';
 import 'package:supertonic_audiobook/features/convert/presentation/widgets/vista_log.dart';
 import 'package:supertonic_audiobook/presentation/l10n/app_localizations.dart';
 import 'package:supertonic_audiobook/shared/domain/entities/voice_config.dart';
-
-class _MockController extends Mock implements HomeController {}
 
 HomeEstado _estado({
   List<String> lineasLog = const [],
@@ -46,7 +43,6 @@ Widget _wrap(HomeEstado estado) => MaterialApp(
       home: Scaffold(
         body: ContenidoRegistro(
           estado: estado,
-          controller: _MockController(),
         ),
       ),
     );

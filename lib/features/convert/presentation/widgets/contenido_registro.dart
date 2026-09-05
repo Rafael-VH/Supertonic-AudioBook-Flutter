@@ -10,11 +10,9 @@ class ContenidoRegistro extends StatelessWidget {
   const ContenidoRegistro({
     super.key,
     required this.estado,
-    required this.controller,
   });
 
   final HomeEstado estado;
-  final HomeController controller;
 
   @override
   Widget build(BuildContext context) {

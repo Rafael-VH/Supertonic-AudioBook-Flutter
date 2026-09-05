@@ -60,7 +60,7 @@ class _CuerpoApiladoState extends State<CuerpoApilado> {
           onAlternar: controller.alternarSeleccion,
         ),
       2 => ContenidoOpciones(estado: estado, controller: controller),
-      3 => ContenidoRegistro(estado: estado, controller: controller),
+      3 => ContenidoRegistro(estado: estado),
       _ => ContenidoCarpetas(
           key: const ValueKey(0),
           estado: estado,

@@ -15,7 +15,6 @@ import 'package:supertonic_audiobook/features/benchmark/domain/entities/device_s
 import 'package:supertonic_audiobook/features/benchmark/domain/use_cases/registrar_conversion_en_historial.dart';
 import 'package:supertonic_audiobook/features/benchmark/presentation/controllers/benchmark_controller.dart';
 import 'package:supertonic_audiobook/features/audio_manager/domain/use_cases/guardar_audio.dart';
-import 'package:supertonic_audiobook/features/audio_manager/domain/use_cases/limpiar_temporales.dart';
 import 'package:supertonic_audiobook/features/audio_manager/presentation/controllers/audio_manager_controller.dart';
 import 'package:supertonic_audiobook/features/editor_metadata/domain/contracts/editor_metadata.dart';
 
@@ -171,10 +170,6 @@ final benchmarkControllerProvider =
 
 final guardarAudioProvider = Provider<GuardarAudio>((ref) {
   return GuardarAudio(archivos: ref.read(repositorioArchivosProvider));
-});
-
-final limpiarTemporalesProvider = Provider<LimpiarTemporales>((ref) {
-  return LimpiarTemporales(archivos: ref.read(repositorioArchivosProvider));
 });
 
 final audioManagerControllerProvider =

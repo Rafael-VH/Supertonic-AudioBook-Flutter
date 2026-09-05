@@ -41,7 +41,6 @@ void main() {
 
       expect(estado.ejecutando, isFalse);
       expect(estado.filaEjecutando, isNull);
-      expect(estado.cancelado, isFalse);
       expect(estado.error, isNull);
       expect(estado.resultados, isEmpty);
     });
@@ -165,7 +164,7 @@ void main() {
       expect(estado.resultados.containsKey(5000), isFalse);
     });
 
-    test('cancelar detiene la ejecución', () async {
+    test('ejecutarFila completa aunque el motor tarde', () async {
       final container = crearContenedor();
       final controller = container.read(benchmarkControllerProvider.notifier);
 
@@ -175,12 +174,14 @@ void main() {
 
       expect(container.read(benchmarkControllerProvider).ejecutando, isTrue);
 
-      controller.cancelar();
+      // No hay cancelación de UI en benchmark: al liberar el motor, la fila
+      // completa y persiste su resultado.
       motor.esperaVoz!.complete();
       await futuro;
 
       final estado = container.read(benchmarkControllerProvider);
       expect(estado.ejecutando, isFalse);
+      expect(estado.resultados.containsKey(2500), isTrue);
     });
 
     test('error en ejecución se refleja en el estado', () async {

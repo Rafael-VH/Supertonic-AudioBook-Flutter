@@ -531,14 +531,10 @@ class HomeController extends Notifier<HomeEstado> {
                 final fileSize = tempFile.existsSync() ? tempFile.lengthSync() : 0;
                 acumulados.add(AudioPendiente(
                   tempPath: resultado.tempPath!,
-                  originalName: archivo.nombre,
                   displayName: archivo.titulo,
                   format: formatos.first,
                   durationSec: resultado.duracionAudioSeg,
                   fileSizeBytes: fileSize,
-                  chars: resultado.caracteres,
-                  segments: resultado.segmentos,
-                  fecha: DateTime.now(),
                 ));
               }
             case ResultadoProceso.omitido:

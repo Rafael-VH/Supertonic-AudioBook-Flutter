@@ -106,7 +106,6 @@ class HomeScreen extends ConsumerWidget {
             const SizedBox(height: 32),
             FunctionCard(
               icon: Icons.audiotrack_outlined,
-              selectedIcon: Icons.audiotrack,
               title: t.dashboard_procesar,
               description: t.dashboard_procesar_desc,
               onTap: () => _mostrarOpcionesConversion(context, ref),
@@ -114,7 +113,6 @@ class HomeScreen extends ConsumerWidget {
             const SizedBox(height: 12),
             FunctionCard(
               icon: Icons.edit_outlined,
-              selectedIcon: Icons.edit,
               title: t.home_editor_metadata,
               description: t.home_editor_metadata_desc,
               onTap: () => context.push(Rutas.editorMetadata),
@@ -122,7 +120,6 @@ class HomeScreen extends ConsumerWidget {
             const SizedBox(height: 12),
             FunctionCard(
               icon: Icons.record_voice_over_outlined,
-              selectedIcon: Icons.record_voice_over,
               title: t.home_editor_voz,
               description: t.home_editor_voz_desc,
               enabled: false,
