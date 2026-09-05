@@ -69,27 +69,22 @@ flutter run
 
 ### Flujo principal
 
-```
-1ª ejecución                              Ejecuciones siguientes
-    │                                          │
-    ▼                                          ▼
- Splash ──→ Onboarding ──→ Dashboard      Splash ──→ Dashboard
-                               │                          │
-              ┌────────────────┼────────────────┐        │
-              ▼                ▼                ▼        │
-           Home           Biblioteca        Settings     │
-              │                                │        │
-    ┌─────────┴──────────┐          ┌─────────┤        │
-    ▼                    ▼          ▼         ▼        │
- Convertir           Editor ID3  Audios   Configuración │
- (carpeta o           (tags      generados  (voz, tema, │
-  archivos .md)        MP3)      (play/     idioma,      │
-              │                   pausa)    benchmark)   │
-              ▼                                     │
- AudioManager                                      │
- (renombrar,                                       │
-  guardar,                                         │
-  cancelar) ────────────────────────────────────────┘
+```mermaid
+flowchart TD
+    Splash[Splash] --> EsPrimera{¿Primera<br/>ejecución?}
+    EsPrimera -- Sí --> Onboarding[Onboarding]
+    EsPrimera -- No --> Dashboard[Dashboard]
+    Onboarding --> Dashboard
+
+    Dashboard --> Home[Home · hub]
+    Dashboard --> Biblioteca[Biblioteca]
+    Dashboard --> Settings[Settings]
+
+    Home -- Convertir archivos --> Convert[Convert · /home]
+    Home -- Editar MP3 --> Editor[Editor de metadatos]
+    Convert --> AudioManager[Audio Manager · audios<br/>pendientes]
+    Settings -- Estado del modelo --> Modelo[Modelo · descarga]
+    Settings -- Benchmark --> Bench[Benchmark]
 ```
 
 **Dashboard** = `NavigationBar` con 3 pestañas: Home (hub), Biblioteca, Settings.
