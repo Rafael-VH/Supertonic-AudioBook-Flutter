@@ -453,103 +453,23 @@ class HomeController extends Notifier<HomeEstado> {
 
       final useCase = ref.read(procesarArchivoProvider);
       final totalArchivos = seleccion.length;
-      var exitos = 0;
-      var errores = 0;
-      final acumulados = <AudioPendiente>[];
       // Se acumulan entradas de historial y se persisten SOLO si el lote
       // completa sin cancelación (ver más abajo).
       final historialPendiente = <Map<String, Object?>>[];
-      // Benchmark cargado una vez: null silencia toda la ruta viva (EVC-3).
-      final benchmark = _cargarBenchmark();
-      var procesados = 0;
-      for (var i = 0; i < totalArchivos; i++) {
-        final archivo = seleccion[i];
-        if (state.cancelar) break;
-        var estadoArchivo = t.estado_archivo(i + 1, totalArchivos, archivo.nombre);
-        // Estimación por archivo (EVC-1): chars × tasa del benchmark.
-        if (benchmark != null) {
-          try {
-            final chars = limpiarMarkdown(
-              ref.read(repositorioArchivosProvider).leerArchivo(archivo.ruta),
-            ).length;
-            if (chars > 0) {
-              final estimado = estimarTiempo(benchmark: benchmark, textoChars: chars);
-              if (estimado != null) {
-                estadoArchivo =
-                    '$estadoArchivo · ~${_formatearTiempo(t, estimado)}';
-              }
-            }
-          } catch (_) {
-            // Fallo de lectura silencioso: la conversión continúa (EVC-1).
-          }
-        }
-        state = state.copyWith(
-          estado: estadoArchivo,
-          progresoActual: 0,
-          progresoTotal: 0,
-        );
-        _appendLog(t.log_archivo(i + 1, totalArchivos, archivo.nombre));
-        try {
-          final resultado = await useCase.procesar(
-            archivo,
-            '$salida${Platform.pathSeparator}${archivo.titulo}',
-            steps: steps,
-            speed: speed,
-            formatos: formatos,
-            lang: lang,
-            onProgreso: (actual, total) => _onProgreso(t, actual, total),
-            debeDetenerse: () => state.cancelar,
-          );
-          switch (resultado.estado) {
-            case ResultadoProceso.ok:
-              _appendLog(t.log_archivo_fin(i + 1, totalArchivos));
-              _appendLog('  Segmentos: ${resultado.segmentos}, Audio: ${resultado.duracionAudioSeg.toStringAsFixed(1)}s');
-              exitos++;
-              procesados++;
-              // Tiempo restante del lote (EVC-2): promedio real × restantes.
-              final elapsedSec = DateTime.now().difference(inicio).inSeconds.toDouble();
-              final filesRemaining = totalArchivos - (i + 1);
-              if (procesados > 0 && filesRemaining > 0) {
-                final avgRealSec = elapsedSec / procesados;
-                final remainingSec = avgRealSec * filesRemaining;
-                state = state.copyWith(
-                  tiempoEstimado:
-                      t.restante_estimado(_formatearTiempo(t, remainingSec)),
-                );
-              }
-              // Se acumula en memoria; se escribe al historial solo si el
-              // lote completo sin cancelación.
-              historialPendiente.add(ConversionEntry(
-                nombreArchivo: archivo.nombre,
-                caracteres: resultado.caracteres,
-                segmentos: resultado.segmentos,
-                duracionAudioSeg: resultado.duracionAudioSeg,
-                fecha: DateTime.now(),
-              ).toMap());
-              if (resultado.tempPath != null) {
-                final tempFile = File(resultado.tempPath!);
-                final fileSize = tempFile.existsSync() ? tempFile.lengthSync() : 0;
-                acumulados.add(AudioPendiente(
-                  tempPath: resultado.tempPath!,
-                  displayName: archivo.titulo,
-                  format: formatos.first,
-                  durationSec: resultado.duracionAudioSeg,
-                  fileSizeBytes: fileSize,
-                ));
-              }
-            case ResultadoProceso.omitido:
-              _appendLog(
-                  t.log_archivo_omitido(i + 1, totalArchivos, archivo.nombre));
-            case ResultadoProceso.error:
-              errores++;
-              _appendLog(
-                  t.log_archivo_error(i + 1, totalArchivos, archivo.nombre));
-          }
-        } catch (exc) {
-          errores++;
-          _appendLog('Error en ${archivo.nombre}: $exc');
-        }
-      }
+      final (exitos: exitos, errores: errores, acumulados: acumulados) =
+          await _procesarLote(
+        t,
+        seleccion: seleccion,
+        totalArchivos: totalArchivos,
+        salida: salida,
+        steps: steps,
+        speed: speed,
+        formatos: formatos,
+        lang: lang,
+        inicio: inicio,
+        useCase: useCase,
+        historialPendiente: historialPendiente,
+      );
 
       // EVC-4: al terminar el loop (con o sin cancelación) no queda restante.
       state = state.copyWith(clearTiempoEstimado: true);
@@ -633,6 +553,120 @@ class HomeController extends Notifier<HomeEstado> {
       }
     }
     return true;
+  }
+
+  /// Ejecuta el loop de conversión archivo por archivo (lote). Devuelve los
+  /// contadores acumulados; muta [historialPendiente] (se persiste solo si el
+  /// lote completa sin cancelación, en el llamador).
+  Future<({int exitos, int errores, List<AudioPendiente> acumulados})>
+      _procesarLote(
+    AppLocalizations t, {
+    required List<Archivo> seleccion,
+    required int totalArchivos,
+    required String salida,
+    required int steps,
+    required double speed,
+    required List<String> formatos,
+    required String lang,
+    required DateTime inicio,
+    required ProcesarArchivo useCase,
+    required List<Map<String, Object?>> historialPendiente,
+  }) async {
+    var exitos = 0;
+    var errores = 0;
+    final acumulados = <AudioPendiente>[];
+    // Benchmark cargado una vez: null silencia toda la ruta viva (EVC-3).
+    final benchmark = _cargarBenchmark();
+    var procesados = 0;
+    for (var i = 0; i < totalArchivos; i++) {
+      final archivo = seleccion[i];
+      if (state.cancelar) break;
+      var estadoArchivo = t.estado_archivo(i + 1, totalArchivos, archivo.nombre);
+      // Estimación por archivo (EVC-1): chars × tasa del benchmark.
+      if (benchmark != null) {
+        try {
+          final chars = limpiarMarkdown(
+            ref.read(repositorioArchivosProvider).leerArchivo(archivo.ruta),
+          ).length;
+          if (chars > 0) {
+            final estimado = estimarTiempo(benchmark: benchmark, textoChars: chars);
+            if (estimado != null) {
+              estadoArchivo =
+                  '$estadoArchivo · ~${_formatearTiempo(t, estimado)}';
+            }
+          }
+        } catch (_) {
+          // Fallo de lectura silencioso: la conversión continúa (EVC-1).
+        }
+      }
+      state = state.copyWith(
+        estado: estadoArchivo,
+        progresoActual: 0,
+        progresoTotal: 0,
+      );
+      _appendLog(t.log_archivo(i + 1, totalArchivos, archivo.nombre));
+      try {
+        final resultado = await useCase.procesar(
+          archivo,
+          '$salida${Platform.pathSeparator}${archivo.titulo}',
+          steps: steps,
+          speed: speed,
+          formatos: formatos,
+          lang: lang,
+          onProgreso: (actual, total) => _onProgreso(t, actual, total),
+          debeDetenerse: () => state.cancelar,
+        );
+        switch (resultado.estado) {
+          case ResultadoProceso.ok:
+            _appendLog(t.log_archivo_fin(i + 1, totalArchivos));
+            _appendLog('  Segmentos: ${resultado.segmentos}, Audio: ${resultado.duracionAudioSeg.toStringAsFixed(1)}s');
+            exitos++;
+            procesados++;
+            // Tiempo restante del lote (EVC-2): promedio real × restantes.
+            final elapsedSec = DateTime.now().difference(inicio).inSeconds.toDouble();
+            final filesRemaining = totalArchivos - (i + 1);
+            if (procesados > 0 && filesRemaining > 0) {
+              final avgRealSec = elapsedSec / procesados;
+              final remainingSec = avgRealSec * filesRemaining;
+              state = state.copyWith(
+                tiempoEstimado:
+                    t.restante_estimado(_formatearTiempo(t, remainingSec)),
+              );
+            }
+            // Se acumula en memoria; se escribe al historial solo si el
+            // lote completo sin cancelación.
+            historialPendiente.add(ConversionEntry(
+              nombreArchivo: archivo.nombre,
+              caracteres: resultado.caracteres,
+              segmentos: resultado.segmentos,
+              duracionAudioSeg: resultado.duracionAudioSeg,
+              fecha: DateTime.now(),
+            ).toMap());
+            if (resultado.tempPath != null) {
+              final tempFile = File(resultado.tempPath!);
+              final fileSize = tempFile.existsSync() ? tempFile.lengthSync() : 0;
+              acumulados.add(AudioPendiente(
+                tempPath: resultado.tempPath!,
+                displayName: archivo.titulo,
+                format: formatos.first,
+                durationSec: resultado.duracionAudioSeg,
+                fileSizeBytes: fileSize,
+              ));
+            }
+          case ResultadoProceso.omitido:
+            _appendLog(
+                t.log_archivo_omitido(i + 1, totalArchivos, archivo.nombre));
+          case ResultadoProceso.error:
+            errores++;
+            _appendLog(
+                t.log_archivo_error(i + 1, totalArchivos, archivo.nombre));
+        }
+      } catch (exc) {
+        errores++;
+        _appendLog('Error en ${archivo.nombre}: $exc');
+      }
+    }
+    return (exitos: exitos, errores: errores, acumulados: acumulados);
   }
 
   // ------------------------------------------------------------- helpers
