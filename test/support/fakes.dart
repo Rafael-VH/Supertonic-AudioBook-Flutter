@@ -261,14 +261,18 @@ class ModeloGestorFake implements ModeloGestor {
 
 /// Buscador de archivos falso: devuelve [resultado] sin tocar la plataforma.
 class FilePickerFake extends FilePickerPlatform {
-  FilePickerFake(this.resultado);
+  FilePickerFake(this.resultado, {this.carpeta});
 
   FilePickerResult? resultado;
+
+  /// Ruta devuelta por `getDirectoryPath` (opción "elegir carpeta").
+  String? carpeta;
 
   int llamadas = 0;
   FileType? ultimoTipo;
   List<String>? ultimasExtensiones;
   bool? ultimoMultiple;
+  int llamadasCarpeta = 0;
 
   @override
   Future<FilePickerResult?> pickFiles({
@@ -290,6 +294,16 @@ class FilePickerFake extends FilePickerPlatform {
     ultimasExtensiones = allowedExtensions;
     ultimoMultiple = allowMultiple;
     return resultado;
+  }
+
+  @override
+  Future<String?> getDirectoryPath({
+    String? dialogTitle,
+    bool lockParentWindow = false,
+    String? initialDirectory,
+  }) async {
+    llamadasCarpeta++;
+    return carpeta;
   }
 }
 
