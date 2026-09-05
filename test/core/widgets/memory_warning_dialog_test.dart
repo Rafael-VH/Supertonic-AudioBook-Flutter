@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:supertonic_audiobook/features/audio_manager/presentation/screens/memory_warning_dialog.dart';
+import 'package:supertonic_audiobook/core/widgets/memory_warning_dialog.dart';
 import 'package:supertonic_audiobook/presentation/l10n/app_localizations.dart';
 
 /// Monta un botón que abre el diálogo y entrega el resultado del Future.

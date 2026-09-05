@@ -12,7 +12,7 @@ import 'package:supertonic_audiobook/features/convert/domain/use_cases/procesar_
 import 'package:supertonic_audiobook/features/convert/domain/use_cases/limpiar_markdown.dart';
 import 'package:supertonic_audiobook/shared/domain/entities/audio_pendiente.dart';
 import 'package:supertonic_audiobook/shared/domain/use_cases/estimar_memoria_disponible.dart';
-import 'package:supertonic_audiobook/features/audio_manager/presentation/screens/memory_warning_dialog.dart';
+import 'package:supertonic_audiobook/core/widgets/memory_warning_dialog.dart';
 import 'package:supertonic_audiobook/features/benchmark/domain/entities/benchmark_result.dart';
 import 'package:supertonic_audiobook/features/benchmark/domain/entities/conversion_entry.dart';
 import 'package:supertonic_audiobook/features/benchmark/domain/use_cases/estimar_tiempo.dart';
