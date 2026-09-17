@@ -302,18 +302,10 @@
   <span><a href="https://github.com/Rafael-VH/Supertonic-AudioBook-Flutter">Rafael-VH/Supertonic-AudioBook-Flutter</a></span>
 </footer>
 
-<script id="datos" type="application/json">{"total":1,"diagramas":[{"slug":"arquitectura-general","titulo":"Supertonic AudioBook — Arquitectura general","tipo":"architecture","descripcion":"Arquitectura por capas: presentación en Flutter, estado y dominio, datos e infraestructura, y el modelo TTS on-device.","etiquetas":["arquitectura","capas","flutter","onnx"],"destacado":true,"nodos":10,"relaciones":10,"capitulos":3,"actualizado":"2026-09-17","archivo":"diagramas/arquitectura-general/arquitectura-general.html","especificacion":"diagramas/arquitectura-general/arquitectura-general.json"}]}</script>
+<script id="datos" type="application/json">{"total":1,"diagramas":[{"slug":"arquitectura-general","titulo":"Supertonic AudioBook — Arquitectura general","tipo":"architecture","tipoTexto":"Arquitectura","descripcion":"Arquitectura por capas: presentación en Flutter, estado y dominio, datos e infraestructura, y el modelo TTS on-device.","etiquetas":["arquitectura","capas","flutter","onnx"],"destacado":true,"nodos":10,"relaciones":10,"capitulos":3,"actualizado":"2026-09-17","archivo":"diagramas/arquitectura-general/index.html","especificacion":"diagramas/arquitectura-general/arquitectura-general.json"}]}</script>
 <script>
 (function () {
   "use strict";
-
-  var ETIQUETA_TIPO = {
-    architecture: "Arquitectura",
-    workflow: "Proceso",
-    sequence: "Secuencia",
-    dataflow: "Flujo de datos",
-    lifecycle: "Ciclo de vida"
-  };
 
   var datos = JSON.parse(document.getElementById("datos").textContent);
   var diagramas = datos.diagramas || [];
@@ -377,7 +369,10 @@
   }
 
   function textoTipo(tipo) {
-    return ETIQUETA_TIPO[tipo] || tipo;
+    for (var i = 0; i < diagramas.length; i++) {
+      if (diagramas[i].tipo === tipo) return diagramas[i].tipoTexto || tipo;
+    }
+    return tipo;
   }
 
   /* ---------- chips ---------- */

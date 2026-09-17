@@ -307,14 +307,6 @@
 (function () {
   "use strict";
 
-  var ETIQUETA_TIPO = {
-    architecture: "Arquitectura",
-    workflow: "Proceso",
-    sequence: "Secuencia",
-    dataflow: "Flujo de datos",
-    lifecycle: "Ciclo de vida"
-  };
-
   var datos = JSON.parse(document.getElementById("datos").textContent);
   var diagramas = datos.diagramas || [];
 
@@ -377,7 +369,10 @@
   }
 
   function textoTipo(tipo) {
-    return ETIQUETA_TIPO[tipo] || tipo;
+    for (var i = 0; i < diagramas.length; i++) {
+      if (diagramas[i].tipo === tipo) return diagramas[i].tipoTexto || tipo;
+    }
+    return tipo;
   }
 
   /* ---------- chips ---------- */

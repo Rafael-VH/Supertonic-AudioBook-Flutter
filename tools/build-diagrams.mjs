@@ -22,8 +22,29 @@ const diagramasDir = path.join(docsDir, 'diagramas');
 const manifestPath = path.join(diagramasDir, 'manifest.json');
 const templatePath = path.join(repoRoot, 'tools', 'dashboard.template.html');
 const indexPath = path.join(docsDir, 'index.html');
+const diagramTemplatePath = path.join(repoRoot, 'tools', 'diagram.template.html');
 
 const TIPOS = new Set(['architecture', 'workflow', 'sequence', 'dataflow', 'lifecycle']);
+
+const ETIQUETA_TIPO = {
+  architecture: 'Arquitectura',
+  workflow: 'Proceso',
+  sequence: 'Secuencia',
+  dataflow: 'Flujo de datos',
+  lifecycle: 'Ciclo de vida',
+};
+
+function textoTipo(tipo) {
+  return ETIQUETA_TIPO[tipo] || tipo;
+}
+
+function escaparHtml(texto) {
+  return String(texto)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
 
 function aPosix(ruta) {
   return ruta.split(path.sep).join('/');
@@ -106,6 +127,7 @@ function recolectar() {
       slug,
       titulo: typeof spec.meta?.title === 'string' && spec.meta.title ? spec.meta.title : slug,
       tipo,
+      tipoTexto: textoTipo(tipo),
       descripcion: typeof extra.descripcion === 'string' ? extra.descripcion : '',
       etiquetas: normalizarEtiquetas(extra.etiquetas),
       destacado: extra.destacado === true,
@@ -113,7 +135,9 @@ function recolectar() {
       relaciones: Array.isArray(spec.connections) ? spec.connections.length : 0,
       capitulos: Array.isArray(spec.meta?.views) ? spec.meta.views.length : 0,
       actualizado: fechaDeActualizacion(htmlRel, htmlAbs),
-      archivo: aPosix(path.relative(docsDir, htmlAbs)),
+      // Todos los enlaces apuntan a la página envolvente, que aporta la barra con
+      // el botón de volver al dashboard. El HTML de Archify nunca se modifica.
+      archivo: aPosix(path.join(path.relative(docsDir, dir), 'index.html')),
       especificacion: aPosix(path.relative(docsDir, specAbs)),
     });
   }
@@ -125,6 +149,35 @@ function recolectar() {
   });
 
   return { diagramas, errores };
+}
+
+/**
+ * Escribe docs/diagramas/<slug>/index.html: una página envolvente con la barra
+ * de navegación (botón "Volver a los diagramas") y el diagrama embebido.
+ *
+ * El HTML que genera Archify queda intacto: nunca lo reescribimos, así que
+ * volver a correr `deliver` no rompe nada.
+ */
+function escribirEnvoltorios(diagramas) {
+  const plantilla = readFileSync(diagramTemplatePath, 'utf8');
+  const marcadores = ['__TITULO__', '__TIPO__', '__DIAGRAMA__', '__ESPECIFICACION__'];
+
+  for (const marcador of marcadores) {
+    if (!plantilla.includes(marcador)) {
+      console.error(`tools/diagram.template.html no contiene el marcador ${marcador}.`);
+      process.exit(1);
+    }
+  }
+
+  for (const diagrama of diagramas) {
+    const html = plantilla
+      .replaceAll('__TITULO__', escaparHtml(diagrama.titulo))
+      .replaceAll('__TIPO__', escaparHtml(diagrama.tipoTexto))
+      .replaceAll('__DIAGRAMA__', `${diagrama.slug}.html`)
+      .replaceAll('__ESPECIFICACION__', `${diagrama.slug}.json`);
+
+    writeFileSync(path.join(diagramasDir, diagrama.slug, 'index.html'), html, 'utf8');
+  }
 }
 
 function main() {
@@ -158,10 +211,12 @@ function main() {
   const datos = JSON.stringify({ total: diagramas.length, diagramas }).replace(/</g, '\\u003c');
   writeFileSync(indexPath, plantilla.replace(marcador, datos), 'utf8');
 
+  escribirEnvoltorios(diagramas);
+
   const destacados = diagramas.filter((diagrama) => diagrama.destacado).length;
   console.log(
     `OK · ${diagramas.length} diagrama(s)${destacados ? ` · ${destacados} destacado(s)` : ''} ` +
-      `→ docs/index.html + docs/diagramas/manifest.json`,
+      `→ docs/index.html, docs/diagramas/manifest.json y ${diagramas.length} página(s) envolvente(s)`,
   );
 }
 

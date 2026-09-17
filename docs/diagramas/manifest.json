@@ -6,6 +6,7 @@
       "slug": "arquitectura-general",
       "titulo": "Supertonic AudioBook — Arquitectura general",
       "tipo": "architecture",
+      "tipoTexto": "Arquitectura",
       "descripcion": "Arquitectura por capas: presentación en Flutter, estado y dominio, datos e infraestructura, y el modelo TTS on-device.",
       "etiquetas": [
         "arquitectura",
@@ -18,7 +19,7 @@
       "relaciones": 10,
       "capitulos": 3,
       "actualizado": "2026-09-17",
-      "archivo": "diagramas/arquitectura-general/arquitectura-general.html",
+      "archivo": "diagramas/arquitectura-general/index.html",
       "especificacion": "diagramas/arquitectura-general/arquitectura-general.json"
     }
   ]
