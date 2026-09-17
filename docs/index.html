@@ -302,7 +302,7 @@
   <span><a href="https://github.com/Rafael-VH/Supertonic-AudioBook-Flutter">Rafael-VH/Supertonic-AudioBook-Flutter</a></span>
 </footer>
 
-<script id="datos" type="application/json">{"total":1,"diagramas":[{"slug":"arquitectura-general","titulo":"Supertonic AudioBook — Arquitectura general","tipo":"architecture","tipoTexto":"Arquitectura","descripcion":"Arquitectura por capas: presentación en Flutter, estado y dominio, datos e infraestructura, y el modelo TTS on-device.","etiquetas":["arquitectura","capas","flutter","onnx"],"destacado":true,"nodos":10,"relaciones":10,"capitulos":3,"actualizado":"2026-09-17","archivo":"diagramas/arquitectura-general/index.html","especificacion":"diagramas/arquitectura-general/arquitectura-general.json"}]}</script>
+<script id="datos" type="application/json">{"total":2,"diagramas":[{"slug":"arquitectura-general","titulo":"Supertonic AudioBook — Arquitectura general","tipo":"architecture","tipoTexto":"Arquitectura","descripcion":"Arquitectura por capas: presentación en Flutter, estado y dominio, datos e infraestructura, y el modelo TTS on-device.","etiquetas":["arquitectura","capas","flutter","onnx"],"destacado":true,"nodos":10,"relaciones":10,"etiquetaNodos":"nodos","etiquetaRelaciones":"relaciones","capitulos":3,"actualizado":"2026-09-17","archivo":"diagramas/arquitectura-general/index.html","especificacion":"diagramas/arquitectura-general/arquitectura-general.json"},{"slug":"ciclo-vida-modelo","titulo":"Supertonic AudioBook — Ciclo de vida del modelo","tipo":"lifecycle","tipoTexto":"Ciclo de vida","descripcion":"Ciclo de vida del gate del modelo: verificación en disco al arrancar, descarga resumible desde Hugging Face, verificación de integridad y las salidas recuperables.","etiquetas":["ciclo de vida","modelo","descarga","integridad"],"destacado":false,"nodos":7,"relaciones":10,"etiquetaNodos":"estados","etiquetaRelaciones":"transiciones","capitulos":3,"actualizado":"2026-09-17","archivo":"diagramas/ciclo-vida-modelo/index.html","especificacion":"diagramas/ciclo-vida-modelo/ciclo-vida-modelo.json"}]}</script>
 <script>
 (function () {
   "use strict";
@@ -364,8 +364,8 @@
     }
   }
 
-  function plural(cantidad, singular) {
-    return cantidad + " " + singular + (cantidad === 1 ? "" : "s");
+  function plural(cantidad, singular, pluralForm) {
+    return cantidad + " " + (cantidad === 1 ? singular : pluralForm || singular + "s");
   }
 
   function textoTipo(tipo) {
@@ -496,7 +496,10 @@
 
     var metricas = document.createElement("p");
     metricas.className = "metricas";
-    var partes = [plural(diagrama.nodos, "nodo"), plural(diagrama.relaciones, "relación")];
+    var partes = [
+      plural(diagrama.nodos, "nodo", diagrama.etiquetaNodos),
+      plural(diagrama.relaciones, "relación", diagrama.etiquetaRelaciones),
+    ];
     if (diagrama.capitulos > 0) partes.push(plural(diagrama.capitulos, "capítulo"));
     metricas.textContent = partes.join(" · ");
     tarjeta.appendChild(metricas);

@@ -1,6 +1,6 @@
 {
   "generado_por": "tools/build-diagrams.mjs",
-  "total": 1,
+  "total": 2,
   "diagramas": [
     {
       "slug": "arquitectura-general",
@@ -17,10 +17,34 @@
       "destacado": true,
       "nodos": 10,
       "relaciones": 10,
+      "etiquetaNodos": "nodos",
+      "etiquetaRelaciones": "relaciones",
       "capitulos": 3,
       "actualizado": "2026-09-17",
       "archivo": "diagramas/arquitectura-general/index.html",
       "especificacion": "diagramas/arquitectura-general/arquitectura-general.json"
+    },
+    {
+      "slug": "ciclo-vida-modelo",
+      "titulo": "Supertonic AudioBook — Ciclo de vida del modelo",
+      "tipo": "lifecycle",
+      "tipoTexto": "Ciclo de vida",
+      "descripcion": "Ciclo de vida del gate del modelo: verificación en disco al arrancar, descarga resumible desde Hugging Face, verificación de integridad y las salidas recuperables.",
+      "etiquetas": [
+        "ciclo de vida",
+        "modelo",
+        "descarga",
+        "integridad"
+      ],
+      "destacado": false,
+      "nodos": 7,
+      "relaciones": 10,
+      "etiquetaNodos": "estados",
+      "etiquetaRelaciones": "transiciones",
+      "capitulos": 3,
+      "actualizado": "2026-09-17",
+      "archivo": "diagramas/ciclo-vida-modelo/index.html",
+      "especificacion": "diagramas/ciclo-vida-modelo/ciclo-vida-modelo.json"
     }
   ]
 }

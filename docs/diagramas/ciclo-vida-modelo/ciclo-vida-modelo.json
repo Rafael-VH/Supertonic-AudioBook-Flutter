@@ -1,0 +1,133 @@
+{
+  "schema_version": 1,
+  "diagram_type": "lifecycle",
+  "meta": {
+    "title": "Supertonic AudioBook — Ciclo de vida del modelo",
+    "quality_profile": "showcase",
+    "viewBox": [1060, 566],
+    "views": [
+      {
+        "id": "camino-principal",
+        "label": "Gate y descarga",
+        "focus": ["verificando", "pendiente", "descarga", "integridad", "listo"],
+        "note": "Del arranque verificado al gate abierto: quién puede bajar el modelo y cuándo se publica listo."
+      },
+      {
+        "id": "resumible",
+        "label": "Reanudar y cancelar",
+        "focus": ["descarga", "cancelada", "pendiente", "integridad"],
+        "note": "El .part conserva lo bajado: cancelar no es un error y la próxima apertura reanuda con Range."
+      },
+      {
+        "id": "fallos",
+        "label": "Fallos y reintentos",
+        "focus": ["descarga", "integridad", "error", "listo"],
+        "note": "Red agotada o corrupción persistente: por qué listo nunca se publica con un modelo incompleto."
+      }
+    ]
+  },
+  "lanes": [
+    { "id": "main", "label": "Fases del gate" },
+    { "id": "salidas", "label": "Salidas recuperables" }
+  ],
+  "states": [
+    {
+      "id": "verificando",
+      "type": "start",
+      "label": "Verificación",
+      "sublabel": "archivos en disco",
+      "tag": "entrada",
+      "step": "01",
+      "lane": "main",
+      "col": 0
+    },
+    {
+      "id": "pendiente",
+      "type": "waiting",
+      "label": "Sin modelo",
+      "sublabel": "espera al usuario",
+      "tag": "espera",
+      "step": "02",
+      "lane": "main",
+      "col": 1
+    },
+    {
+      "id": "descarga",
+      "type": "active",
+      "label": "Descarga",
+      "sublabel": "resumible · Range",
+      "tag": "trabajo",
+      "step": "03",
+      "lane": "main",
+      "col": 2
+    },
+    {
+      "id": "integridad",
+      "type": "decision",
+      "label": "Integridad",
+      "sublabel": "SHA-256 · isolate",
+      "tag": "control",
+      "step": "04",
+      "lane": "main",
+      "col": 3
+    },
+    {
+      "id": "listo",
+      "type": "success",
+      "label": "Modelo listo",
+      "sublabel": "gate abierto",
+      "tag": "final",
+      "step": "05",
+      "lane": "main",
+      "col": 4
+    },
+    {
+      "id": "cancelada",
+      "type": "failure",
+      "label": "Cancelada",
+      "sublabel": ".part en disco",
+      "tag": "sin error",
+      "lane": "salidas",
+      "col": 0
+    },
+    {
+      "id": "error",
+      "type": "failure",
+      "label": "Error",
+      "sublabel": "red o corrupto",
+      "tag": "reintentable",
+      "lane": "salidas",
+      "col": 1
+    }
+  ],
+  "transitions": [
+    { "id": "arranque-sin-modelo", "from": "verificando", "to": "pendiente", "route": "straight", "fromSide": "right", "toSide": "left" },
+    { "id": "arranque-verificado", "from": "verificando", "to": "listo", "label": "ya verificado", "fromSide": "bottom", "toSide": "bottom", "via": [[94, 370], [710, 370]] },
+    { "id": "descargar", "from": "pendiente", "to": "descarga", "route": "straight", "fromSide": "right", "toSide": "left" },
+    { "id": "archivo-completo", "from": "descarga", "to": "integridad", "route": "straight", "fromSide": "right", "toSide": "left" },
+    { "id": "archivo-publicado", "from": "integridad", "to": "listo", "route": "straight", "fromSide": "right", "toSide": "left" },
+    { "id": "corrupto", "from": "integridad", "to": "descarga", "label": "corrupto: descarta .part", "fromSide": "top", "toSide": "top", "via": [[556, 80], [402, 80]] },
+    { "id": "cancelar", "from": "descarga", "to": "cancelada" },
+    { "id": "red-agotada", "from": "descarga", "to": "error" },
+    { "id": "cancelada-vuelve", "from": "cancelada", "to": "pendiente" },
+    { "id": "reintentar", "from": "error", "to": "descarga", "label": "Reintentar", "labelDx": -37 }
+  ],
+  "cards": [
+    {
+      "dot": "emerald",
+      "title": "Gate del modelo",
+      "items": [
+        "/home se desvía a /modelo mientras listo sea false, y vuelve al origen cuando el modelo queda verificado.",
+        "modelo_descargado guarda el veredicto: el arranque muestra un listo optimista que la verificación de fondo corrige si el modelo ya no está."
+      ]
+    },
+    {
+      "dot": "cyan",
+      "title": "Descarga e integridad",
+      "items": [
+        "16 archivos y unos 400 MB desde huggingface.co/Supertone/supertonic-3/resolve/main hacia la carpeta modelo de la app.",
+        "Un .part con Range: bytes=N- reanuda la bajada; si la verificación falla se borra, se reintenta desde cero hasta 3 veces y listo nunca se publica incompleto."
+      ]
+    }
+  ]
+}

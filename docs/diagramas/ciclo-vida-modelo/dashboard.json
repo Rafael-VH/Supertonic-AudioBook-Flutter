@@ -1,0 +1,4 @@
+{
+  "descripcion": "Ciclo de vida del gate del modelo: verificación en disco al arrancar, descarga resumible desde Hugging Face, verificación de integridad y las salidas recuperables.",
+  "etiquetas": ["ciclo de vida", "modelo", "descarga", "integridad"]
+}

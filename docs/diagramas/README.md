@@ -47,7 +47,8 @@ nada. Es a propósito: un diagrama mal subido debe romper el build, no desaparec
 ```
 
 Sin este archivo, la tarjeta usa el título y el tipo que ya vienen en la especificación, más
-el conteo de nodos y relaciones.
+el conteo de elementos de ese tipo y su sustantivo: nodos y relaciones, estados y transiciones,
+participantes y mensajes, o flujos según el diagrama.
 
 ## Agregar un diagrama
 

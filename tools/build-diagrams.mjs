@@ -37,6 +37,55 @@ function textoTipo(tipo) {
   return ETIQUETA_TIPO[tipo] || tipo;
 }
 
+/**
+ * Cada tipo de diagrama nombra distinto sus colecciones: la tarjeta tiene que contar
+ * las que existen y rotularlas con el sustantivo del tipo (p. ej. "estados" y
+ * "transiciones"), no siempre "nodos" y "relaciones".
+ */
+const CONTEO = {
+  architecture: {
+    nodos: 'components',
+    relaciones: 'connections',
+    etiquetaNodos: 'nodos',
+    etiquetaRelaciones: 'relaciones',
+  },
+  workflow: {
+    nodos: 'nodes',
+    relaciones: 'edges',
+    etiquetaNodos: 'nodos',
+    etiquetaRelaciones: 'conexiones',
+  },
+  sequence: {
+    nodos: 'participants',
+    relaciones: 'messages',
+    etiquetaNodos: 'participantes',
+    etiquetaRelaciones: 'mensajes',
+  },
+  dataflow: {
+    nodos: 'nodes',
+    relaciones: 'flows',
+    etiquetaNodos: 'nodos',
+    etiquetaRelaciones: 'flujos',
+  },
+  lifecycle: {
+    nodos: 'states',
+    relaciones: 'transitions',
+    etiquetaNodos: 'estados',
+    etiquetaRelaciones: 'transiciones',
+  },
+};
+
+function contarElementos(spec, tipo) {
+  const conteo = CONTEO[tipo] || CONTEO.architecture;
+  const cuenta = (clave) => (Array.isArray(spec[clave]) ? spec[clave].length : 0);
+  return {
+    nodos: cuenta(conteo.nodos),
+    relaciones: cuenta(conteo.relaciones),
+    etiquetaNodos: conteo.etiquetaNodos,
+    etiquetaRelaciones: conteo.etiquetaRelaciones,
+  };
+}
+
 function escaparHtml(texto) {
   return String(texto)
     .replace(/&/g, '&amp;')
@@ -196,8 +245,7 @@ function recolectar() {
       descripcion: typeof extra.descripcion === 'string' ? extra.descripcion : '',
       etiquetas: normalizarEtiquetas(extra.etiquetas),
       destacado: extra.destacado === true,
-      nodos: Array.isArray(spec.components) ? spec.components.length : 0,
-      relaciones: Array.isArray(spec.connections) ? spec.connections.length : 0,
+      ...contarElementos(spec, tipo),
       capitulos: Array.isArray(spec.meta?.views) ? spec.meta.views.length : 0,
       actualizado: fechaDeActualizacion(htmlRel, htmlAbs),
       // Todos los enlaces apuntan a la página envolvente, que aporta la barra con
