@@ -22,7 +22,6 @@ const diagramasDir = path.join(docsDir, 'diagramas');
 const manifestPath = path.join(diagramasDir, 'manifest.json');
 const templatePath = path.join(repoRoot, 'tools', 'dashboard.template.html');
 const indexPath = path.join(docsDir, 'index.html');
-const diagramTemplatePath = path.join(repoRoot, 'tools', 'diagram.template.html');
 
 const TIPOS = new Set(['architecture', 'workflow', 'sequence', 'dataflow', 'lifecycle']);
 
@@ -45,6 +44,72 @@ function escaparHtml(texto) {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;');
 }
+
+/**
+ * Botón de retorno al dashboard, inyectado dentro del propio visor.
+ *
+ * Usa los tokens de chrome del visor (--toolbar-*) en lugar de colores fijos: así
+ * hereda el tema claro/oscuro y los presets (classic, signal-flow, blueprint,
+ * editorial) sin duplicar la paleta. El estilo replica `.toolbar button`.
+ */
+const RETORNO_ESTILO = `  <style id="archify-back-style">
+    /* Réplica exacta de \`.toolbar button\`: así el botón pertenece al chrome del
+       visor y sigue su tema y su preset sin duplicar la paleta. */
+    .archify-back {
+      flex: 0 0 auto;
+      display: inline-flex;
+      align-items: center;
+      gap: .375rem;
+      min-height: 2.75rem;
+      padding: .5rem .875rem;
+      border-radius: .625rem;
+      border: 1px solid var(--toolbar-border);
+      background: var(--toolbar-bg);
+      color: var(--toolbar-text);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 4px 14px rgba(0, 0, 0, .08);
+      transition: background .15s, border-color .15s, color .15s;
+      font-family: inherit;
+      font-size: .75rem;
+      font-weight: 500;
+      line-height: 1;
+      text-decoration: none;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+    .archify-back:hover {
+      background: var(--toolbar-hover);
+      border-color: color-mix(in srgb, var(--arrow) 62%, var(--toolbar-border));
+    }
+    .archify-back:focus-visible { outline: 2px solid var(--arrow-emphasis); outline-offset: 2px; }
+    .archify-back svg { width: .95rem; height: .95rem; flex: 0 0 auto; }
+    html[data-present="true"] .archify-back { display: none; }
+
+    /* El preset editorial redondea menos los controles del visor. */
+    html[data-preset="editorial"] .archify-back { border-radius: .3rem; }
+
+    /* Mismo breakpoint en el que el visor oculta las etiquetas del toolbar. */
+    @media (max-width: 360px) {
+      .archify-back span { display: none; }
+      .archify-back { padding-right: .58rem; padding-left: .58rem; }
+    }
+
+    /* Diagramas sin .header-row: el botón flota arriba a la izquierda. */
+    .archify-back--flotante { position: fixed; top: 1rem; left: 1rem; z-index: 60; }
+  </style>
+`;
+
+const BOTON_RETORNO =
+  '<a class="archify-back no-print" lang="es" href="../../index.html" aria-label="Atrás" ' +
+  'title="Volver a los diagramas">' +
+  '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="none" stroke="currentColor" ' +
+  'stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M19 12H5m0 0 6-6m-6 6 6 6"/></svg>' +
+  '<span>Atrás</span></a>';
+
+const BOTON_RETORNO_FLOTANTE = BOTON_RETORNO.replace(
+  'class="archify-back ',
+  'class="archify-back archify-back--flotante ',
+);
 
 function aPosix(ruta) {
   return ruta.split(path.sep).join('/');
@@ -152,29 +217,37 @@ function recolectar() {
 }
 
 /**
- * Escribe docs/diagramas/<slug>/index.html: una página envolvente con la barra
- * de navegación (botón "Volver a los diagramas") y el diagrama embebido.
+ * Escribe docs/diagramas/<slug>/index.html: el diagrama con el botón de retorno
+ * inyectado dentro de su propio header.
  *
- * El HTML que genera Archify queda intacto: nunca lo reescribimos, así que
- * volver a correr `deliver` no rompe nada.
+ * El artefacto <slug>.html que produjo `deliver` nunca se modifica: siempre se lee
+ * para producir la copia publicada, así que volver a correr `deliver` no rompe nada.
  */
-function escribirEnvoltorios(diagramas) {
-  const plantilla = readFileSync(diagramTemplatePath, 'utf8');
-  const marcadores = ['__TITULO__', '__TIPO__', '__DIAGRAMA__', '__ESPECIFICACION__'];
-
-  for (const marcador of marcadores) {
-    if (!plantilla.includes(marcador)) {
-      console.error(`tools/diagram.template.html no contiene el marcador ${marcador}.`);
-      process.exit(1);
-    }
-  }
-
+function escribirPaginas(diagramas) {
   for (const diagrama of diagramas) {
-    const html = plantilla
-      .replaceAll('__TITULO__', escaparHtml(diagrama.titulo))
-      .replaceAll('__TIPO__', escaparHtml(diagrama.tipoTexto))
-      .replaceAll('__DIAGRAMA__', `${diagrama.slug}.html`)
-      .replaceAll('__ESPECIFICACION__', `${diagrama.slug}.json`);
+    const origen = path.join(diagramasDir, diagrama.slug, `${diagrama.slug}.html`);
+    let html = readFileSync(origen, 'utf8');
+
+    if (!html.includes('archify-back')) {
+      if (!html.includes('</head>')) {
+        console.error(`docs/diagramas/${diagrama.slug}/${diagrama.slug}.html no tiene </head>.`);
+        process.exit(1);
+      }
+      html = html.replace('</head>', `${RETORNO_ESTILO}</head>`);
+
+      const anclaHeader = /<div class="header-row"[^>]*>/.exec(html);
+      const anclaBody = anclaHeader ? null : /<body[^>]*>/.exec(html);
+
+      if (!anclaHeader && !anclaBody) {
+        console.error(`docs/diagramas/${diagrama.slug}/${diagrama.slug}.html no tiene header ni body.`);
+        process.exit(1);
+      }
+
+      const ancla = anclaHeader || anclaBody;
+      const boton = anclaHeader ? BOTON_RETORNO : BOTON_RETORNO_FLOTANTE;
+      const corte = ancla.index + ancla[0].length;
+      html = html.slice(0, corte) + boton + html.slice(corte);
+    }
 
     writeFileSync(path.join(diagramasDir, diagrama.slug, 'index.html'), html, 'utf8');
   }
@@ -211,12 +284,12 @@ function main() {
   const datos = JSON.stringify({ total: diagramas.length, diagramas }).replace(/</g, '\\u003c');
   writeFileSync(indexPath, plantilla.replace(marcador, datos), 'utf8');
 
-  escribirEnvoltorios(diagramas);
+  escribirPaginas(diagramas);
 
   const destacados = diagramas.filter((diagrama) => diagrama.destacado).length;
   console.log(
     `OK · ${diagramas.length} diagrama(s)${destacados ? ` · ${destacados} destacado(s)` : ''} ` +
-      `→ docs/index.html, docs/diagramas/manifest.json y ${diagramas.length} página(s) envolvente(s)`,
+      `→ docs/index.html, docs/diagramas/manifest.json y ${diagramas.length} página(s) con botón de retorno`,
   );
 }
 

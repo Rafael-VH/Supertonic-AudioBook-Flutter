@@ -4,16 +4,17 @@ Escribe los archivos **generados** a partir de lo que haya en `docs/diagramas/`:
 
 - `docs/index.html` — el dashboard que se publica en GitHub Pages.
 - `docs/diagramas/manifest.json` — los datos del listado.
-- `docs/diagramas/<slug>/index.html` — la página envolvente de cada diagrama: barra de
-  navegación con el botón **← Volver a los diagramas** y el diagrama embebido debajo.
+- `docs/diagramas/<slug>/index.html` — el diagrama con el botón **Atrás** inyectado dentro de
+  su propio header. Al usar los tokens del visor (`--toolbar-*`), el botón hereda el tema
+  claro/oscuro y los cuatro presets sin duplicar la paleta.
 
 ```bash
 node tools/build-diagrams.mjs
 ```
 
 No edites esos archivos a mano: se sobrescriben. Para cambiar el dashboard editá
-`tools/dashboard.template.html`; para cambiar la barra del diagrama,
-`tools/diagram.template.html`.
+`tools/dashboard.template.html`; para cambiar el botón, `RETORNO_ESTILO` y `BOTON_RETORNO`
+en `tools/build-diagrams.mjs`.
 
 ## Estructura
 
@@ -25,12 +26,12 @@ docs/diagramas/
     ├── <slug>.html      # el diagrama de Archify (obligatorio, no se modifica)
     ├── <slug>.json      # la especificación de Archify (obligatorio)
     ├── dashboard.json   # metadatos de la tarjeta (opcional)
-    └── index.html       # GENERADO: barra con el botón de volver + diagrama embebido
+    └── index.html       # GENERADO: el diagrama + el botón "Atrás"
 ```
 
-Las tarjetas del dashboard enlazan a `index.html` (la envolvente), nunca directo al HTML de
-Archify. Así el botón de volver siempre está presente y el artefacto de Archify queda intacto:
-volver a correr `deliver` no rompe la navegación.
+Las tarjetas del dashboard enlazan a `index.html`, nunca directo al HTML de Archify. El
+artefacto de Archify queda intacto: volver a correr `deliver` no rompe la navegación, porque
+el generador vuelve a inyectar el botón sobre la versión nueva.
 
 Si falta `<slug>.html` o `<slug>.json`, el script falla con código de salida 1 y no escribe
 nada. Es a propósito: un diagrama mal subido debe romper el build, no desaparecer en silencio.
