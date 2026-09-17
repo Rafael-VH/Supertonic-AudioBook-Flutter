@@ -1,0 +1,193 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Supertonic AudioBook — Arquitectura general",
+    "quality_profile": "showcase",
+    "viewBox": [1360, 640],
+    "repository": {
+      "url": "https://github.com/Rafael-VH/Supertonic-AudioBook-Flutter",
+      "provider": "github",
+      "link_mode": "web",
+      "revision": "5e47abd5e54308df7342473872d73535e62e3072"
+    },
+    "views": [
+      {
+        "id": "flujo-conversion",
+        "label": "Flujo MD → Audio",
+        "focus": ["ui_convert", "app_logic", "tts", "export", "repos"],
+        "note": "Camino principal: de la pantalla Convert al motor TTS on-device y al WAV temporal."
+      },
+      {
+        "id": "modelo",
+        "label": "Modelo y descarga",
+        "focus": ["app_logic", "modelo", "hf", "tts"],
+        "note": "Descarga resumible del modelo Supertonic 3 y su verificación SHA-256."
+      },
+      {
+        "id": "guardado",
+        "label": "Biblioteca y guardado",
+        "focus": ["ui_audio_manager", "ui_biblioteca", "repos"],
+        "note": "Los WAV temporales se confirman con un rename atómico y luego se listan."
+      }
+    ]
+  },
+  "components": [
+    {
+      "id": "ui_shell",
+      "type": "frontend",
+      "label": "Dashboard shell",
+      "sublabel": "NavigationBar · 3 pestañas",
+      "tag": "go_router",
+      "pos": [40, 60],
+      "size": [190, 72],
+      "sources": [{ "path": "lib/features/dashboard/presentation/screens/dashboard_screen.dart" }]
+    },
+    {
+      "id": "ui_convert",
+      "type": "frontend",
+      "label": "Convert · Home",
+      "sublabel": "selección .md · voz · log",
+      "pos": [400, 60],
+      "size": [190, 72],
+      "sources": [{ "path": "lib/features/convert/presentation/screens/convert_screen.dart" }]
+    },
+    {
+      "id": "ui_audio_manager",
+      "type": "frontend",
+      "label": "Audio Manager",
+      "sublabel": "renombrar · guardar",
+      "pos": [760, 60],
+      "size": [190, 72],
+      "sources": [{ "path": "lib/features/audio_manager/presentation/screens/audio_manager_screen.dart" }]
+    },
+    {
+      "id": "ui_biblioteca",
+      "type": "frontend",
+      "label": "Biblioteca",
+      "sublabel": "por libro · play/pausa",
+      "pos": [1120, 60],
+      "size": [190, 72],
+      "sources": [{ "path": "lib/features/biblioteca/presentation/screens/biblioteca_screen.dart" }]
+    },
+    {
+      "id": "hf",
+      "type": "external",
+      "label": "Supertonic 3",
+      "sublabel": "Hugging Face · ~400 MB",
+      "pos": [40, 280],
+      "size": [190, 72]
+    },
+    {
+      "id": "modelo",
+      "type": "cloud",
+      "label": "ModeloManager",
+      "sublabel": "resumible · SHA-256",
+      "pos": [400, 280],
+      "size": [190, 72],
+      "sources": [{ "path": "lib/features/modelo/data/repositories/modelo_manager.dart" }]
+    },
+    {
+      "id": "app_logic",
+      "type": "backend",
+      "label": "Estado y dominio",
+      "sublabel": "Riverpod · casos de uso",
+      "pos": [760, 280],
+      "size": [190, 72],
+      "sources": [{ "path": "lib/features/convert/domain/use_cases/procesar_archivo.dart" }]
+    },
+    {
+      "id": "tts",
+      "type": "backend",
+      "label": "MotorTtsSupertonic",
+      "sublabel": "ONNX Runtime on-device",
+      "tag": "4 grafos",
+      "pos": [400, 500],
+      "size": [190, 72],
+      "sources": [{ "path": "lib/features/convert/data/repositories/motor_tts.dart" }]
+    },
+    {
+      "id": "export",
+      "type": "backend",
+      "label": "ExportadorFfmpeg",
+      "sublabel": "MP3 · FLAC · OGG",
+      "tag": "ffmpeg",
+      "pos": [760, 500],
+      "size": [190, 72],
+      "sources": [{ "path": "lib/features/convert/data/repositories/exportador_audio_ffmpeg.dart" }]
+    },
+    {
+      "id": "repos",
+      "type": "database",
+      "label": "Repositorios locales",
+      "sublabel": "JSON · archivos · _temp/",
+      "pos": [1120, 500],
+      "size": [190, 72],
+      "sources": [{ "path": "lib/shared/data/repositories/repositorio_preferencias.dart" }]
+    }
+  ],
+  "boundaries": [
+    {
+      "kind": "region",
+      "label": "Capa de presentación · Flutter UI",
+      "wraps": ["ui_shell", "ui_convert", "ui_audio_manager", "ui_biblioteca"]
+    },
+    {
+      "kind": "region",
+      "label": "Modelo TTS y servicio externo",
+      "wraps": ["hf", "modelo"]
+    },
+    {
+      "kind": "region",
+      "label": "Estado y dominio",
+      "wraps": ["app_logic"]
+    },
+    {
+      "kind": "region",
+      "label": "Datos e infraestructura · lib/data",
+      "wraps": ["tts", "export", "repos"]
+    }
+  ],
+  "connections": [
+    { "id": "shell-convert", "from": "ui_shell", "to": "ui_convert", "label": "Convertir archivos", "variant": "emphasis", "fromSide": "right", "toSide": "left" },
+    { "id": "convert-logic", "from": "ui_convert", "to": "app_logic", "label": "Procesar lote", "variant": "emphasis", "fromSide": "right", "toSide": "top", "labelDy": 87 },
+    { "id": "manager-logic", "from": "ui_audio_manager", "to": "app_logic", "label": "GuardarAudio", "variant": "emphasis", "fromSide": "bottom", "toSide": "top", "labelDy": 87 },
+    { "id": "logic-modelo", "from": "app_logic", "to": "modelo", "label": "estado del modelo", "fromSide": "left", "toSide": "right" },
+    { "id": "modelo-hf", "from": "modelo", "to": "hf", "label": "descarga + SHA-256", "variant": "dashed", "fromSide": "left", "toSide": "right" },
+    { "id": "modelo-tts", "from": "modelo", "to": "tts", "label": "modelo verificado", "fromSide": "bottom", "toSide": "top", "labelDx": -60, "labelDy": 87 },
+    { "id": "logic-tts", "from": "app_logic", "to": "tts", "label": "sintetizar()", "variant": "emphasis", "fromSide": "bottom", "toSide": "top", "labelDy": 87 },
+    { "id": "logic-export", "from": "app_logic", "to": "export", "label": "convertir formato", "fromSide": "bottom", "toSide": "top", "labelDy": 121 },
+    { "id": "logic-repos", "from": "app_logic", "to": "repos", "label": "WAV en _temp/", "fromSide": "bottom", "toSide": "top", "labelDy": 87 },
+    { "id": "biblioteca-repos", "from": "ui_biblioteca", "to": "repos", "label": "listar audios", "fromSide": "bottom", "toSide": "top", "labelDy": 197 }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Presentación · Flutter UI",
+      "items": [
+        "Dashboard shell, Convert, Audio Manager, Biblioteca y Settings.",
+        "Navegación centralizada con go_router.",
+        "Editor de metadatos ID3 y onboarding de primera ejecución."
+      ]
+    },
+    {
+      "dot": "violet",
+      "title": "Estado y dominio",
+      "items": [
+        "Controllers Riverpod y casos de uso; contratos en domain/.",
+        "data/ se inyecta como overrides en main.dart (composition root).",
+        "Limpieza de Markdown y segmentación (1500 chars) puras."
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "Datos, modelo y servicios",
+      "items": [
+        "MotorTtsSupertonic: 4 grafos ONNX on-device.",
+        "ExportadorFfmpeg: MP3, FLAC y OGG desde WAV PCM16.",
+        "ModeloManager: descarga resumible de Hugging Face + SHA-256.",
+        "Repositorios: preferencias JSON, archivos y _temp/."
+      ]
+    }
+  ]
+}

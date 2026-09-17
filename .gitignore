@@ -45,3 +45,9 @@ app.*.map.json
 
 # fdb session state
 .fdb/
+
+# Command Code (config local del agente)
+.commandcode/
+
+# Evidencia regenerable de los diagramas (ver docs/diagramas/README.md)
+docs/diagramas/**/*.visual-check.*

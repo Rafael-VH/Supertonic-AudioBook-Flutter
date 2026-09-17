@@ -1,0 +1,5 @@
+{
+  "descripcion": "Arquitectura por capas: presentación en Flutter, estado y dominio, datos e infraestructura, y el modelo TTS on-device.",
+  "etiquetas": ["arquitectura", "capas", "flutter", "onnx"],
+  "destacado": true
+}

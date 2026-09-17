@@ -25,8 +25,8 @@ sintetiza con voces en **31 idiomas + auto**. Nada sale de tu equipo.
 
 ## Tabla de contenidos
 
-[Características](#características) · [Privacidad](#privacidad) · [Instalación](#instalación) ·
-[Uso](#uso) · [Arquitectura](#arquitectura) · [Stack técnico](#stack-técnico) ·
+[Características](#características) · [Privacidad](#privacidad) · [Diagramas interactivos](#diagramas-interactivos) ·
+[Instalación](#instalación) · [Uso](#uso) · [Arquitectura](#arquitectura) · [Stack técnico](#stack-técnico) ·
 [Testing](#testing) · [Formatos de audio](#formatos-de-audio) · [Contribuir](#contribuir) ·
 [Documentación](#documentación) · [Licencia](#licencia)
 
@@ -52,6 +52,15 @@ sintetiza con voces en **31 idiomas + auto**. Nada sale de tu equipo.
 | 📱 | **Responsive** | Móvil: acordeones apilados · Tablet (≥ 900 px): paneles lado a lado |
 | 🔄 | **Descarga resumible** | Modelo Supertonic 3 (~400 MB) con verificación SHA-256 |
 | 🧠 | **Advertencia de memoria** | Estima el presupuesto del lote antes de procesar; avisa si supera el 70 % de la RAM disponible |
+
+## Diagramas interactivos
+
+Diagramas del proyecto navegables en el navegador, publicados con GitHub Pages:
+
+**<https://rafael-vh.github.io/Supertonic-AudioBook-Flutter/>**
+
+Cada diagrama es autocontenido: permite cambiar tema claro/oscuro, hacer zoom, buscar nodos y
+trazar relaciones. Para agregar uno nuevo, ver [docs/diagramas/README.md](docs/diagramas/README.md).
 
 ## Instalación
 
@@ -297,6 +306,7 @@ Documentación completa del proyecto disponible en español e inglés.
 | Internacionalización | [i18n.md](docs/es/i18n.md) | [i18n.md](docs/en/i18n.md) |
 | ONNX Runtime | [onnx-runtime.md](docs/es/onnx-runtime.md) | [onnx-runtime.md](docs/en/onnx-runtime.md) |
 | Modelo Supertonic 3 | [supertonic-3-model.md](docs/es/supertonic-3-model.md) | [supertonic-3-model.md](docs/en/supertonic-3-model.md) |
+| Diagramas interactivos | [Dashboard en GitHub Pages](https://rafael-vh.github.io/Supertonic-AudioBook-Flutter/) | [Dashboard (UI en español)](https://rafael-vh.github.io/Supertonic-AudioBook-Flutter/) |
 
 ### Roadmap
 

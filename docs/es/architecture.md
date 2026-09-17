@@ -21,6 +21,15 @@ flowchart TD
 
 **Features**: `audio_manager`, `benchmark`, `biblioteca`, `convert`, `dashboard`, `editor_metadata`, `home`, `modelo`, `onboarding`, `settings`, `splash`.
 
+## Diagramas interactivos
+
+Diagramas navegables del proyecto, publicados con GitHub Pages:
+
+**<https://rafael-vh.github.io/Supertonic-AudioBook-Flutter/>**
+
+Cada diagrama es autocontenido: permite cambiar tema claro/oscuro, hacer zoom, buscar nodos y
+trazar relaciones. Para agregar uno nuevo, ver [diagramas/README.md](../diagramas/README.md).
+
 ## Regla de Dependencia
 
 **`domain/` nunca importa `data/` ni usa `dart:io`.**
