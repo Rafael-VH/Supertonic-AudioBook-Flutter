@@ -1,0 +1,4 @@
+{
+  "descripcion": "Interacciones entre los módulos: quién resuelve contratos, cómo el gate del modelo bloquea /home y cómo viaja el audio hasta la biblioteca.",
+  "etiquetas": ["arquitectura", "módulos", "interacciones", "riverpod"]
+}

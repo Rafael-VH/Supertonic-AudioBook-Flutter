@@ -1,6 +1,6 @@
 {
   "generado_por": "tools/build-diagrams.mjs",
-  "total": 2,
+  "total": 3,
   "diagramas": [
     {
       "slug": "arquitectura-general",
@@ -45,6 +45,28 @@
       "actualizado": "2026-09-17",
       "archivo": "diagramas/ciclo-vida-modelo/index.html",
       "especificacion": "diagramas/ciclo-vida-modelo/ciclo-vida-modelo.json"
+    },
+    {
+      "slug": "interacciones-modulos",
+      "titulo": "Supertonic AudioBook — Interacciones entre módulos",
+      "tipo": "architecture",
+      "tipoTexto": "Arquitectura",
+      "descripcion": "Interacciones entre los módulos: quién resuelve contratos, cómo el gate del modelo bloquea /home y cómo viaja el audio hasta la biblioteca.",
+      "etiquetas": [
+        "arquitectura",
+        "módulos",
+        "interacciones",
+        "riverpod"
+      ],
+      "destacado": false,
+      "nodos": 11,
+      "relaciones": 13,
+      "etiquetaNodos": "nodos",
+      "etiquetaRelaciones": "relaciones",
+      "capitulos": 3,
+      "actualizado": "2026-09-17",
+      "archivo": "diagramas/interacciones-modulos/index.html",
+      "especificacion": "diagramas/interacciones-modulos/interacciones-modulos.json"
     }
   ]
 }

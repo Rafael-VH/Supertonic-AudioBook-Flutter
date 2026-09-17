@@ -1,0 +1,227 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Supertonic AudioBook — Interacciones entre módulos",
+    "quality_profile": "showcase",
+    "viewBox": [1340, 820],
+    "repository": {
+      "url": "https://github.com/Rafael-VH/Supertonic-AudioBook-Flutter",
+      "provider": "github",
+      "link_mode": "web",
+      "revision": "92ffbd9ea31fba66045c46d656c8c01eaf184a75"
+    },
+    "views": [
+      {
+        "id": "camino-principal",
+        "label": "Camino de conversión",
+        "focus": ["shell", "convert", "infra", "audio_manager", "biblioteca"],
+        "note": "Del tab Inicio al audio confirmado: quién orquesta, quién sintetiza y quién guarda."
+      },
+      {
+        "id": "gate-modelo",
+        "label": "Gate y motor",
+        "focus": ["shell", "modelo", "hf", "benchmark", "convert"],
+        "note": "El estado del modelo bloquea /home y el motor ONNX lee el mismo directorio que descarga el gate."
+      },
+      {
+        "id": "persistencia",
+        "label": "Persistencia y handoff",
+        "focus": ["convert", "benchmark", "settings", "infra", "audio_manager"],
+        "note": "Los tres JSON compartidos, el historial que escribe convert y el push hacia audio-manager."
+      }
+    ]
+  },
+  "components": [
+    {
+      "id": "hf",
+      "type": "external",
+      "label": "Hugging Face",
+      "sublabel": "Supertone/supertonic-3",
+      "pos": [40, 24],
+      "size": [180, 72]
+    },
+    {
+      "id": "wiring",
+      "type": "backend",
+      "label": "Wiring y contratos",
+      "sublabel": "15 providers fail-fast",
+      "tag": "main.dart",
+      "pos": [500, 60],
+      "size": [210, 76],
+      "sources": [
+        { "path": "lib/presentation/controllers/providers.dart" },
+        { "path": "lib/main.dart" }
+      ]
+    },
+    {
+      "id": "modelo",
+      "type": "frontend",
+      "label": "Gate del modelo",
+      "sublabel": "verificar · descargar",
+      "tag": "ModeloManager",
+      "pos": [40, 240],
+      "size": [200, 76],
+      "sources": [
+        { "path": "lib/features/modelo/data/repositories/modelo_manager.dart" },
+        { "path": "lib/features/modelo/presentation/controllers/modelo_controller.dart" }
+      ]
+    },
+    {
+      "id": "benchmark",
+      "type": "frontend",
+      "label": "Benchmark",
+      "sublabel": "filas por tamaño",
+      "tag": "BenchmarkController",
+      "pos": [320, 190],
+      "size": [200, 76],
+      "sources": [
+        { "path": "lib/features/benchmark/presentation/controllers/benchmark_controller.dart" },
+        { "path": "lib/features/benchmark/domain/use_cases/registrar_conversion_en_historial.dart" }
+      ]
+    },
+    {
+      "id": "settings",
+      "type": "frontend",
+      "label": "Settings",
+      "sublabel": "tema · idioma · carpetas",
+      "tag": "SettingsController",
+      "pos": [280, 350],
+      "size": [200, 76],
+      "sources": [
+        { "path": "lib/features/settings/presentation/controllers/settings_controller.dart" },
+        { "path": "lib/features/settings/presentation/widgets/card_estado_modelo.dart" }
+      ]
+    },
+    {
+      "id": "shell",
+      "type": "frontend",
+      "label": "Shell y router",
+      "sublabel": "splash · onboarding · 3 pestañas",
+      "tag": "go_router",
+      "pos": [40, 470],
+      "size": [200, 76],
+      "sources": [
+        { "path": "lib/presentation/routing/app_router.dart" },
+        { "path": "lib/features/dashboard/presentation/screens/dashboard_screen.dart" },
+        { "path": "lib/features/splash/presentation/screens/splash_screen.dart" }
+      ]
+    },
+    {
+      "id": "convert",
+      "type": "frontend",
+      "label": "Convert",
+      "sublabel": ".md → WAV · lote y cancelación",
+      "tag": "HomeController",
+      "pos": [540, 380],
+      "size": [220, 96],
+      "sources": [
+        { "path": "lib/features/convert/presentation/controllers/home_controller.dart" },
+        { "path": "lib/features/convert/domain/use_cases/procesar_archivo.dart" },
+        { "path": "lib/features/convert/presentation/screens/convert_screen.dart" }
+      ]
+    },
+    {
+      "id": "audio_manager",
+      "type": "frontend",
+      "label": "Audio Manager",
+      "sublabel": "confirma el WAV de _temp",
+      "tag": "GuardarAudio",
+      "pos": [800, 300],
+      "size": [200, 76],
+      "sources": [
+        { "path": "lib/features/audio_manager/domain/use_cases/guardar_audio.dart" },
+        { "path": "lib/features/audio_manager/presentation/controllers/audio_manager_controller.dart" }
+      ]
+    },
+    {
+      "id": "biblioteca",
+      "type": "frontend",
+      "label": "Biblioteca",
+      "sublabel": "listar · reproducir",
+      "tag": "BibliotecaController",
+      "pos": [860, 470],
+      "size": [200, 76],
+      "sources": [
+        { "path": "lib/features/biblioteca/presentation/controllers/biblioteca_controller.dart" },
+        { "path": "lib/features/biblioteca/domain/use_cases/listar_audios_generados.dart" }
+      ]
+    },
+    {
+      "id": "metadata",
+      "type": "frontend",
+      "label": "Editor ID3",
+      "sublabel": "tags y portada",
+      "tag": "EditorMetadata",
+      "pos": [1060, 380],
+      "size": [200, 76],
+      "sources": [
+        { "path": "lib/features/editor_metadata/data/repositories/editor_metadata_id3_codec.dart" },
+        { "path": "lib/features/editor_metadata/presentation/controllers/metadata_editor_controller.dart" }
+      ]
+    },
+    {
+      "id": "infra",
+      "type": "backend",
+      "label": "Infraestructura y runtime",
+      "sublabel": "JSON · archivos · ONNX/FFmpeg",
+      "tag": "lib/shared + nativo",
+      "pos": [560, 660],
+      "size": [270, 96],
+      "sources": [
+        { "path": "lib/shared/data/repositories/repositorio_preferencias.dart" },
+        { "path": "lib/shared/data/repositories/repositorio_archivos.dart" },
+        { "path": "lib/features/convert/data/repositories/motor_tts.dart" }
+      ]
+    }
+  ],
+  "boundaries": [
+    {
+      "kind": "region",
+      "label": "Módulos · lib/features",
+      "wraps": [
+        "shell",
+        "convert",
+        "audio_manager",
+        "biblioteca",
+        "modelo",
+        "benchmark",
+        "settings",
+        "metadata"
+      ]
+    },
+    { "kind": "region", "label": "Wiring · lib/presentation", "wraps": ["wiring"] },
+    { "kind": "region", "label": "lib/shared + runtime nativo", "wraps": ["infra"] }
+  ],
+  "connections": [
+    { "id": "shell-convert", "from": "shell", "to": "convert", "label": "tab Inicio · push /home", "variant": "emphasis", "fromSide": "right", "toSide": "left", "labelDy": 32 },
+    { "id": "shell-modelo", "from": "shell", "to": "modelo", "label": "gate: lee listo", "variant": "emphasis", "fromSide": "top", "toSide": "bottom", "labelDx": 62 },
+    { "id": "convert-wiring", "from": "convert", "to": "wiring", "label": "resuelve contratos", "fromSide": "top", "toSide": "bottom", "labelDx": 90 },
+    { "id": "convert-infra", "from": "convert", "to": "infra", "label": "ONNX + FFmpeg · WAV en _temp/", "variant": "emphasis", "fromSide": "bottom", "toSide": "top", "labelDx": -70 },
+    { "id": "audio-manager-infra", "from": "audio_manager", "to": "infra", "label": "rename a carpeta_out", "fromSide": "left", "toSide": "top", "labelAt": [780, 580] },
+    { "id": "biblioteca-infra", "from": "biblioteca", "to": "infra", "label": "lista y reproduce", "fromSide": "bottom", "toSide": "top", "labelDx": 100 },
+    { "id": "metadata-infra", "from": "metadata", "to": "infra", "label": "ID3: tags y portada", "fromSide": "bottom", "toSide": "right", "labelDy": 40 },
+    { "id": "modelo-hf", "from": "modelo", "to": "hf", "label": "descarga resumible", "variant": "dashed", "fromSide": "top", "toSide": "bottom", "labelDy": -46 },
+    { "id": "convert-benchmark", "from": "convert", "to": "benchmark", "label": "registra el historial", "variant": "emphasis", "fromSide": "top", "toSide": "bottom", "labelDy": -34 },
+    { "id": "convert-audio-manager", "from": "convert", "to": "audio_manager", "label": "push AudioPendiente", "variant": "emphasis", "fromSide": "right", "toSide": "left", "labelAt": [713, 497] },
+    { "id": "benchmark-modelo", "from": "benchmark", "to": "modelo", "label": "segundo gate", "fromSide": "left", "toSide": "right" },
+    { "id": "settings-modelo", "from": "settings", "to": "modelo", "label": "card de estado", "fromSide": "left", "toSide": "right", "labelAt": [260, 330] },
+    { "id": "modelo-infra", "from": "modelo", "to": "infra", "label": "16 archivos a modelo/", "fromSide": "left", "toSide": "left", "via": [[20, 278], [20, 708]], "labelAt": [166, 560] }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Contratos, no imports",
+      "items": [
+        "Solo main.dart importa data/ e inyecta 15 implementaciones; los módulos resuelven contratos y no se importan entre sí, y el router es la excepción: importa las 10 screens y lee modeloControllerProvider en el redirect."
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "Gate, disco y handoff",
+      "items": [
+        "/home se desvía a /modelo mientras listo sea false y BenchmarkScreen repite el gate; convert escribe el historial que lee benchmark y empuja los audios a /audio-manager por extra, con el WAV en _temp/ hasta el rename."
+      ]
+    }
+  ]
+}
