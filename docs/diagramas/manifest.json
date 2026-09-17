@@ -1,6 +1,6 @@
 {
   "generado_por": "tools/build-diagrams.mjs",
-  "total": 3,
+  "total": 4,
   "diagramas": [
     {
       "slug": "arquitectura-general",
@@ -23,6 +23,28 @@
       "actualizado": "2026-09-17",
       "archivo": "diagramas/arquitectura-general/index.html",
       "especificacion": "diagramas/arquitectura-general/arquitectura-general.json"
+    },
+    {
+      "slug": "benchmark-mediciones",
+      "titulo": "Supertonic AudioBook — Benchmark y sus consumidores",
+      "tipo": "dataflow",
+      "tipoTexto": "Flujo de datos",
+      "descripcion": "Benchmark y sus consumidores: cómo se mide el ritmo del motor TTS, dónde se persiste el resultado y quién deriva la ETA y el historial.",
+      "etiquetas": [
+        "benchmark",
+        "medición",
+        "eta",
+        "historial"
+      ],
+      "destacado": false,
+      "nodos": 11,
+      "relaciones": 11,
+      "etiquetaNodos": "nodos",
+      "etiquetaRelaciones": "flujos",
+      "capitulos": 3,
+      "actualizado": "2026-09-17",
+      "archivo": "diagramas/benchmark-mediciones/index.html",
+      "especificacion": "diagramas/benchmark-mediciones/benchmark-mediciones.json"
     },
     {
       "slug": "ciclo-vida-modelo",

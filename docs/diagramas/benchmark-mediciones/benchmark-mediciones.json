@@ -1,0 +1,377 @@
+{
+  "schema_version": 1,
+  "diagram_type": "dataflow",
+  "meta": {
+    "title": "Supertonic AudioBook — Benchmark y sus consumidores",
+    "quality_profile": "showcase",
+    "viewBox": [
+      1080,
+      820
+    ],
+    "views": [
+      {
+        "id": "medicion",
+        "label": "Medición cronometrada",
+        "focus": [
+          "gate",
+          "device",
+          "tamanios",
+          "sintesis",
+          "resultado"
+        ],
+        "note": "El benchmark exige el modelo listo: sintetiza 6 tamaños (1500–15000) con Stopwatch y adjunta el DeviceSpec al BenchmarkResult."
+      },
+      {
+        "id": "persistencia",
+        "label": "Persistencia y consumidores",
+        "focus": [
+          "resultado",
+          "benchmark_json",
+          "estimador",
+          "convert",
+          "settings"
+        ],
+        "note": "avgMsPerChar se persiste en benchmark.json; Convert deriva la ETA por archivo y Settings muestra el ritmo en caracteres/segundo."
+      },
+      {
+        "id": "historial",
+        "label": "Historial y pantalla",
+        "focus": [
+          "convert",
+          "historial",
+          "pantalla",
+          "resultado"
+        ],
+        "note": "Convert prepende cada conversión en conversion_history (tope 100); la pantalla muestra las filas medidas y el historial."
+      }
+    ]
+  },
+  "stages": [
+    {
+      "label": "Entrada"
+    },
+    {
+      "label": "Medición"
+    },
+    {
+      "label": "Persistencia"
+    },
+    {
+      "label": "Derivación"
+    },
+    {
+      "label": "Consumidores"
+    }
+  ],
+  "nodes": [
+    {
+      "id": "tamanios",
+      "type": "backend",
+      "label": "Tamaños de prueba",
+      "sublabel": "1500–15000",
+      "width": 150,
+      "stage": 0,
+      "row": 0
+    },
+    {
+      "id": "gate",
+      "type": "security",
+      "label": "Gate del modelo",
+      "sublabel": "¿listo?",
+      "width": 130,
+      "stage": 0,
+      "row": 1
+    },
+    {
+      "id": "device",
+      "type": "external",
+      "label": "Dispositivo",
+      "sublabel": "DeviceSpec",
+      "width": 130,
+      "stage": 0,
+      "row": 2
+    },
+    {
+      "id": "sintesis",
+      "type": "backend",
+      "label": "Síntesis cronometrada",
+      "sublabel": "RunBenchmark",
+      "width": 200,
+      "stage": 1,
+      "row": 1
+    },
+    {
+      "id": "historial",
+      "type": "database",
+      "label": "historial_conversiones.json",
+      "sublabel": "conversion_history",
+      "width": 210,
+      "stage": 2,
+      "row": 0
+    },
+    {
+      "id": "benchmark_json",
+      "type": "database",
+      "label": "benchmark.json",
+      "sublabel": "benchmark_results",
+      "width": 160,
+      "stage": 2,
+      "row": 1
+    },
+    {
+      "id": "resultado",
+      "type": "backend",
+      "label": "BenchmarkResult",
+      "sublabel": "avgMsPerChar",
+      "width": 160,
+      "stage": 2,
+      "row": 2
+    },
+    {
+      "id": "estimador",
+      "type": "backend",
+      "label": "Estimador ETA",
+      "sublabel": "estimarTiempo",
+      "width": 140,
+      "stage": 3,
+      "row": 1
+    },
+    {
+      "id": "pantalla",
+      "type": "frontend",
+      "label": "Pantalla Benchmark",
+      "sublabel": "filas e historial",
+      "width": 170,
+      "stage": 3,
+      "row": 2
+    },
+    {
+      "id": "convert",
+      "type": "frontend",
+      "label": "Convert",
+      "sublabel": "ETA por archivo",
+      "width": 140,
+      "stage": 4,
+      "row": 1
+    },
+    {
+      "id": "settings",
+      "type": "frontend",
+      "label": "Settings",
+      "sublabel": "caracteres/segundo",
+      "width": 150,
+      "stage": 4,
+      "row": 2
+    }
+  ],
+  "flows": [
+    {
+      "id": "f-gate",
+      "from": "gate",
+      "to": "sintesis",
+      "label": "modelo listo",
+      "route": "straight",
+      "labelAt": [
+        190,
+        314
+      ]
+    },
+    {
+      "id": "f-tamanios",
+      "from": "tamanios",
+      "to": "sintesis",
+      "label": "mide 6 tamaños"
+    },
+    {
+      "id": "f-resultado",
+      "from": "sintesis",
+      "to": "resultado",
+      "label": "escribe BenchmarkResult",
+      "fromSide": "bottom",
+      "toSide": "left",
+      "via": [
+        [
+          315,
+          385
+        ],
+        [
+          450,
+          385
+        ]
+      ],
+      "labelAt": [
+        382,
+        430
+      ]
+    },
+    {
+      "id": "f-device",
+      "from": "device",
+      "to": "resultado",
+      "label": "DeviceSpec adjunto",
+      "fromSide": "right",
+      "toSide": "left",
+      "via": [
+        [
+          300,
+          385
+        ],
+        [
+          430,
+          385
+        ]
+      ],
+      "labelAt": [
+        232,
+        364
+      ]
+    },
+    {
+      "id": "f-persistir",
+      "from": "resultado",
+      "to": "benchmark_json",
+      "label": "persiste en benchmark.json",
+      "labelAt": [
+        500,
+        328
+      ]
+    },
+    {
+      "id": "f-eta",
+      "from": "benchmark_json",
+      "to": "estimador",
+      "label": "lee avgMsPerChar",
+      "route": "straight",
+      "labelAt": [
+        632,
+        230
+      ]
+    },
+    {
+      "id": "f-convert",
+      "from": "estimador",
+      "to": "convert",
+      "label": "ETA = caracteres × avgMsPerChar / 1000",
+      "route": "straight",
+      "labelAt": [
+        852,
+        314
+      ]
+    },
+    {
+      "id": "f-settings",
+      "from": "benchmark_json",
+      "to": "settings",
+      "label": "caracteres/segundo",
+      "fromSide": "right",
+      "toSide": "bottom",
+      "via": [
+        [
+          620,
+          271
+        ],
+        [
+          620,
+          330
+        ],
+        [
+          960,
+          330
+        ],
+        [
+          960,
+          480
+        ]
+      ],
+      "labelAt": [
+        790,
+        330
+      ]
+    },
+    {
+      "id": "f-historial",
+      "from": "convert",
+      "to": "historial",
+      "label": "prepend con tope 100",
+      "route": "top-channel"
+    },
+    {
+      "id": "f-pantalla-filas",
+      "from": "resultado",
+      "to": "pantalla",
+      "label": "muestra filas",
+      "fromSide": "bottom",
+      "toSide": "left",
+      "via": [
+        [
+          530,
+          470
+        ],
+        [
+          650,
+          470
+        ],
+        [
+          650,
+          385
+        ],
+        [
+          660,
+          385
+        ]
+      ],
+      "labelAt": [
+        578,
+        460
+      ]
+    },
+    {
+      "id": "f-pantalla-historial",
+      "from": "historial",
+      "to": "pantalla",
+      "label": "muestra historial",
+      "fromSide": "right",
+      "toSide": "bottom",
+      "via": [
+        [
+          1035,
+          157
+        ],
+        [
+          1040,
+          157
+        ],
+        [
+          1040,
+          500
+        ],
+        [
+          745,
+          500
+        ]
+      ],
+      "labelAt": [
+        770,
+        150
+      ]
+    }
+  ],
+  "cards": [
+    {
+      "dot": "emerald",
+      "title": "Cómo se mide",
+      "items": [
+        "6 tamaños de prueba (1500–15000) con lorem de 200× y Stopwatch; avgMsPerChar = Σ(ms/chars)/n",
+        "El benchmark exige el modelo listo y repite el gate en su propia screen"
+      ]
+    },
+    {
+      "dot": "violet",
+      "title": "Quién escribe y quién lee",
+      "items": [
+        "El historial lo escribe Convert al terminar cada archivo (prepend, tope 100); el benchmark no",
+        "Convert estima la ETA por archivo; Settings muestra caracteres/segundo"
+      ]
+    }
+  ]
+}
