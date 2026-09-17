@@ -1,0 +1,324 @@
+{
+  "schema_version": 1,
+  "diagram_type": "dataflow",
+  "meta": {
+    "title": "Supertonic AudioBook — Audio Manager",
+    "quality_profile": "showcase",
+    "viewBox": [
+      1080,
+      620
+    ],
+    "views": [
+      {
+        "id": "guardado",
+        "label": "Guardar un audio",
+        "focus": [
+          "pendientes",
+          "colision",
+          "sufijo",
+          "mover",
+          "carpeta_out"
+        ],
+        "note": "El nombre elegido se comprueba contra el destino; si está ocupado se agrega (N) y recién entonces se mueve el WAV."
+      },
+      {
+        "id": "limpieza",
+        "label": "Limpieza de temporales",
+        "focus": [
+          "temp",
+          "gc"
+        ],
+        "note": "Al arrancar, main.dart borra los WAV de _temp con más de 24 horas de antigüedad."
+      },
+      {
+        "id": "consumidores",
+        "label": "Consumidores y confirmación",
+        "focus": [
+          "carpeta_out",
+          "biblioteca",
+          "snackbar",
+          "error"
+        ],
+        "note": "La Biblioteca lista los audios confirmados; el snackbar de éxito es fijo y el estado de error no se pinta en ninguna vista."
+      }
+    ]
+  },
+  "stages": [
+    {
+      "label": "Entrada"
+    },
+    {
+      "label": "Colisión"
+    },
+    {
+      "label": "Confirmación"
+    },
+    {
+      "label": "Destino"
+    },
+    {
+      "label": "Consumidores"
+    }
+  ],
+  "nodes": [
+    {
+      "id": "pendientes",
+      "type": "backend",
+      "label": "Audios pendientes",
+      "sublabel": "AudioPendiente",
+      "width": 150,
+      "stage": 0,
+      "row": 0
+    },
+    {
+      "id": "temp",
+      "type": "database",
+      "label": "Carpeta _temp",
+      "sublabel": "WAV de trabajo",
+      "width": 150,
+      "stage": 0,
+      "row": 1
+    },
+    {
+      "id": "gc",
+      "type": "backend",
+      "label": "Limpiar temporales",
+      "sublabel": "más de 24 h",
+      "width": 150,
+      "stage": 0,
+      "row": 2
+    },
+    {
+      "id": "colision",
+      "type": "security",
+      "label": "¿Nombre ocupado?",
+      "sublabel": "existe()",
+      "width": 150,
+      "stage": 1,
+      "row": 1
+    },
+    {
+      "id": "sufijo",
+      "type": "backend",
+      "label": "Sufijo (N)",
+      "sublabel": "nombre(1).mp3",
+      "width": 150,
+      "stage": 2,
+      "row": 0
+    },
+    {
+      "id": "mover",
+      "type": "backend",
+      "label": "moverArchivo",
+      "sublabel": "rename atómico",
+      "width": 160,
+      "stage": 2,
+      "row": 1
+    },
+    {
+      "id": "error",
+      "type": "frontend",
+      "label": "Estado de error",
+      "sublabel": "no se pinta",
+      "width": 160,
+      "stage": 2,
+      "row": 2
+    },
+    {
+      "id": "carpeta_out",
+      "type": "database",
+      "label": "Carpeta de salida",
+      "sublabel": "carpeta_out",
+      "width": 160,
+      "stage": 3,
+      "row": 1
+    },
+    {
+      "id": "snackbar",
+      "type": "frontend",
+      "label": "Snackbar",
+      "sublabel": "éxito fijo",
+      "width": 150,
+      "stage": 4,
+      "row": 0
+    },
+    {
+      "id": "biblioteca",
+      "type": "frontend",
+      "label": "Biblioteca",
+      "sublabel": "listarAudios()",
+      "width": 150,
+      "stage": 4,
+      "row": 1
+    }
+  ],
+  "flows": [
+    {
+      "id": "f-temp",
+      "from": "pendientes",
+      "to": "temp",
+      "label": "tempPath",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "labelAt": [
+        100,
+        214
+      ]
+    },
+    {
+      "id": "f-gc",
+      "from": "temp",
+      "to": "gc",
+      "label": "borra > 24 h",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "labelAt": [
+        100,
+        328
+      ]
+    },
+    {
+      "id": "f-nombre",
+      "from": "pendientes",
+      "to": "colision",
+      "label": "displayName + formato",
+      "fromSide": "right",
+      "toSide": "left",
+      "via": [
+        [
+          205,
+          157
+        ],
+        [
+          205,
+          271
+        ]
+      ],
+      "labelAt": [
+        205,
+        214
+      ]
+    },
+    {
+      "id": "f-libre",
+      "from": "colision",
+      "to": "mover",
+      "label": "nombre libre",
+      "route": "straight",
+      "labelAt": [
+        420,
+        314
+      ]
+    },
+    {
+      "id": "f-ocupado",
+      "from": "colision",
+      "to": "sufijo",
+      "label": "nombre ocupado",
+      "fromSide": "top",
+      "toSide": "top",
+      "via": [
+        [
+          315,
+          112
+        ],
+        [
+          530,
+          112
+        ]
+      ],
+      "labelAt": [
+        420,
+        112
+      ]
+    },
+    {
+      "id": "f-resuelto",
+      "from": "sufijo",
+      "to": "mover",
+      "label": "nombre(N).ext",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "labelAt": [
+        530,
+        214
+      ]
+    },
+    {
+      "id": "f-fallo",
+      "from": "mover",
+      "to": "error",
+      "label": "fallo del guardado",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "labelAt": [
+        530,
+        328
+      ]
+    },
+    {
+      "id": "f-guardado",
+      "from": "mover",
+      "to": "carpeta_out",
+      "label": "mueve el WAV",
+      "route": "straight",
+      "labelAt": [
+        685,
+        314
+      ]
+    },
+    {
+      "id": "f-snackbar",
+      "from": "carpeta_out",
+      "to": "snackbar",
+      "label": "tras el await",
+      "fromSide": "right",
+      "toSide": "left",
+      "via": [
+        [
+          875,
+          271
+        ],
+        [
+          875,
+          157
+        ]
+      ],
+      "labelAt": [
+        875,
+        214
+      ]
+    },
+    {
+      "id": "f-biblioteca",
+      "from": "carpeta_out",
+      "to": "biblioteca",
+      "label": "lista los audios",
+      "route": "straight",
+      "labelAt": [
+        852,
+        314
+      ]
+    }
+  ],
+  "cards": [
+    {
+      "dot": "emerald",
+      "title": "Guardar uno o todos",
+      "items": [
+        "guardarUno y guardarTodos recorren el mismo GuardarAudio; cambia el nombre y si el pendiente se quita de la lista",
+        "La colisión se resuelve con sufijo (N) antes de la extensión y se re-comprueba hasta hallar un nombre libre",
+        "El movimiento es File.renameSync con la carpeta destino creada antes si no existe"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "Trampas de la pantalla",
+      "items": [
+        "AudioManagerEstado.error se guarda en el catch pero ninguna vista lo escucha: el caso 'folder' muestra un snackbar de éxito fijo tras el await",
+        "guardando bloquea llamadas concurrentes y guardarTodos corta si no hay pendientes",
+        "main.dart limpia los .wav de _temp con más de 24 h antes de runApp"
+      ]
+    }
+  ]
+}

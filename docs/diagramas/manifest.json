@@ -1,6 +1,6 @@
 {
   "generado_por": "tools/build-diagrams.mjs",
-  "total": 5,
+  "total": 6,
   "diagramas": [
     {
       "slug": "arquitectura-general",
@@ -23,6 +23,28 @@
       "actualizado": "2026-09-17",
       "archivo": "diagramas/arquitectura-general/index.html",
       "especificacion": "diagramas/arquitectura-general/arquitectura-general.json"
+    },
+    {
+      "slug": "audio-manager-guardado",
+      "titulo": "Supertonic AudioBook — Audio Manager",
+      "tipo": "dataflow",
+      "tipoTexto": "Flujo de datos",
+      "descripcion": "Audio Manager: cómo un WAV de _temp se confirma en carpeta_out con un rename atómico, quién resuelve la colisión de nombres y qué pasa al arrancar con los temporales viejos.",
+      "etiquetas": [
+        "audio manager",
+        "guardado",
+        "rename",
+        "temporales"
+      ],
+      "destacado": false,
+      "nodos": 10,
+      "relaciones": 10,
+      "etiquetaNodos": "nodos",
+      "etiquetaRelaciones": "flujos",
+      "capitulos": 3,
+      "actualizado": "2026-09-17",
+      "archivo": "diagramas/audio-manager-guardado/index.html",
+      "especificacion": "diagramas/audio-manager-guardado/audio-manager-guardado.json"
     },
     {
       "slug": "benchmark-mediciones",
