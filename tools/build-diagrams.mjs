@@ -97,6 +97,9 @@ function escaparHtml(texto) {
 /**
  * Botón de retorno al dashboard, inyectado dentro del propio visor.
  *
+ * Es solo la flecha, sin texto visible: así cuadra con los controles del toolbar.
+ * El nombre accesible vive en `aria-label`/`title`, que el visor no dibuja.
+ *
  * Usa los tokens de chrome del visor (--toolbar-*) en lugar de colores fijos: así
  * hereda el tema claro/oscuro y los presets (classic, signal-flow, blueprint,
  * editorial) sin duplicar la paleta. El estilo replica `.toolbar button`.
@@ -137,12 +140,6 @@ const RETORNO_ESTILO = `  <style id="archify-back-style">
     /* El preset editorial redondea menos los controles del visor. */
     html[data-preset="editorial"] .archify-back { border-radius: .3rem; }
 
-    /* Mismo breakpoint en el que el visor oculta las etiquetas del toolbar. */
-    @media (max-width: 360px) {
-      .archify-back span { display: none; }
-      .archify-back { padding-right: .58rem; padding-left: .58rem; }
-    }
-
     /* Diagramas sin .header-row: el botón flota arriba a la izquierda. */
     .archify-back--flotante { position: fixed; top: 1rem; left: 1rem; z-index: 60; }
   </style>
@@ -153,7 +150,7 @@ const BOTON_RETORNO =
   'title="Volver a los diagramas">' +
   '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="none" stroke="currentColor" ' +
   'stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M19 12H5m0 0 6-6m-6 6 6 6"/></svg>' +
-  '<span>Atrás</span></a>';
+  '</a>';
 
 const BOTON_RETORNO_FLOTANTE = BOTON_RETORNO.replace(
   'class="archify-back ',

@@ -4,8 +4,9 @@ Escribe los archivos **generados** a partir de lo que haya en `docs/diagramas/`:
 
 - `docs/index.html` — el dashboard que se publica en GitHub Pages.
 - `docs/diagramas/manifest.json` — los datos del listado.
-- `docs/diagramas/<slug>/index.html` — el diagrama con el botón **Atrás** inyectado dentro de
-  su propio header. Al usar los tokens del visor (`--toolbar-*`), el botón hereda el tema
+- `docs/diagramas/<slug>/index.html` — el diagrama con el botón de volver inyectado dentro de
+  su propio header. El botón es solo la flecha, sin texto visible; el nombre accesible vive en
+  `aria-label`/`title`. Al usar los tokens del visor (`--toolbar-*`), hereda el tema
   claro/oscuro y los cuatro presets sin duplicar la paleta.
 
 ```bash
@@ -26,7 +27,7 @@ docs/diagramas/
     ├── <slug>.html      # el diagrama de Archify (obligatorio, no se modifica)
     ├── <slug>.json      # la especificación de Archify (obligatorio)
     ├── dashboard.json   # metadatos de la tarjeta (opcional)
-    └── index.html       # GENERADO: el diagrama + el botón "Atrás"
+    └── index.html       # GENERADO: el diagrama + el botón de volver
 ```
 
 Las tarjetas del dashboard enlazan a `index.html`, nunca directo al HTML de Archify. El
