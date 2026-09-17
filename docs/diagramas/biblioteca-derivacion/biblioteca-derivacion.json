@@ -1,0 +1,284 @@
+{
+  "schema_version": 1,
+  "diagram_type": "dataflow",
+  "meta": {
+    "title": "Supertonic AudioBook — Biblioteca",
+    "quality_profile": "showcase",
+    "viewBox": [
+      1080,
+      620
+    ],
+    "views": [
+      {
+        "id": "derivacion",
+        "label": "Cómo se deriva cada libro",
+        "focus": [
+          "carpeta_out",
+          "listar",
+          "agrupar",
+          "prioridad",
+          "libro"
+        ],
+        "note": "El listado agrupa las rutas por stem en orden de primer encuentro y elige el formato ganador por prioridad mp3 > ogg > flac > wav."
+      },
+      {
+        "id": "pantalla",
+        "label": "Pantalla y reproducción",
+        "focus": [
+          "libro",
+          "pantalla",
+          "reproductor",
+          "reproduccion"
+        ],
+        "note": "Cada libro es un tile; la rutaPrioritaria alimenta el reproductor y el stream de estado manda pausa y fin del audio."
+      },
+      {
+        "id": "vacio",
+        "label": "Sin audios",
+        "focus": [
+          "carpeta_out",
+          "listar",
+          "vacio",
+          "pantalla"
+        ],
+        "note": "Si no hay audios y no hubo error, la pantalla muestra el estado vacío con la acción que lleva a Convert."
+      }
+    ]
+  },
+  "stages": [
+    {
+      "label": "Entrada"
+    },
+    {
+      "label": "Listado"
+    },
+    {
+      "label": "Derivación"
+    },
+    {
+      "label": "Pantalla"
+    },
+    {
+      "label": "Reproducción"
+    }
+  ],
+  "nodes": [
+    {
+      "id": "carpeta_out",
+      "type": "database",
+      "label": "Carpeta de salida",
+      "sublabel": "carpeta_out",
+      "width": 150,
+      "stage": 0,
+      "row": 1
+    },
+    {
+      "id": "listar",
+      "type": "backend",
+      "label": "Listar audios",
+      "sublabel": "listarAudios()",
+      "width": 160,
+      "stage": 1,
+      "row": 1
+    },
+    {
+      "id": "agrupar",
+      "type": "backend",
+      "label": "Agrupar por stem",
+      "sublabel": "stemDeRuta",
+      "width": 150,
+      "stage": 2,
+      "row": 0
+    },
+    {
+      "id": "prioridad",
+      "type": "backend",
+      "label": "Formato ganador",
+      "sublabel": "mp3 > ogg > flac > wav",
+      "width": 150,
+      "stage": 2,
+      "row": 1
+    },
+    {
+      "id": "libro",
+      "type": "backend",
+      "label": "LibroGenerado",
+      "sublabel": "archivos + formato",
+      "width": 170,
+      "stage": 2,
+      "row": 2
+    },
+    {
+      "id": "vacio",
+      "type": "frontend",
+      "label": "Estado vacío",
+      "sublabel": "CTA a Convert",
+      "width": 150,
+      "stage": 3,
+      "row": 0
+    },
+    {
+      "id": "pantalla",
+      "type": "frontend",
+      "label": "Pantalla Biblioteca",
+      "sublabel": "un tile por libro",
+      "width": 170,
+      "stage": 3,
+      "row": 1
+    },
+    {
+      "id": "reproductor",
+      "type": "external",
+      "label": "Reproductor",
+      "sublabel": "just_audio",
+      "width": 150,
+      "stage": 4,
+      "row": 1
+    },
+    {
+      "id": "reproduccion",
+      "type": "backend",
+      "label": "Estado de reproducción",
+      "sublabel": "detenido · reproduciendo · pausado",
+      "width": 180,
+      "stage": 4,
+      "row": 2
+    }
+  ],
+  "flows": [
+    {
+      "id": "f-carpeta",
+      "from": "carpeta_out",
+      "to": "listar",
+      "label": "carpeta de salida",
+      "route": "straight",
+      "labelAt": [
+        207,
+        314
+      ]
+    },
+    {
+      "id": "f-listar",
+      "from": "listar",
+      "to": "agrupar",
+      "label": "rutas de audio",
+      "fromSide": "right",
+      "toSide": "left",
+      "via": [
+        [
+          420,
+          271
+        ],
+        [
+          420,
+          157
+        ]
+      ],
+      "labelAt": [
+        420,
+        214
+      ]
+    },
+    {
+      "id": "f-agrupar",
+      "from": "agrupar",
+      "to": "prioridad",
+      "label": "un grupo por stem",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "labelAt": [
+        530,
+        214
+      ]
+    },
+    {
+      "id": "f-prioridad",
+      "from": "prioridad",
+      "to": "libro",
+      "label": "formato ganador",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "labelAt": [
+        530,
+        328
+      ]
+    },
+    {
+      "id": "f-libro",
+      "from": "libro",
+      "to": "pantalla",
+      "label": "un tile por libro",
+      "fromSide": "right",
+      "toSide": "left",
+      "via": [
+        [
+          640,
+          385
+        ],
+        [
+          640,
+          271
+        ]
+      ],
+      "labelAt": [
+        628,
+        340
+      ]
+    },
+    {
+      "id": "f-vacio",
+      "from": "pantalla",
+      "to": "vacio",
+      "label": "sin libros",
+      "fromSide": "top",
+      "toSide": "bottom",
+      "labelAt": [
+        745,
+        214
+      ]
+    },
+    {
+      "id": "f-play",
+      "from": "pantalla",
+      "to": "reproductor",
+      "label": "rutaPrioritaria",
+      "route": "straight",
+      "labelAt": [
+        852,
+        314
+      ]
+    },
+    {
+      "id": "f-estado",
+      "from": "reproductor",
+      "to": "reproduccion",
+      "label": "emite estado",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "labelAt": [
+        960,
+        328
+      ]
+    }
+  ],
+  "cards": [
+    {
+      "dot": "emerald",
+      "title": "Cómo se deriva cada libro",
+      "items": [
+        "Agrupa por stem (nombre sin la última extensión) en el orden de primer encuentro del listado",
+        "El formato ganador sigue la prioridad mp3 > ogg > flac > wav; rutaPrioritaria es la primera con ese formato",
+        "Los nombres salen de la ruta, no de metadatos: normaliza separadores de Windows y no lee ID3"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "Pantalla y reproducción",
+      "items": [
+        "Sin libros y sin error la pantalla muestra el estado vacío con la acción que lleva a Convert",
+        "El stream de estado es la fuente de verdad: el fin natural del audio limpia el tile que suena",
+        "Al salir de la pantalla se detiene el audio; un fallo del reproductor se pinta como error con reintentar"
+      ]
+    }
+  ]
+}

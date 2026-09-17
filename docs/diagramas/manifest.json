@@ -1,6 +1,6 @@
 {
   "generado_por": "tools/build-diagrams.mjs",
-  "total": 4,
+  "total": 5,
   "diagramas": [
     {
       "slug": "arquitectura-general",
@@ -45,6 +45,28 @@
       "actualizado": "2026-09-17",
       "archivo": "diagramas/benchmark-mediciones/index.html",
       "especificacion": "diagramas/benchmark-mediciones/benchmark-mediciones.json"
+    },
+    {
+      "slug": "biblioteca-derivacion",
+      "titulo": "Supertonic AudioBook — Biblioteca",
+      "tipo": "dataflow",
+      "tipoTexto": "Flujo de datos",
+      "descripcion": "Biblioteca y derivación: cómo el listado agrupa los audios por stem, elige el formato ganador y alimenta la lista, la reproducción y el estado vacío.",
+      "etiquetas": [
+        "biblioteca",
+        "derivación",
+        "stem",
+        "reproducción"
+      ],
+      "destacado": false,
+      "nodos": 9,
+      "relaciones": 8,
+      "etiquetaNodos": "nodos",
+      "etiquetaRelaciones": "flujos",
+      "capitulos": 3,
+      "actualizado": "2026-09-17",
+      "archivo": "diagramas/biblioteca-derivacion/index.html",
+      "especificacion": "diagramas/biblioteca-derivacion/biblioteca-derivacion.json"
     },
     {
       "slug": "ciclo-vida-modelo",
